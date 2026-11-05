@@ -1069,7 +1069,7 @@ enum AssistantHeaderMetrics {
     static func formulaHeight() -> CGFloat {
         let body = UIFont.preferredFont(forTextStyle: .body)
         let name = UIFont.systemFont(ofSize: body.pointSize, weight: .semibold)
-        return ceil(max(22, name.lineHeight)) + 4
+        return ceil(max(44, name.lineHeight)) + 4
     }
 
     /// What a learned header height depends on besides width: the body size.
