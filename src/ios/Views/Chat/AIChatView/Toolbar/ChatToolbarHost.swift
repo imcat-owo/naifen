@@ -479,7 +479,7 @@ private struct ChatTrailingMenu: View, Equatable {
         } label: {
             Image(systemName: "ellipsis")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
         }
         // [T-ios-voiceover-labels] Matches the label the UIKit ellipsis button
         // elsewhere in this file already sets, so both read the same.
@@ -608,7 +608,7 @@ struct ChatTrailingMenuButton: UIViewRepresentable {
         let button = HitPaddedButton(type: .system)
         let cfg = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
         button.setImage(UIImage(systemName: "ellipsis", withConfiguration: cfg), for: .normal)
-        button.tintColor = UIColor(ChatColors.primaryText)
+        button.tintColor = UIColor(Theme.Color.ink)
         button.showsMenuAsPrimaryAction = true
         button.accessibilityLabel = AppLocalized("More options")
         button.menu = Self.buildMenu(key: key, coordinator: context.coordinator)
@@ -858,7 +858,7 @@ struct ChatNavMenuBarItemInstaller: UIViewRepresentable {
             item = UIBarButtonItem(image: UIImage(systemName: "ellipsis", withConfiguration: cfg), menu: nil)
             // Same colour as ChatTrailingMenuButton. A bar item otherwise takes
             // the app tint; iOS 26's glass hides that, iOS 16-18 would show it.
-            item.tintColor = UIColor(ChatColors.primaryText)
+            item.tintColor = UIColor(Theme.Color.ink)
             item.accessibilityLabel = AppLocalized("More options")
             item.menu = ChatTrailingMenuButton.buildMenu(key: menu.key, coordinator: inner)
             inner.lastKey = menu.key
