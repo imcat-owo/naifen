@@ -60,7 +60,7 @@ struct BridgedAssistantHeaderV3: View {
             )
             Text(soulMeta.name.isEmpty ? "Minis" : soulMeta.name)
                 .font(.body.weight(.semibold))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
         }
         // [T-ios-assistant-header-open-soul] Hit area and tap, applied to the
         // icon+name HStack only — NOT to the full-width row below it.
