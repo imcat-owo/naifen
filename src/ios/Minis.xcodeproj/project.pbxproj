@@ -96,6 +96,8 @@
 		C0B1AF9A75C90C3C178A8804 /* VoiceTextSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7656F4130247E4002A3AC0C /* VoiceTextSanitizer.swift */; };
 		C39F1823882535F6FCC47D18 /* UserAskCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A85BF57B9450AF0807ACDDE /* UserAskCenter.swift */; };
 		E51000001 /* MinisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51000011 /* MinisApp.swift */; };
+		THM000001 /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000011 /* Tokens.swift */; };
+		THM000002 /* ThemeModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000012 /* ThemeModifier.swift */; };
 		E51000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E51000013 /* Assets.xcassets */; };
 		E51000004 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E51000014 /* Preview Assets.xcassets */; };
 		E52000001 /* LLMTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52000011 /* LLMTypes.swift */; };
@@ -866,6 +868,8 @@
 		DE154CF628D8699BD99CF9CB /* AudioSessionCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioSessionCoordinator.swift; sourceTree = "<group>"; };
 		E51000010 /* Minis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Minis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E51000011 /* MinisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinisApp.swift; sourceTree = "<group>"; };
+		THM000011 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
+		THM000012 /* ThemeModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeModifier.swift; sourceTree = "<group>"; };
 		E51000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E51000014 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E52000011 /* LLMTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTypes.swift; sourceTree = "<group>"; };
@@ -1691,6 +1695,15 @@
 			);
 			sourceTree = "<group>";
 		};
+		THM000030 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				THM000011 /* Tokens.swift */,
+				THM000012 /* ThemeModifier.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
 		E51000031 /* Minis */ = {
 			isa = PBXGroup;
 			children = (
@@ -1717,6 +1730,7 @@
 				E5L000030 /* NativeOffloads */,
 				E54000030 /* Debug */,
 				E5CR00100 /* Diagnostics */,
+				THM000030 /* Theme */,
 				E51000013 /* Assets.xcassets */,
 				E51000033 /* Preview Content */,
 				AA71B0212F44BEB200A28A5E /* Launch Screen.storyboard */,
@@ -3087,6 +3101,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				THM000001 /* Tokens.swift in Sources */,
+				THM000002 /* ThemeModifier.swift in Sources */,
 				AC0000202 /* ProviderCustomizationGenerated.swift in Sources */,
 				E54000AC1 /* DebugSkillGenerated.swift in Sources */,
 				E5FP00100 /* AppGroupChangeWatcher.swift in Sources */,

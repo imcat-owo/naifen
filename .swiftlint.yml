@@ -1,0 +1,75 @@
+# SwiftLint — milk-pink theme slop rules (ui-ios)
+#
+# NOTE (honest status, 2026-11-05): swiftlint is NOT installed on this Linux
+# VM and no local Xcode compile is possible. This config has NOT been run.
+# CI is the only lint/compile gate. Do not claim a lint or compile pass
+# until CI has run it.
+
+disabled_rules:
+  - trailing_whitespace
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - force_unwrapping
+  - redundant_nil_coalescing
+  - sorted_imports
+  - unneeded_parentheses_in_closure_argument
+
+# Token values live in Theme/Tokens.swift by design; that file is the one
+# place numeric literals are allowed.
+excluded:
+  - src/ios/Theme/Tokens.swift
+  - src/ios/MinisTests
+  - src/ios/MinisUITests
+  - src/ios/Vendor
+
+custom_rules:
+  no_color_hex:
+    name: "No Color(hex:) — use Theme.Color tokens"
+    regex: 'Color\(hex:'
+    message: "Use a Theme.Color token instead of Color(hex:)"
+    severity: error
+  no_system_font_literal:
+    name: "No .font(.system(size:)) outside Theme.Font"
+    regex: '\.font\(\.system\(size:'
+    message: "Use Theme.Font instead of .font(.system(size:))"
+    severity: error
+  no_hardcoded_corner_radius:
+    name: "No hardcoded cornerRadius — use Theme.Radius"
+    regex: 'cornerRadius\(\s*\d'
+    message: "Use a Theme.Radius token instead of a literal cornerRadius"
+    severity: error
+  no_hardcoded_padding_literal:
+    name: "No literal .padding(N) — use Theme.Spacing"
+    regex: '\.padding\(\s*\d'
+    message: "Use a Theme.Spacing value instead of a literal padding"
+    severity: warning
+  no_purple_pink_gradient:
+    name: "No purple-pink gradients"
+    regex: 'LinearGradient\([^)]*(purple|pink|734DED|A385FF)'
+    message: "Purple-pink gradients are forbidden; use flat milk-pink tokens"
+    severity: error
+  no_generic_gradient:
+    name: "No generic gradients — flat milk-pink surfaces only"
+    regex: 'LinearGradient\('
+    message: "Generic gradient slop is banned; use a flat Theme.Color surface"
+    severity: warning
+  no_rainbow_tool_colors:
+    name: "No rainbow system color literals — one accent family"
+    regex: 'Color\.(blue|red|green|orange|purple|pink|cyan|yellow)\b'
+    message: "Use Theme.Color tokens; the rainbow tool accents are forbidden"
+    severity: error
+  no_buzzword_tokens:
+    name: "No buzzwords in place of a token"
+    regex: '(?i)\b(clean|modern|professional|sleek|premium|beautiful|elegant)\b'
+    message: "A buzzword is not a token — trace the choice to a named anchor + Theme token"
+    severity: warning
+
+line_length:
+  warning: 140
+  error: 180
+  ignores_function_declarations: true
+  ignores_comments: true
+  ignores_urls: true
