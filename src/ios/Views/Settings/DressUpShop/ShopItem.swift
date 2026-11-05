@@ -268,12 +268,18 @@ final class DressUpStore: ObservableObject {
         savedSetIds = defaults.stringArray(forKey: Keys.savedSetIds) ?? []
     }
 
-    /// The item currently applied in a category's slot, if any.
+    /// The item currently applied in a category's slot, if any. One item
+    /// only: categories with two slots (theme holds the theme AND the
+    /// wallpaper; bubbles hold the user bubble AND the assistant
+    /// surface) have no single answer here — this returns the
+    /// category's primary slot (theme, user bubble) for the preview,
+    /// which wants the theme. Rows must use `isApplied(_:)`, which
+    /// reads each item's own slot.
     func appliedItem(in category: ShopCategory) -> ShopItem? {
         let id: String?
         switch category {
         case .theme: id = appliedThemeId
-        case .bubbles: id = appliedUserBubbleId ?? appliedAssistantId
+        case .bubbles: id = appliedUserBubbleId
         case .avatarPendants: id = appliedPendantId
         case .fonts: id = appliedFontId
         case .namecards: id = appliedNamecardId
@@ -282,8 +288,37 @@ final class DressUpStore: ObservableObject {
         return id.flatMap { ShopCatalog.item(id: $0) }
     }
 
+    /// Whether this exact item is the one applied in its own slot.
+    /// Per-slot: each item id maps to its own stored key — theme to
+    /// `appliedThemeId`, wallpaper to `appliedWallpaperId`, user bubble
+    /// to `appliedUserBubbleId`, assistant surface to
+    /// `appliedAssistantId`, pendant / font / namecard to their own
+    /// keys. The wallpaper stores "bundled:WallpaperMilkPink", not its
+    /// item id (see `apply(_:)`), so it compares against that value.
+    /// Applying one slot therefore never marks a different slot's row
+    /// Applied, and the assistant surface shows Applied even when the
+    /// user bubble is applied too.
     func isApplied(_ item: ShopItem) -> Bool {
-        appliedItem(in: item.category)?.id == item.id
+        switch item.id {
+        case ShopCatalog.milkPinkTheme.id:
+            return appliedThemeId == item.id
+        case ShopCatalog.milkPinkWallpaper.id:
+            return appliedWallpaperId == "bundled:WallpaperMilkPink"
+        case ShopCatalog.userBubble.id:
+            return appliedUserBubbleId == item.id
+        case ShopCatalog.assistantSurface.id:
+            return appliedAssistantId == item.id
+        case ShopCatalog.avatarRing.id, ShopCatalog.avatarFrame.id:
+            return appliedPendantId == item.id
+        case ShopCatalog.frauncesDisplay.id, ShopCatalog.fontDial.id:
+            return appliedFontId == item.id
+        case ShopCatalog.porcelainNamecard.id, ShopCatalog.tagPill.id:
+            return appliedNamecardId == item.id
+        default:
+            // Inspiration items have no slot: nothing to apply, so
+            // never Applied.
+            return false
+        }
     }
 
     /// Apply an item: writes only that item's slot key. Saved sets are
