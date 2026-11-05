@@ -59,7 +59,7 @@ struct MinisVideoPlayerView: View {
                 // Fixed-size placeholder matches mediaPlaceholderHeight to prevent layout jumps
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(ChatColors.secondaryBg)
+                        .fill(Theme.Color.surface)
                     VStack(spacing: 8) {
                         Image(systemName: "play.circle.fill")
                             .font(.system(size: 48))
@@ -67,7 +67,7 @@ struct MinisVideoPlayerView: View {
                         Text(url.lastPathComponent)
                             .lineLimit(1)
                             .font(.caption)
-                            .foregroundColor(ChatColors.secondaryText)
+                            .foregroundColor(Theme.Color.ink)
                     }
                 }
                 .frame(maxWidth: 400, minHeight: mediaPlaceholderHeight, maxHeight: mediaPlaceholderHeight)
@@ -82,7 +82,7 @@ struct MinisVideoPlayerView: View {
                         .lineLimit(1)
                         .font(.caption)
                 }
-                .foregroundColor(ChatColors.secondaryText)
+                .foregroundColor(Theme.Color.ink)
                 .padding(.top, 4)
             }
         }
@@ -100,9 +100,9 @@ struct MinisVideoPlayerView: View {
             ProgressView()
             Text(url.lastPathComponent).lineLimit(1).font(.caption)
         }
-        .foregroundColor(ChatColors.secondaryText)
+        .foregroundColor(Theme.Color.ink)
         .frame(maxWidth: 400, minHeight: mediaPlaceholderHeight, maxHeight: mediaPlaceholderHeight)
-        .background(ChatColors.secondaryBg)
+        .background(Theme.Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
@@ -239,7 +239,7 @@ struct MinisVideoFullscreenPlayer: View {
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(ChatColors.primaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .frame(width: 44, height: 44)
                                 .contentShape(Circle())
                                 .background(.ultraThinMaterial, in: Circle())
@@ -257,7 +257,7 @@ struct MinisVideoFullscreenPlayer: View {
                                         .offset(y: -1)
                                 case .saving:
                                     ProgressView()
-                                        .tint(ChatColors.primaryText)
+                                        .tint(Theme.Color.ink)
                                 case .saved:
                                     Image(systemName: "checkmark")
                                         .foregroundStyle(.green)
@@ -266,7 +266,7 @@ struct MinisVideoFullscreenPlayer: View {
                                 }
                             }
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 44, height: 44)
                             .contentShape(Circle())
                             .background(.ultraThinMaterial, in: Circle())
@@ -279,7 +279,7 @@ struct MinisVideoFullscreenPlayer: View {
                             Image(systemName: "square.and.arrow.up")
                                 .offset(y: -1)
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(ChatColors.primaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .frame(width: 44, height: 44)
                                 .contentShape(Circle())
                                 .background(.ultraThinMaterial, in: Circle())
