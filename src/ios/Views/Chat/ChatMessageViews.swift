@@ -77,7 +77,7 @@ struct MessageContextMenuPreview: View {
             // width comes from the ScrollView's width (the outer .frame below),
             // which starts at the cap and shrinks to the measured content.
             Text(shown)
-                .font(.system(size: FontSettings.shared.scaledMessage(16.5)))
+                .font(.system(size: FontSettings.shared.scaled(16.5)))
                 .foregroundStyle(Theme.Color.ink)
                 .multilineTextAlignment(.leading)
                 .padding(16)
@@ -441,7 +441,7 @@ struct ChatMessageRow: View {
                 if !userDisplayText.isEmpty {
                     HStack(spacing: 6) {
                         SearchHighlightText(userDisplayText, key: searchKey())
-                            .font(.system(size: FontSettings.shared.scaledMessage(16.5)))
+                            .font(.system(size: FontSettings.shared.scaled(16.5)))
                             .foregroundStyle(Theme.Color.ink)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
