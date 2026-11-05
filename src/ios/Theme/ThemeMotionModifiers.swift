@@ -24,9 +24,8 @@
 // feel, try-on swap feel, dots looping, and grab-mid-animation behaviour
 // are SPECULATION until a simulator run.
 //
-// OPEN ITEM: this file is not yet in Minis.xcodeproj/project.pbxproj.
-// It must gain a file ref and a Minis-target Sources entry before it
-// compiles into the app. That wiring is a separate step, not this block.
+// Wired into Minis.xcodeproj/project.pbxproj in Phase 1 Block 8
+// (file ref THM000014, Minis-target Sources entry THM000004).
 
 import SwiftUI
 
