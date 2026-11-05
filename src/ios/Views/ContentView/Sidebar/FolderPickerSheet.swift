@@ -92,7 +92,7 @@ struct FolderPickerSheet: View {
                 Section {
                     HStack {
                         Image(systemName: "folder.badge.plus")
-                            .foregroundStyle(Color.accentColor)
+                            .foregroundStyle(Theme.Color.accent)
                         TextField("New Group Name", text: $newFolderName)
                             .focused($nameFieldFocused)
                             .submitLabel(.next)
@@ -124,7 +124,7 @@ struct FolderPickerSheet: View {
                                     ProgressView().controlSize(.small)
                                 } else {
                                     Image(systemName: "sparkles")
-                                        .foregroundStyle(Color.accentColor)
+                                        .foregroundStyle(Theme.Color.accent)
                                 }
                                 Text(suggestFailed ? "AI Suggest (failed — try again)" : "AI Suggest")
                             }
@@ -146,7 +146,7 @@ struct FolderPickerSheet: View {
                             onChoose(.existing(dup.id))
                         } label: {
                             Label {
-                                VStack(alignment: .leading, spacing: 2) {
+                                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                                     // Folder name is user data — interpolated, not a key.
                                     Text("“\(dup.name)” already exists")
                                         .font(.subheadline)
@@ -156,7 +156,7 @@ struct FolderPickerSheet: View {
                                 }
                             } icon: {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
+                                    .foregroundStyle(Theme.Color.accent)
                             }
                         }
                     }
@@ -169,7 +169,7 @@ struct FolderPickerSheet: View {
                                 Text("Move into “\(merge.folderName)”?")
                             } icon: {
                                 Image(systemName: "sparkles")
-                                    .foregroundStyle(Color.accentColor)
+                                    .foregroundStyle(Theme.Color.accent)
                             }
                         }
                     }
@@ -199,23 +199,23 @@ struct FolderPickerSheet: View {
                         Button {
                             onChoose(.removeFromFolder)
                         } label: {
-                            HStack(spacing: 8) {
+                            HStack(spacing: Theme.Spacing.sm) {
                                 // Sized to match FolderComposedIcon below so the
                                 // row's text baseline lines up with the group rows.
                                 ZStack {
                                     Circle()
-                                        .fill(Color(UIColor.tertiarySystemFill))
+                                        .fill(Theme.Color.surface2)
                                         .frame(width: 40, height: 40)
                                     Image(systemName: "folder.badge.minus")
                                         .foregroundStyle(.secondary)
                                 }
-                                VStack(alignment: .leading, spacing: 2) {
+                                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                                     Text("No Group")
-                                        .foregroundStyle(Color(UIColor.label))
+                                        .foregroundStyle(Theme.Color.ink)
                                         .lineLimit(1)
                                     Text("Remove from its current group")
-                                        .font(.system(size: 13))
-                                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                                        .font(Theme.Font.body())
+                                        .foregroundStyle(Theme.Color.ink)
                                         .lineLimit(1)
                                 }
                                 Spacer()
@@ -235,12 +235,12 @@ struct FolderPickerSheet: View {
                                 // same composed circle icon, same
                                 // "N chats · context" subtitle (and thus the
                                 // same localization keys).
-                                HStack(spacing: 8) {
+                                HStack(spacing: Theme.Spacing.sm) {
                                     FolderComposedIcon(glyphs: item.glyphs, diameter: 40)
-                                    VStack(alignment: .leading, spacing: 2) {
+                                    VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                                         // Folder names are user data — verbatim.
                                         Text(item.folder.name)
-                                            .foregroundStyle(Color(UIColor.label))
+                                            .foregroundStyle(Theme.Color.ink)
                                             .lineLimit(1)
                                         Group {
                                             if let sub = item.subtitle {
@@ -252,8 +252,8 @@ struct FolderPickerSheet: View {
                                                 Text("Empty group")
                                             }
                                         }
-                                        .font(.system(size: 13))
-                                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                                        .font(Theme.Font.body())
+                                        .foregroundStyle(Theme.Color.ink)
                                         .lineLimit(1)
                                     }
                                     Spacer()
