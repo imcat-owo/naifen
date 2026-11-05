@@ -20,9 +20,9 @@
 // the sheet spring, the try-on swap, and the dots rhythm is SPECULATION
 // until a simulator run.
 //
-// This file is not yet referenced in Minis.xcodeproj/project.pbxproj.
-// Adding the file ref and the Sources entry is Phase 1 wiring work, not
-// part of this block (new files only).
+// OPEN ITEM: this file is not yet in Minis.xcodeproj/project.pbxproj.
+// It must gain a file ref and a Minis-target Sources entry before it
+// compiles into the app. That wiring is a separate step, not this block.
 
 import SwiftUI
 
@@ -97,9 +97,14 @@ enum DressUpMotion {
     /// The spring for a kind, or an at-once change under Reduce Motion.
     /// Use only for position / scale changes; under Reduce Motion those
     /// changes must not travel, so they happen at once. Opacity-only
-    /// changes under Reduce Motion use fadeAnimation instead.
+    /// changes under Reduce Motion use fadeAnimation instead — including
+    /// .press, which under Reduce Motion is opacity-only (scale is
+    /// forced to 1), so it fades over Theme.Motion.fast.
     static func animation(for kind: Kind, reduceMotion: Bool) -> Animation {
         if reduceMotion {
+            if kind == .press {
+                return fadeAnimation(reduceMotion: true)
+            }
             return .linear(duration: Theme.Motion.instant)
         }
         switch kind {

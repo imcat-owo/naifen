@@ -11,18 +11,22 @@
 //   .dressUpTryOnSwap(value:)    modifier form of the try-on swap
 //   ThinkingDotsView             three dots, 0.4s rhythm, opacity only
 //
-// Every API reads accessibilityReduceMotion and falls back to a fade (or
-// to no motion for the dots). No API animates on its own: the caller opts
-// in, and the screen declares at most one signature motion.
+// These APIs read accessibilityReduceMotion and fall back to a fade (or
+// to no motion for the dots): DressUpPressButtonStyle, DressUpModalSheet,
+// DressUpTryOnPreview, DressUpTryOnSwapModifier, and ThinkingDotsView.
+// The native sheet (.dressUpSheet) never reads it — it relies on the
+// system sheet, which follows Reduce Motion itself. No API animates on
+// its own: the caller opts in, and the screen declares at most one
+// signature motion.
 //
 // Honest status: no local Xcode compile is possible on this VM and no
 // simulator run has happened. CI is the only compile gate. Sheet-spring
 // feel, try-on swap feel, dots looping, and grab-mid-animation behaviour
 // are SPECULATION until a simulator run.
 //
-// This file is not yet referenced in Minis.xcodeproj/project.pbxproj.
-// Adding the file ref and the Sources entry is Phase 1 wiring work, not
-// part of this block (new files only).
+// OPEN ITEM: this file is not yet in Minis.xcodeproj/project.pbxproj.
+// It must gain a file ref and a Minis-target Sources entry before it
+// compiles into the app. That wiring is a separate step, not this block.
 
 import SwiftUI
 
@@ -122,6 +126,9 @@ extension View {
     }
 
     /// Overlay form of the custom bottom sheet. See DressUpModalSheet.
+    /// Attach ONLY at the screen root: SwiftUI sizes overlay content to
+    /// the host view, so attached to a smaller host the scrim dims only
+    /// that subview and the sheet is clamped to the host width.
     /// Signature: .sheet.
     func dressUpModalSheet<SheetContent: View>(
         isPresented: Binding<Bool>,
@@ -154,6 +161,10 @@ extension AnyTransition {
 
 /// Custom bottom sheet for the dress-up shop, for when the shop needs its
 /// own sheet instead of the system one.
+///
+/// Attach at the screen root only (via .dressUpModalSheet): SwiftUI sizes
+/// overlay content to the host view, so on a smaller host the scrim dims
+/// only that subview and the sheet is clamped to the host width.
 ///
 /// Contract, all by hand so the shop builder can read it here:
 /// - Drag is 1:1 downward; an upward drag is pinned at the rest position.
@@ -188,6 +199,7 @@ struct DressUpModalSheet<Content: View>: View {
                 sheet
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .animation(sheetAnimation, value: isPresented)
     }
 
@@ -255,6 +267,17 @@ struct DressUpModalSheet<Content: View>: View {
                 dragTranslation = max(0, value.translation.height)
             }
             .onEnded { value in
+                // Geometry not yet measured: sheetHeight starts at 0, so
+                // the threshold is unreachable until onGeometryChange
+                // fires. Never dismiss in that window — spring back.
+                guard sheetHeight > 0 else {
+                    withAnimation(
+                        DressUpMotion.animation(for: .motion, reduceMotion: reduceMotion)
+                    ) {
+                        dragTranslation = 0
+                    }
+                    return
+                }
                 let threshold = sheetHeight * DressUpMotion.dismissFraction
                 let draggedPast = value.translation.height > threshold
                 let flungPast = value.predictedEndTranslation.height > threshold
@@ -276,8 +299,9 @@ struct DressUpModalSheet<Content: View>: View {
 /// Try-on preview swap for the dress-up shop. Tap a sample card, the
 /// preview swaps with the primary spring; the swap is interruptible
 /// (interactiveSpring retargets from the current spot on a new tap).
-/// The preview content should keep a fixed frame so the swap does not
-/// resize its container mid-flight.
+/// Shop builder duty: give the preview content a fixed frame. A caller
+/// that forgets gets a container that resizes mid-flight as the
+/// incoming and outgoing previews differ in size.
 /// Signature: .tryOnSwap.
 /// Reduce Motion: crossfade only, no scale, no spring travel.
 struct DressUpTryOnPreview<Selection: Equatable, Content: View>: View {
