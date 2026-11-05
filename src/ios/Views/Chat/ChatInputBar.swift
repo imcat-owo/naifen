@@ -22,12 +22,12 @@ private let minisLogger = AppLogger(category: "MinisURL")
 //   34pt glyph -> displayExtraLarge (32pt, -2) | 20pt glyph -> displaySmall (exact)
 //   18/16pt glyphs -> displaySmall (20pt; all remove glyphs unified at 20pt)
 //   13pt semibold -> bodyEmphasized (exact) | 12pt medium glyph -> mono (12pt, exact size)
-//   10pt -> meta (exact; semibold weight drops — no 10pt semibold role)
+//   10pt -> meta (renders at 11pt: meta() floors via scaledSize; semibold weight drops — no 10pt semibold role)
 //   9/8pt text -> caption (11pt; the plan's sans floor)
-// The input font (16.5pt) has no Theme.Font role either: PastableTextView
-// builds it once in `inputUIFont()` from UIFontMetrics on .body — the same
-// mechanism Theme.Font.scaledSize uses — so the one global 10–15pt dial
-// moves it via the root .dynamicTypeSize / window contentSizeCategory.
+// The input font (16.5pt) has no Theme.Font SwiftUI role: it lives in
+// Theme.Font.inputUIFont() as a UIFont, scaled continuously by the one
+// global 10–15pt dial exactly as message text — so input and message
+// text are the same size at every dial value.
 struct SwipeToSendHint: View {
     let progress: CGFloat
     let armFraction: CGFloat
@@ -1712,13 +1712,13 @@ struct PastableTextView: UIViewRepresentable {
     var maxHeightOverride: CGFloat?
 
     /// [Phase 2 composer] The composer input font: 16.5pt through the
-    /// Theme.Font scaling path. Theme.Font has no 16.5pt role, so the size
-    /// lives here as the single call site; the scaling is UIFontMetrics on
-    /// .body — the same mechanism Theme.Font.scaledSize uses — so the one
-    /// global 10–15pt dial moves it (root .dynamicTypeSize + window
-    /// contentSizeCategory, both driven by FontSettings).
+    /// Theme.Font scaling path (Theme.Font.inputUIFont()), scaled
+    /// continuously by the one global 10–15pt dial exactly as message
+    /// text (FontSettings.shared.scaled(16.5)) — same size at every dial
+    /// value, so typed text does not change size on send.
+    @MainActor
     private static func inputUIFont() -> UIFont {
-        UIFont.systemFont(ofSize: UIFontMetrics(forTextStyle: .body).scaledValue(for: 16.5))
+        Theme.Font.inputUIFont()
     }
 
     func makeCoordinator() -> Coordinator {
