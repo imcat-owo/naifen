@@ -283,7 +283,7 @@ struct SelectableMarkdownView: UIViewRepresentable {
             key: messageId.flatMap { mid in blockId.map { ChatSearchUnitKey(messageId: mid, blockId: $0, field: .body) } },
             dimmed: searchDimmed)
 
-        let currentFontSize = FontSettings.shared.scaledMessage(16.5)
+        let currentFontSize = FontSettings.shared.scaled(16.5)
         let fontChanged = context.coordinator.lastFontSize != currentFontSize
 
         // [AttachHotPath] updateUIView entry — only log when this textView has
@@ -558,7 +558,7 @@ struct SelectableMarkdownView: UIViewRepresentable {
 
         var hasher = Hasher()
         hasher.combine(cachedContent != nil ? cachedContent!.blocks.hashValue : markdown.hashValue)
-        hasher.combine(FontSettings.shared.scaledMessage(16.5))
+        hasher.combine(FontSettings.shared.scaled(16.5))
         let contentHash: Int = hasher.finalize()
         if contentHash == context.coordinator.lastRenderedContentHash {
             // [DIAG-RENDER-3] Content hash matches — skip re-render.
@@ -630,7 +630,7 @@ struct SelectableMarkdownView: UIViewRepresentable {
             if _hasPlainSuffix {
                 let mut = NSMutableAttributedString(attributedString: renderedBody)
                 let suffixAttrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: FontSettings.shared.scaledMessage(16.5)),
+                    .font: UIFont.systemFont(ofSize: FontSettings.shared.scaled(16.5)),
                     .foregroundColor: UIColor.label,
                 ]
                 mut.append(NSAttributedString(string: _splitForUpdate.plainSuffix, attributes: suffixAttrs))
