@@ -98,6 +98,11 @@
 		E51000001 /* MinisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51000011 /* MinisApp.swift */; };
 		THM000001 /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000011 /* Tokens.swift */; };
 		THM000002 /* ThemeModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000012 /* ThemeModifier.swift */; };
+		THM000003 /* DressUpMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000013 /* DressUpMotion.swift */; };
+		THM000004 /* ThemeMotionModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000014 /* ThemeMotionModifiers.swift */; };
+		DSP000001 /* ShopItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DSP000011 /* ShopItem.swift */; };
+		DSP000002 /* ShopSampleCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = DSP000012 /* ShopSampleCards.swift */; };
+		DSP000003 /* DressUpShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DSP000013 /* DressUpShopView.swift */; };
 		FNT000001 /* Fraunces-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FNT000011 /* Fraunces-SemiBold.ttf */; };
 		FNT000002 /* Fraunces-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FNT000012 /* Fraunces-Regular.ttf */; };
 		E51000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E51000013 /* Assets.xcassets */; };
@@ -405,6 +410,7 @@
 		E5Q000002 /* cl100k_base.tiktoken in Resources */ = {isa = PBXBuildFile; fileRef = E5Q000012 /* cl100k_base.tiktoken */; };
 		E5Q000003 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5Q000013 /* AppLogger.swift */; };
 		E5Q000004 /* FontSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5Q000014 /* FontSettings.swift */; };
+		WLP000001 /* WallpaperStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLP000011 /* WallpaperStore.swift */; };
 		E5QA0001 /* QuickActionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5QA0101 /* QuickActionRouter.swift */; };
 		E5QA0002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5QA0102 /* AppDelegate.swift */; };
 		E5QA0003 /* QuickActionWorkflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5QA0103 /* QuickActionWorkflow.swift */; };
@@ -872,6 +878,11 @@
 		E51000011 /* MinisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinisApp.swift; sourceTree = "<group>"; };
 		THM000011 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
 		THM000012 /* ThemeModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeModifier.swift; sourceTree = "<group>"; };
+		THM000013 /* DressUpMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DressUpMotion.swift; sourceTree = "<group>"; };
+		THM000014 /* ThemeMotionModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeMotionModifiers.swift; sourceTree = "<group>"; };
+		DSP000011 /* ShopItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopItem.swift; sourceTree = "<group>"; };
+		DSP000012 /* ShopSampleCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopSampleCards.swift; sourceTree = "<group>"; };
+		DSP000013 /* DressUpShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DressUpShopView.swift; sourceTree = "<group>"; };
 		FNT000011 /* Fraunces-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file.ttf; path = Fraunces-SemiBold.ttf; sourceTree = "<group>"; };
 		FNT000012 /* Fraunces-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file.ttf; path = Fraunces-Regular.ttf; sourceTree = "<group>"; };
 		E51000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1232,6 +1243,7 @@
 		E5Q000012 /* cl100k_base.tiktoken */ = {isa = PBXFileReference; lastKnownFileType = text; path = cl100k_base.tiktoken; sourceTree = "<group>"; };
 		E5Q000013 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		E5Q000014 /* FontSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSettings.swift; sourceTree = "<group>"; };
+		WLP000011 /* WallpaperStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperStore.swift; sourceTree = "<group>"; };
 		E5QA0101 /* QuickActionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionRouter.swift; sourceTree = "<group>"; };
 		E5QA0102 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E5QA0103 /* QuickActionWorkflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionWorkflow.swift; sourceTree = "<group>"; };
@@ -1704,8 +1716,20 @@
 			children = (
 				THM000011 /* Tokens.swift */,
 				THM000012 /* ThemeModifier.swift */,
+				THM000013 /* DressUpMotion.swift */,
+				THM000014 /* ThemeMotionModifiers.swift */,
 			);
 			path = Theme;
+			sourceTree = "<group>";
+		};
+		DSP000030 /* DressUpShop */ = {
+			isa = PBXGroup;
+			children = (
+				DSP000011 /* ShopItem.swift */,
+				DSP000012 /* ShopSampleCards.swift */,
+				DSP000013 /* DressUpShopView.swift */,
+			);
+			path = DressUpShop;
 			sourceTree = "<group>";
 		};
 		FNT000030 /* Fonts */ = {
@@ -2100,6 +2124,7 @@
 				E5PRIV11 /* EnvVarPrivacyStore.swift */,
 				E5PRIV12 /* EnvVarRedactor.swift */,
 				E5Q000014 /* FontSettings.swift */,
+				WLP000011 /* WallpaperStore.swift */,
 				E5J000022 /* FileHandleSafeWrite.h */,
 				E5J000021 /* FileHandleSafeWrite.m */,
 				E5J000052 /* ObjCExceptionCatcher.h */,
@@ -2651,6 +2676,7 @@
 				E5SOUL102 /* SoulSettingsView.swift */,
 				E5CVSET0000000000000A011 /* SettingsSheet.swift */,
 				E5CVSET0000000000000A012 /* AppearanceSettingsView.swift */,
+				DSP000030 /* DressUpShop */,
 				E5SCH0014 /* HelperSettingsView.swift */,
 				E5TLS0011 /* ToolsSettingsView.swift */,
 				E5LOCK102 /* FaceIDProtectionSettingsView.swift */,
@@ -3119,6 +3145,11 @@
 			files = (
 				THM000001 /* Tokens.swift in Sources */,
 				THM000002 /* ThemeModifier.swift in Sources */,
+				THM000003 /* DressUpMotion.swift in Sources */,
+				THM000004 /* ThemeMotionModifiers.swift in Sources */,
+				DSP000001 /* ShopItem.swift in Sources */,
+				DSP000002 /* ShopSampleCards.swift in Sources */,
+				DSP000003 /* DressUpShopView.swift in Sources */,
 				AC0000202 /* ProviderCustomizationGenerated.swift in Sources */,
 				E54000AC1 /* DebugSkillGenerated.swift in Sources */,
 				E5FP00100 /* AppGroupChangeWatcher.swift in Sources */,
@@ -3568,6 +3599,7 @@
 				LOC00001 /* AppLocalization.swift in Sources */,
 				F1S00012 /* ChatSessionIdEnvironment.swift in Sources */,
 				E5Q000004 /* FontSettings.swift in Sources */,
+				WLP000001 /* WallpaperStore.swift in Sources */,
 				E5R000001 /* ICloudBackupManager.swift in Sources */,
 				E5R000002 /* ICloudBackupView.swift in Sources */,
 				E5S000001 /* DeviceIdentity.swift in Sources */,
