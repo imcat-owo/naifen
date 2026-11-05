@@ -294,7 +294,7 @@ struct AppearanceSettingsView: View {
                             .foregroundStyle(Theme.Color.ink)
                             .font(.title3)
                             .frame(width: 28)
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("Dress-Up Shop")
                                 .foregroundStyle(.primary)
                             Text("Milk Pink theme, bubbles, wallpaper, and more.")
