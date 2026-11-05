@@ -141,21 +141,14 @@ struct AgentCallbackCellView: View {
     let callback: AgentCallback
     let sessionId: String?
 
-    private var accent: Color {
-        // [T-scheduled-task-card] Amber for the scheduler, whatever its status:
-        // the colour distinguishes WHO injected the turn, not how it went. An
-        // agent callback keeps its status-driven palette (blue running, green
-        // done, yellow cancelled/timeout, red otherwise), so the two kinds
-        // never collide — a scheduled firing carries `status: "running"`, which
-        // would otherwise have painted it the same blue as a running agent.
-        if callback.kind == .scheduled { return .orange }
-        switch callback.status {
-        case "running": return HelperAccent.color
-        case "done": return .green
-        case "cancelled", "timeout": return .yellow
-        default: return .red
-        }
-    }
+    // [T-scheduled-task-card] Status is carried by the word (headline kind
+    // + subline status, both already in ink) and the glyph, never by hue.
+    // The old status palette is gone — milk-pink running, green done,
+    // yellow cancelled/timeout, red otherwise, amber for a scheduled firing
+    // — so a scheduled card no longer needs its amber to read as scheduled:
+    // its headline says "Scheduled task" and its glyph is calendar+clock.
+    // The disc is plain surface-2 and the icon is ink (ink on surface-2 is
+    // 8.00:1 light / 11.16:1 dark, WCAG from Tokens.swift hexes).
 
     private var icon: String {
         switch callback.kind {
@@ -268,10 +261,10 @@ struct AgentCallbackCellView: View {
     var body: some View {
         HStack(spacing: 10) {
             ZStack {
-                Circle().fill(accent.opacity(0.15))
+                Circle().fill(Theme.Color.surface2)
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(accent)
+                    .foregroundStyle(Theme.Color.ink)
             }
             .frame(width: 30, height: 30)
 
@@ -295,7 +288,7 @@ struct AgentCallbackCellView: View {
         .padding(.horizontal, 12)
         .frame(height: Self.cardHeight)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color(UIColor.secondarySystemBackground)))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(accent.opacity(0.25), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.Color.line, lineWidth: 1))
         .contentShape(Rectangle())
         .onTapGesture {
             var info: [String: Any] = ["callback": callback]
