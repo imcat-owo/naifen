@@ -81,11 +81,26 @@ struct SessionStackRow: View {
         }
         .listRowInsets(EdgeInsets())
         .listRowSeparator(.hidden)
+        // Row background is CLEAR, not opaque: the home wallpaper
+        // (HomeWallpaperBackground, bottom ZStack layer of the list) must
+        // show through behind rows, like chat — an opaque row fill would
+        // hide the adoption behind every row. There is deliberately NO
+        // "wallpaper off" condition here: the DressUpStore slot has no off
+        // state (ShopItem.swift:253 — nil = never chose, which still
+        // renders the bundled WallpaperMilkPink; "custom" renders the
+        // upload; a missing custom file falls back to bundled), so the
+        // backdrop renders in every state and `appliedWallpaperId != nil`
+        // would wrongly hide the DEFAULT wallpaper behind rows. If an off
+        // state is ever added to the slot, gate this one place on it.
+        // The opaque fallback is the List-level
+        // `.background(Theme.Color.background)` (W-B), plus the backdrop's
+        // own Theme base layer — clear rows never open a white hole.
+        // Folder rows keep their opaque sampled-glass card by design.
         .listRowBackground(Group {
             if inFolder {
                 FolderMemberRowBackground(isLast: isLastInFolder)
             } else {
-                Theme.Color.background
+                Color.clear
             }
         })
         .contextMenu {
