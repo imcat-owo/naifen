@@ -134,9 +134,11 @@ struct ShopAvatarSample: View {
             case .none:
                 EmptyView()
             case .ring:
-                Circle()
-                    .stroke(Theme.Color.avatarRing, lineWidth: 2)
-                    .frame(width: Self.ringFrameSize, height: Self.ringFrameSize)
+                // No extra overlay: SoulIconView already draws its own
+                // milk-pink ring (2pt + 2pt gap), so a second ring here
+                // drew a double band over it. The renderer ring IS the
+                // ring pendant now.
+                EmptyView()
             case .frame:
                 Image("AvatarFrame")
                     .resizable()
