@@ -412,17 +412,17 @@ private struct MinisFileChipView: View {
             HStack(spacing: 6) {
                 Image(systemName: minisFileIcon(for: ext))
                     .font(.system(size: 13))
-                    .foregroundColor(ChatColors.accent)
+                    .foregroundColor(Theme.Color.accent)
                 Text(filename)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(ChatColors.primaryText)
+                    .foregroundColor(Theme.Color.ink)
                     .lineLimit(1)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(ChatColors.toolBg)
+            .background(Theme.Color.surface2)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(ChatColors.toolBorder, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line.opacity(0.5), lineWidth: 1))
         }
         .sheet(isPresented: $showShareSheet) {
             if let fileURL = resolveMinisFileURL(url: url) {
@@ -704,7 +704,7 @@ private struct MinisImageView: View {
                         }
                 case .failure:
                     Label("Image failed to load", systemImage: "photo")
-                        .foregroundColor(ChatColors.secondaryText)
+                        .foregroundColor(Theme.Color.ink)
                 default:
                     ProgressView()
                 }
@@ -743,10 +743,10 @@ private struct MinisImageView: View {
                     .lineLimit(1)
                     .font(.caption)
             }
-            .foregroundColor(ChatColors.secondaryText)
+            .foregroundColor(Theme.Color.ink)
             .frame(maxWidth: 400, minHeight: mediaPlaceholderHeight, maxHeight: mediaPlaceholderHeight)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(ChatColors.secondaryBg)
+            .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
@@ -837,7 +837,7 @@ struct MinisImageFilePreviewView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .frame(width: 44, height: 44)
                         .contentShape(Circle())
                         .background(.ultraThinMaterial, in: Circle())
@@ -915,7 +915,7 @@ struct MinisTextPreviewView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                ChatColors.secondaryBg.ignoresSafeArea()
+                Theme.Color.surface.ignoresSafeArea()
                 if isLoading {
                     ProgressView()
                 } else {
@@ -927,7 +927,7 @@ struct MinisTextPreviewView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(ChatColors.secondaryText)
+                            .foregroundStyle(Theme.Color.ink2)
                     }
                 }
                 ToolbarItem(placement: .principal) {
@@ -1032,7 +1032,7 @@ struct MinisMarkdownPreviewView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                ChatColors.background.ignoresSafeArea()
+                Theme.Color.background.ignoresSafeArea()
                 if isLoading {
                     ProgressView()
                 } else {
@@ -1050,7 +1050,7 @@ struct MinisMarkdownPreviewView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(ChatColors.secondaryText)
+                            .foregroundStyle(Theme.Color.ink2)
                     }
                 }
                 ToolbarItem(placement: .principal) {
@@ -1133,7 +1133,7 @@ struct MinisHTMLPreviewView: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button { dismiss() } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink2)
                         }
                     }
                     ToolbarItem(placement: .principal) {

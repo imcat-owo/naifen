@@ -216,7 +216,7 @@ extension AIChatView {
                                  ? AppLocalized("Scanning files…")
                                  : AppLocalized("No matching files"))
                                 .font(.system(size: 13))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                             Spacer()
                         }
                         .padding(.horizontal, 12)
@@ -271,7 +271,7 @@ extension AIChatView {
                             ProgressView().scaleEffect(0.6)
                             Text("Scanning more locations…")
                                 .font(.system(size: 11))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                             Spacer()
                         }
                         .padding(.horizontal, 12)
@@ -365,23 +365,23 @@ extension AIChatView {
             HStack(spacing: 10) {
                 Image(systemName: iconName)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(isSelected ? Color.white : ChatColors.secondaryText)
+                    .foregroundStyle(isSelected ? Color.white : Theme.Color.ink2)
                     .frame(width: 20)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(entry.basename)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(isSelected ? Color.white : ChatColors.primaryText)
+                        .foregroundStyle(isSelected ? Color.white : Theme.Color.ink)
                         .lineLimit(1)
                     Text(entry.displayPath)
                         .font(.system(size: 11))
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.75) : ChatColors.secondaryText)
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.75) : Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
                 Spacer()
                 Text(entry.mountName ?? entry.scope.displayLabel)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(isSelected ? Color.white.opacity(0.9) : ChatColors.secondaryText)
+                    .foregroundStyle(isSelected ? Color.white.opacity(0.9) : Theme.Color.ink)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(
@@ -495,13 +495,13 @@ extension AIChatView {
                     VStack(alignment: .leading, spacing: 1) {
                         let isThinkingActive = cmd.id == "thinking" && thinkingLevel.isEnabled && thinkingSupported
                         let titleColor: Color = isThinkingActive
-                            ? .blue : (isSelected ? .white : ChatColors.primaryText)
+                            ? .blue : (isSelected ? .white : Theme.Color.ink)
                         let subtitleText = (cmd.id == "thinking" && !thinkingSupported)
                             ? AppLocalized("Not supported by current model")
                             : cmd.subtitle
                         let subtitleColor: Color = (cmd.id == "thinking" && !thinkingSupported)
                             ? .secondary
-                            : (isThinkingActive ? .blue.opacity(0.7) : (isSelected ? .white.opacity(0.7) : ChatColors.secondaryText))
+                            : (isThinkingActive ? .blue.opacity(0.7) : (isSelected ? .white.opacity(0.7) : Theme.Color.ink))
                         // [T-slash-picker-product-rules] Title + subtitle
                         // each clamped to a single line. Long skill names
                         // and descriptions used to wrap and pump the row
@@ -547,10 +547,10 @@ extension AIChatView {
 
         private var thinkingIconColor: Color {
             guard cmd.id == "thinking" else {
-                return isSelected ? .white.opacity(0.8) : ChatColors.secondaryText
+                return isSelected ? .white.opacity(0.8) : Theme.Color.ink2
             }
             if !thinkingSupported { return .secondary }
-            return thinkingLevel.isEnabled ? .blue : (isSelected ? .white.opacity(0.8) : ChatColors.secondaryText)
+            return thinkingLevel.isEnabled ? .blue : (isSelected ? .white.opacity(0.8) : Theme.Color.ink2)
         }
 
         private var thinkingLevelPicker: some View {

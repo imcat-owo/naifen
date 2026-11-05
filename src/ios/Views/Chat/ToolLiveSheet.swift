@@ -1146,9 +1146,9 @@ struct ToolLiveSheet: View {
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .frame(width: 32, height: 32)
-                        .background(ChatColors.secondaryBg)
+                        .background(Theme.Color.surface)
                         .clipShape(Circle())
                 }
 
@@ -1177,18 +1177,18 @@ struct ToolLiveSheet: View {
                                 .font(.system(size: 8, weight: .bold))
                                 .offset(x: 5, y: 5)
                         }
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .frame(width: 32, height: 32)
-                        .background(ChatColors.secondaryBg)
+                        .background(Theme.Color.surface)
                         .clipShape(Circle())
                     }
                 } else if case .browserTool = block.kind, browserPool != nil {
                     Button { activeSheet = .takeoverBrowser } label: {
                         toolIcon
                             .font(.system(size: 14))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 } else if case .fileWriteTool = block.kind {
@@ -1202,9 +1202,9 @@ struct ToolLiveSheet: View {
                     } label: {
                         Image(systemName: navCopyDone ? "checkmark" : "doc.on.doc")
                             .font(.system(size: 14))
-                            .foregroundStyle(navCopyDone ? Color.green : ChatColors.primaryText)
+                            .foregroundStyle(navCopyDone ? Color.green : Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 } else if case .fileReadTool = block.kind {
@@ -1215,9 +1215,9 @@ struct ToolLiveSheet: View {
                     } label: {
                         Image(systemName: navCopyDone ? "checkmark" : "doc.on.doc")
                             .font(.system(size: 14))
-                            .foregroundStyle(navCopyDone ? Color.green : ChatColors.primaryText)
+                            .foregroundStyle(navCopyDone ? Color.green : Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 } else if case .fileEditTool = block.kind {
@@ -1230,9 +1230,9 @@ struct ToolLiveSheet: View {
                     } label: {
                         Image(systemName: navCopyDone ? "checkmark" : "doc.on.doc")
                             .font(.system(size: 14))
-                            .foregroundStyle(navCopyDone ? Color.green : ChatColors.primaryText)
+                            .foregroundStyle(navCopyDone ? Color.green : Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 } else if case .readImageTool = block.kind {
@@ -1245,9 +1245,9 @@ struct ToolLiveSheet: View {
                     } label: {
                         Image(systemName: navCopyDone ? "checkmark" : "doc.on.doc")
                             .font(.system(size: 14))
-                            .foregroundStyle(navCopyDone ? Color.green : ChatColors.primaryText)
+                            .foregroundStyle(navCopyDone ? Color.green : Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 } else if case .memoryTool = block.kind {
@@ -1259,9 +1259,9 @@ struct ToolLiveSheet: View {
                     } label: {
                         Image(systemName: navCopyDone ? "checkmark" : "doc.on.doc")
                             .font(.system(size: 14))
-                            .foregroundStyle(navCopyDone ? Color.green : ChatColors.primaryText)
+                            .foregroundStyle(navCopyDone ? Color.green : Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 } else if case .delegateTool = block.kind {
@@ -1287,7 +1287,7 @@ struct ToolLiveSheet: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(HelperAccent.color)
                                 .frame(width: 32, height: 32)
-                                .background(ChatColors.secondaryBg)
+                                .background(Theme.Color.surface)
                                 .clipShape(Circle())
                         }
                         .accessibilityLabel(Text("Resume sub agent", comment: "VoiceOver label for the button that restarts an interrupted sub agent"))
@@ -1325,9 +1325,9 @@ struct ToolLiveSheet: View {
                     } label: {
                         Image(systemName: "text.bubble")
                             .font(.system(size: 14))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                     .accessibilityLabel(AppLocalized("Open live agent conversation"))
@@ -1336,9 +1336,9 @@ struct ToolLiveSheet: View {
                     Button { showTerminal = true } label: {
                         toolIcon
                             .font(.system(size: 14))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 32, height: 32)
-                            .background(ChatColors.secondaryBg)
+                            .background(Theme.Color.surface)
                             .clipShape(Circle())
                     }
                 }
@@ -1769,7 +1769,7 @@ struct ToolLiveSheet: View {
                             if !contentHeader.isEmpty {
                                 Text(contentHeader)
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(ChatColors.secondaryText)
+                                    .foregroundStyle(Theme.Color.ink)
                                     .padding(.horizontal, 16)
                                     .padding(.top, 16)
                                     .padding(.bottom, 8)
@@ -2562,7 +2562,7 @@ struct ToolLiveSheet: View {
                         if !contentHeader.isEmpty {
                             Text(contentHeader)
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .padding(.horizontal, 16)
                                 .padding(.top, 16)
                                 .padding(.bottom, 8)
@@ -2706,10 +2706,10 @@ struct ToolLiveSheet: View {
                     VStack(spacing: 8) {
                         Image(systemName: "globe")
                             .font(.system(size: 32))
-                            .foregroundStyle(ChatColors.tertiaryText)
+                            .foregroundStyle(Theme.Color.ink2)
                         Text("Loading...")
                             .font(.system(size: 13))
-                            .foregroundStyle(ChatColors.tertiaryText)
+                            .foregroundStyle(Theme.Color.ink)
                     }
                     Spacer()
                 }
@@ -2734,11 +2734,11 @@ struct ToolLiveSheet: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(toolTitle)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                     Text(toolSubtitle)
                         .font(.system(size: 11))
-                        .foregroundStyle(ChatColors.secondaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
@@ -2755,12 +2755,12 @@ struct ToolLiveSheet: View {
                         if let dur {
                             Text(Self.formatDuration(dur))
                                 .font(.system(size: 11, design: .monospaced))
-                                .foregroundStyle(ChatColors.tertiaryText)
+                                .foregroundStyle(Theme.Color.ink)
                         }
                         if let started = block.toolStartTime {
                             Text(MinisStepTimestampFormatter.string(from: started))
                                 .font(.system(size: 9, design: .monospaced))
-                                .foregroundStyle(ChatColors.tertiaryText.opacity(0.75))
+                                .foregroundStyle(Theme.Color.ink)
                         }
                     }
                 }
@@ -2775,7 +2775,7 @@ struct ToolLiveSheet: View {
                 } label: {
                     Image(systemName: "backward.end.fill")
                         .font(.system(size: 18))
-                        .foregroundStyle(currentIdx > 0 ? ChatColors.primaryText : ChatColors.tertiaryText)
+                        .foregroundStyle(currentIdx > 0 ? Theme.Color.ink : Theme.Color.ink2)
                 }
                 .disabled(currentIdx <= 0)
 
@@ -2788,12 +2788,12 @@ struct ToolLiveSheet: View {
                             .frame(width: 7, height: 7)
                         Text("Live")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                     }
                 } else {
                     Text("\(currentIdx + 1) / \(toolBlocks.count)")
                         .font(.system(size: 13, weight: .medium, design: .monospaced))
-                        .foregroundStyle(ChatColors.secondaryText)
+                        .foregroundStyle(Theme.Color.ink)
                 }
 
                 Spacer()
@@ -2803,7 +2803,7 @@ struct ToolLiveSheet: View {
                 } label: {
                     Image(systemName: "forward.end.fill")
                         .font(.system(size: 18))
-                        .foregroundStyle(currentIdx < toolBlocks.count - 1 ? ChatColors.primaryText : ChatColors.tertiaryText)
+                        .foregroundStyle(currentIdx < toolBlocks.count - 1 ? Theme.Color.ink : Theme.Color.ink2)
                 }
                 .disabled(currentIdx >= toolBlocks.count - 1)
             }
@@ -3372,7 +3372,7 @@ private struct ToolStatusBar: View {
 
                 Text(title)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .contentShape(Rectangle())
@@ -3416,7 +3416,7 @@ private struct ToolStatusBar: View {
                     // spells out what the count means, so it has to stay.
                     Text("\(displayedIdx + 1)/\(toolBlocks.count)")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundStyle(ChatColors.secondaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .accessibilityLabel(
                             AppLocalized("Tool call") + " \(displayedIdx + 1) / \(toolBlocks.count)")
 
@@ -3479,7 +3479,7 @@ private struct ToolStatusBar: View {
                              jump: @escaping () -> Void) -> some View {
         Image(systemName: glyph)
             .font(.system(size: 10, weight: .semibold))
-            .foregroundStyle(enabled ? ChatColors.primaryText : ChatColors.tertiaryText)
+            .foregroundStyle(enabled ? Theme.Color.ink : Theme.Color.ink2)
             .frame(width: 20, height: 20)
             .contentShape(Rectangle())
             .onTapGesture { if enabled { step() } }

@@ -277,7 +277,7 @@ extension AIChatView {
                     // iOS 26 path unchanged (16pt works inside liquid-glass).
                     .font(.system(size: legacyLayout ? 13 : 16, weight: .semibold))
                     .minimumScaleFactor(legacyLayout ? 0.85 : 1.0)
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .fixedSize(horizontal: false, vertical: true)
@@ -320,16 +320,16 @@ extension AIChatView {
                             if isGroupBound {
                                 Image(systemName: "square.stack.3d.up")
                                     .font(.system(size: 8))
-                                    .foregroundStyle(ChatColors.tertiaryText)
+                                    .foregroundStyle(Theme.Color.ink2)
                             }
                             Text(modelName)
                                 .font(.caption2)
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 8, weight: .semibold))
-                                .foregroundStyle(ChatColors.tertiaryText)
+                                .foregroundStyle(Theme.Color.ink2)
                         }
                         .layoutPriority(-1)
                     }
@@ -393,7 +393,7 @@ extension AIChatView {
                         } label: {
                             Text("\(detail.providerLabel) · \(detail.modelName)")
                                 .font(.system(size: 9))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                                 // [NavTitleClip 2026-05-16] Reserve clearance
@@ -521,7 +521,7 @@ extension AIChatView {
             Text(level.displayName)
                 .font(.system(size: 8, weight: .medium))
         }
-        .foregroundStyle(ChatColors.secondaryText)
+        .foregroundStyle(Theme.Color.ink)
         .padding(.horizontal, 4)
         .padding(.vertical, 1)
         .background(Capsule().fill(Color.secondary.opacity(0.10)))

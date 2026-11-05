@@ -959,7 +959,7 @@ struct ContentView: View {
                         // how dark mode looks today.
                         ProgressView()
                             .controlSize(.large)
-                            .tint(ChatColors.primaryText)
+                            .tint(Theme.Color.ink)
                         if let p = exportProgress, p.total > 0 {
                             Text(AppLocalized("Exporting… \(p.done) / \(p.total)"))
                                 .font(.subheadline)

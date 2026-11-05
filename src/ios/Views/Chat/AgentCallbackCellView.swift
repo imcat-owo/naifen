@@ -280,17 +280,17 @@ struct AgentCallbackCellView: View {
                                     key: searchMessageId.map { ChatSearchUnitKey(messageId: $0, blockId: nil, field: .title) },
                                     searchOffset: ChatSearchDisplayText.callbackHeadline(callback).titleOffset)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                 Text(subline)
                     .font(.system(size: 12))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
             }
             Spacer(minLength: 4)
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(ChatColors.tertiaryText)
+                .foregroundStyle(Theme.Color.ink2)
         }
         .padding(.horizontal, 12)
         .frame(height: Self.cardHeight)

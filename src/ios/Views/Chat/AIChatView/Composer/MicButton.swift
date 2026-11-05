@@ -51,11 +51,11 @@ struct MicButton: View {
         // glyph is wider than the mic, so render it ~4pt smaller for parity.
         Image(systemName: isVoiceActive ? "keyboard" : "mic")
             .font(.system(size: isVoiceActive ? 15 : 18, weight: .medium))
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink2)
             .frame(width: Self.diameter, height: Self.diameter)
-            .background(ChatColors.inputIconBg)
+            .background(Theme.Color.surface2)
             .clipShape(Circle())
-            .overlay(Circle().stroke(ChatColors.inputIconBorder, lineWidth: 0.5))
+            .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
             .scaleEffect(micPressed ? 0.9 : 1.0)
             .contentShape(Circle())
             .gesture(

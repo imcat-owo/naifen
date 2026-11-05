@@ -761,10 +761,10 @@ struct InlineVoiceInputView: View {
         } label: {
             Image(systemName: expanded ? "chevron.down" : "chevron.up")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink2)
                 .frame(width: 30, height: 30)
-                .background(Circle().fill(ChatColors.inputIconBg))
-                .overlay(Circle().strokeBorder(ChatColors.inputIconBorder, lineWidth: 0.5))
+                .background(Circle().fill(Theme.Color.surface2))
+                .overlay(Circle().strokeBorder(Theme.Color.line, lineWidth: 0.5))
         }
         .accessibilityLabel(expanded
             ? Text("Collapse voice panel", comment: "Voice panel collapse")
@@ -798,7 +798,7 @@ struct InlineVoiceInputView: View {
                 .focused($editFocused)
                 .font(.body)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .onAppear { editFocused = true }
                 .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
@@ -840,7 +840,7 @@ struct InlineVoiceInputView: View {
                 ScrollView(.vertical, showsIndicators: true) {
                     Text(viewModel.transcript)
                         .font(.body)
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity)
@@ -949,10 +949,10 @@ struct InlineVoiceInputView: View {
             // other controls: black fill, white icon, subtle border.
             Image(systemName: "globe")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink2)
                 .frame(width: 30, height: 30)
-                .background(Circle().fill(ChatColors.inputIconBg))
-                .overlay(Circle().strokeBorder(ChatColors.inputIconBorder, lineWidth: 0.5))
+                .background(Circle().fill(Theme.Color.surface2))
+                .overlay(Circle().strokeBorder(Theme.Color.line, lineWidth: 0.5))
         }
         .accessibilityLabel(Text("Recognition language: \(VoiceLanguages.option(for: viewModel.language).label)", comment: "Inline voice language switch"))
     }
@@ -1006,12 +1006,12 @@ struct InlineVoiceInputView: View {
                 } else {
                     Image(systemName: "sparkles")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(ChatColors.secondaryText)
+                        .foregroundStyle(Theme.Color.ink2)
                 }
             }
             .frame(width: 30, height: 30)
-            .background(Circle().fill(ChatColors.inputIconBg))
-            .overlay(Circle().strokeBorder(ChatColors.inputIconBorder, lineWidth: 0.5))
+            .background(Circle().fill(Theme.Color.surface2))
+            .overlay(Circle().strokeBorder(Theme.Color.line, lineWidth: 0.5))
         }
         .disabled(isCorrecting)
         .accessibilityLabel(Text("Correct transcript with AI", comment: "Voice manual-correction button"))
@@ -1143,11 +1143,11 @@ struct InlineVoiceInputView: View {
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
             }
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Capsule().fill(ChatColors.inputIconBg))
-            .overlay(Capsule().strokeBorder(ChatColors.inputIconBorder, lineWidth: 0.5))
+            .background(Capsule().fill(Theme.Color.surface2))
+            .overlay(Capsule().strokeBorder(Theme.Color.line, lineWidth: 0.5))
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -1387,10 +1387,10 @@ private struct VoiceDeleteButton: View {
     var body: some View {
         Image(systemName: "delete.left.fill")
             .font(.system(size: 21, weight: .medium))
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink2)
             .frame(width: Self.diameter, height: Self.diameter)
-            .background(Circle().fill(ChatColors.inputIconBg))
-            .overlay(Circle().strokeBorder(ChatColors.inputIconBorder, lineWidth: 0.5))
+            .background(Circle().fill(Theme.Color.surface2))
+            .overlay(Circle().strokeBorder(Theme.Color.line, lineWidth: 0.5))
             .scaleEffect(pressing ? 0.9 : 1.0)
             .overlay(
                 DeletePressOverlay(

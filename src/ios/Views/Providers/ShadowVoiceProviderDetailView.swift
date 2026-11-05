@@ -106,7 +106,7 @@ struct ShadowVoiceProviderDetailView: View {
             HStack(spacing: 10) {
                 styledIcon(systemImage, color: color)
                 Text(entry.baseModel.displayName)
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                 Spacer()
                 Image(systemName: "bolt.fill")
                     .font(.caption)

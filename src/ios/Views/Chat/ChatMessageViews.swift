@@ -78,7 +78,7 @@ struct MessageContextMenuPreview: View {
             // which starts at the cap and shrinks to the measured content.
             Text(shown)
                 .font(.system(size: FontSettings.shared.scaledMessage(16.5)))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .multilineTextAlignment(.leading)
                 .padding(16)
                 .background(
@@ -116,7 +116,7 @@ struct MessageContextMenuPreview: View {
 /// `Color.clear` overlay or a `tertiarySystemFill` bubble, so SwiftUI's snapshot
 /// of the attached view was effectively transparent. Glass is a translucent
 /// material, so using it ALONE would risk re-opening exactly that bug. Painting
-/// it over `ChatColors.background` keeps the platter opaque no matter what the
+/// it over `Theme.Color.background` keeps the platter opaque no matter what the
 /// system composites behind it, while the material still supplies the glass
 /// highlight and edge that make it read as continuous with the bubble.
 private struct ContextMenuPreviewSurface: ViewModifier {
@@ -128,10 +128,10 @@ private struct ContextMenuPreviewSurface: ViewModifier {
         if #available(iOS 26.0, *) {
             content
                 // Opaque floor first — see the note above.
-                .background(shape.fill(ChatColors.background))
+                .background(shape.fill(Theme.Color.background))
                 .glassEffect(.regular, in: shape)
         } else {
-            content.background(ChatColors.background)
+            content.background(Theme.Color.background)
         }
     }
 }
@@ -190,12 +190,12 @@ private struct UserBubbleSurface: ViewModifier {
                 .overlay(
                     shape
                         .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
-                        .foregroundStyle(ChatColors.secondaryText.opacity(0.5))
+                        .foregroundStyle(Theme.Color.ink2.opacity(0.5))
                 )
         } else if #available(iOS 26.0, *), !snapshotRendering {
             content.glassEffect(.regular, in: shape)
         } else {
-            content.background(shape.fill(ChatColors.userBubble))
+            content.background(shape.fill(Theme.Color.bubbleUser))
         }
     }
 }
@@ -442,7 +442,7 @@ struct ChatMessageRow: View {
                     HStack(spacing: 6) {
                         SearchHighlightText(userDisplayText, key: searchKey())
                             .font(.system(size: FontSettings.shared.scaledMessage(16.5)))
-                            .foregroundStyle(message.isQueued ? ChatColors.secondaryText : ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
                             .modifier(UserBubbleSurface(isQueued: message.isQueued))
@@ -565,7 +565,7 @@ struct ChatMessageRow: View {
                     )
                 AssistantSoulName()
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
             }
             .padding(.top, 4)
 
@@ -640,7 +640,7 @@ struct ChatMessageRow: View {
                     if showUsage, let completedAt = message.completedAt {
                         Text(Self.completedAtFormatter.string(from: completedAt))
                             .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(ChatColors.tertiaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .opacity(usageContentVisible ? 1 : 0)
                     }
                 }
@@ -767,10 +767,10 @@ struct ChatMessageRow: View {
             Text(usageSummary(usage))
                 .font(.system(size: 10, design: .monospaced))
         }
-        .foregroundStyle(ChatColors.tertiaryText)
+        .foregroundStyle(Theme.Color.ink)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .background(ChatColors.userBubble.opacity(0.6))
+        .background(Theme.Color.bubbleUser.opacity(0.6))
         .clipShape(Capsule())
         .transition(.opacity.combined(with: .scale(scale: 0.8)))
     }
@@ -854,10 +854,10 @@ struct ChatMessageRow: View {
                         Text("Retry")
                             .font(.caption.weight(.semibold))
                     }
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(ChatColors.primaryText.opacity(0.15))
+                    .background(Theme.Color.ink.opacity(0.15))
                     .clipShape(Capsule())
                 }
             }

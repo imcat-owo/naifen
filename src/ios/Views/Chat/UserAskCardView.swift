@@ -476,16 +476,16 @@ struct UserAskCardView: View {
     private var notAskedRow: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "exclamationmark.bubble")
-                .foregroundStyle(ChatColors.tertiaryText)
+                .foregroundStyle(Theme.Color.ink2)
             VStack(alignment: .leading, spacing: 2) {
                 Text(UserAskSummary.notSentTitle(count: notSent.role(block.id).count))
                     .font(.system(size: t.secondary, weight: .medium))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                 if case .failed? = block.toolStatus {
                     Text(AppLocalized("Details missing; the assistant will retry or ask in text"))
                         .font(.system(size: t.meta))
-                        .foregroundStyle(ChatColors.tertiaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -509,7 +509,7 @@ struct UserAskCardView: View {
         if retry.isRetried(id) {
             Text(AppLocalized("Retried"))
                 .font(.system(size: t.meta))
-                .foregroundStyle(ChatColors.tertiaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(1)
         } else if retry.isRetryable(id), let id {
             // Compact (no 44pt minimum height): it must not make the row taller
@@ -527,7 +527,7 @@ struct UserAskCardView: View {
                     .font(.system(size: t.meta, weight: .semibold))
                     .lineLimit(1)
                     .padding(.horizontal, 12).padding(.vertical, 6)
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .background(Capsule().fill(Color.gray.opacity(0.16)))
                     .contentShape(Rectangle().inset(by: -10))
             }
@@ -544,7 +544,7 @@ struct UserAskCardView: View {
                 .foregroundStyle(Color.accentColor)
             Text(AppLocalized("Waiting for your answer…"))
                 .font(.system(size: t.secondary))
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 14).padding(.vertical, 12)
@@ -666,7 +666,7 @@ private struct UserAskPendingCard: View {
             }
             Text(title)
                 .font(.system(size: t.title, weight: .semibold))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(1)
             if let h = q.header, !h.isEmpty {
                 Text(h)
@@ -680,14 +680,14 @@ private struct UserAskPendingCard: View {
             if ask.questions.count > 1 {
                 Text("\(index + 1)/\(ask.questions.count)")
                     .font(.system(size: t.meta, weight: .medium).monospacedDigit())
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
             }
             if let expires = ask.expiresAt {
                 TimelineView(.periodic(from: .now, by: 1)) { ctx in
                     let left = max(0, Int(expires.timeIntervalSince(ctx.date)))
                     Label(String(format: "%d:%02d", left / 60, left % 60), systemImage: "timer")
                         .font(.system(size: t.meta, weight: .medium).monospacedDigit())
-                        .foregroundStyle(left <= 30 ? Color.orange : ChatColors.secondaryText)
+                        .foregroundStyle(left <= 30 ? Color.orange : Theme.Color.ink)
                         .accessibilityLabel(left <= 30 ? AppLocalized("\(left) seconds left") : AppLocalized("Time left"))
                 }
             }
@@ -721,7 +721,7 @@ private struct UserAskPendingCard: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
             questionText
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(questionExpanded ? nil : 3)
                 .fixedSize(horizontal: false, vertical: true)
                 // [T-user-ask-expand-measured] Two hidden copies at the same
@@ -824,13 +824,13 @@ private struct UserAskPendingCard: View {
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: t.icon))
-                    .foregroundStyle(selected ? tint : ChatColors.tertiaryText)
+                    .foregroundStyle(selected ? tint : Theme.Color.ink2)
                     .frame(width: t.icon + 4)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(o.label)
                             .font(.system(size: t.optionTitle, weight: selected ? .semibold : .regular))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                         if i == 0 {
                             Text(AppLocalized("Recommended"))
                                 .font(.system(size: t.chip, weight: .semibold))
@@ -842,7 +842,7 @@ private struct UserAskPendingCard: View {
                     if let d = o.description, !d.isEmpty {
                         Text(d)
                             .font(.system(size: t.optionDetail))
-                            .foregroundStyle(ChatColors.secondaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -877,7 +877,7 @@ private struct UserAskPendingCard: View {
                     .lineLimit(1)
             }
             .font(.system(size: t.secondary))
-            .foregroundStyle(note.isEmpty ? ChatColors.secondaryText : ChatColors.primaryText)
+            .foregroundStyle(Theme.Color.ink)
             .padding(.vertical, 7)
             .frame(minHeight: UserAskTypography.minTapHeight)
             .contentShape(Rectangle())
@@ -890,17 +890,17 @@ private struct UserAskPendingCard: View {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: t.icon))
-                    .foregroundStyle(selected ? tint : ChatColors.tertiaryText)
+                    .foregroundStyle(selected ? tint : Theme.Color.ink2)
                     .frame(width: t.icon + 4)
                 Text(label)
                     .font(.system(size: t.optionTitle, weight: selected ? .semibold : .regular))
-                    .foregroundStyle(selected ? ChatColors.primaryText : ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(2)
                 Spacer(minLength: 0)
                 if let trailingIcon {
                     Image(systemName: trailingIcon)
                         .font(.system(size: t.secondary))
-                        .foregroundStyle(ChatColors.tertiaryText)
+                        .foregroundStyle(Theme.Color.ink2)
                 }
             }
             .padding(.vertical, 7)
@@ -919,7 +919,7 @@ private struct UserAskPendingCard: View {
                     .foregroundStyle(tint)
                 Text(impact)
                     .font(.system(size: t.secondary))
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
@@ -934,7 +934,7 @@ private struct UserAskPendingCard: View {
                     .lineLimit(2)
             }
             .font(.system(size: t.secondary))
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink)
             .padding(.vertical, 7)
             .frame(minHeight: UserAskTypography.minTapHeight)
             .contentShape(Rectangle())
@@ -1142,7 +1142,7 @@ private struct UserAskResolvedCard: View {
                             SearchHighlightText(topic, blockId: block.id, field: .title, messageId: searchMessageId)
                                 .font(isConfirm ? .system(size: t.resolvedTopic - 1, weight: .medium, design: .monospaced)
                                                 : .system(size: t.resolvedTopic, weight: .medium))
-                                .foregroundStyle(ChatColors.primaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1)
                         }
                         HStack(spacing: 6) {
@@ -1156,7 +1156,7 @@ private struct UserAskResolvedCard: View {
                             if !digest.isEmpty {
                                 SearchHighlightText(digest, blockId: block.id, field: .activity, messageId: searchMessageId)
                                     .font(.system(size: t.meta))
-                                    .foregroundStyle(ChatColors.secondaryText)
+                                    .foregroundStyle(Theme.Color.ink)
                                     .lineLimit(1)
                                     .frame(minWidth: 60, alignment: .leading)
                             }
@@ -1165,7 +1165,7 @@ private struct UserAskResolvedCard: View {
                     Spacer(minLength: 4)
                     Image(systemName: block.isThinkingExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(ChatColors.tertiaryText)
+                        .foregroundStyle(Theme.Color.ink2)
                 }
                 .contentShape(Rectangle())
             }
@@ -1176,13 +1176,13 @@ private struct UserAskResolvedCard: View {
                         VStack(alignment: .leading, spacing: 2) {
                             SearchHighlightText(q.question, blockId: block.id, field: .question(i), messageId: searchMessageId)
                                 .font(.system(size: t.resolvedDetail))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .fixedSize(horizontal: false, vertical: true)
                             if i < results.count {
                                 Text(UserAskCardModel.summary(results[i], question: q)
                                      + (results[i].note.map { $0.isEmpty ? "" : " · " + $0 } ?? ""))
                                     .font(.system(size: t.secondary, weight: .medium))
-                                    .foregroundStyle(ChatColors.primaryText)
+                                    .foregroundStyle(Theme.Color.ink)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -1216,9 +1216,9 @@ private struct UserAskResolvedCard: View {
     }
 
     private var statusColor: Color {
-        if dismissReason != nil { return ChatColors.secondaryText }
-        if results.contains(where: { UserAskCardModel.isTimeout($0.status) }) { return ChatColors.secondaryText }
-        if results.contains(where: { $0.status == .denied }) { return ChatColors.secondaryText }
+        if dismissReason != nil { return Theme.Color.ink }
+        if results.contains(where: { UserAskCardModel.isTimeout($0.status) }) { return Theme.Color.ink }
+        if results.contains(where: { $0.status == .denied }) { return Theme.Color.ink }
         return tint
     }
 
@@ -1945,16 +1945,16 @@ struct UserAskSummaryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Label(AppLocalized("Question for you"), systemImage: "questionmark.bubble")
                     .font(.system(size: t.title, weight: .semibold))
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                 ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(row.topic)
                             .font(.system(size: t.secondary, weight: row.value.isEmpty && !row.muted ? .semibold : .regular))
-                            .foregroundStyle(row.value.isEmpty && !row.muted ? Color.accentColor : ChatColors.secondaryText)
+                            .foregroundStyle(row.value.isEmpty && !row.muted ? Color.accentColor : Theme.Color.ink)
                         if !row.value.isEmpty {
                             Text(row.value)
                                 .font(.system(size: t.question, weight: .medium))
-                                .foregroundStyle(row.muted ? ChatColors.secondaryText : ChatColors.primaryText)
+                                .foregroundStyle(Theme.Color.ink)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -1963,12 +1963,12 @@ struct UserAskSummaryView: View {
                    UserAskCardModel.request(block) == nil {
                     Text(AppLocalized("Details missing; the assistant will retry or ask in text"))
                         .font(.system(size: t.meta))
-                        .foregroundStyle(ChatColors.tertiaryText)
+                        .foregroundStyle(Theme.Color.ink)
                 }
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(ChatColors.background)
+        .background(Theme.Color.background)
     }
 }
