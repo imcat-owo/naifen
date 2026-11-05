@@ -280,7 +280,7 @@ struct MessageImageGallery: View {
                 if let item = currentItem {
                     Text(item.title)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .padding(.horizontal, 14)
@@ -344,7 +344,7 @@ struct MessageImageGallery: View {
                     case .idle:
                         Image(systemName: "square.and.arrow.down").offset(y: -1)
                     case .saving:
-                        ProgressView().tint(ChatColors.primaryText)
+                        ProgressView().tint(Theme.Color.ink)
                     case .saved:
                         Image(systemName: "checkmark").foregroundStyle(.green)
                     case .failed:
@@ -352,7 +352,7 @@ struct MessageImageGallery: View {
                     }
                 }
                 .font(.body.weight(.semibold))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .frame(width: 44, height: 44)
                 .contentShape(Circle())
                 .background(.ultraThinMaterial, in: Circle())
@@ -391,7 +391,7 @@ struct MessageImageGallery: View {
     private func chromeIcon(_ name: String, tint: Color? = nil) -> some View {
         Image(systemName: name)
             .font(.body.weight(.semibold))
-            .foregroundStyle(tint ?? ChatColors.primaryText)
+            .foregroundStyle(tint ?? Theme.Color.ink)
             .frame(width: 44, height: 44)
             .contentShape(Circle())
             .background(.ultraThinMaterial, in: Circle())
