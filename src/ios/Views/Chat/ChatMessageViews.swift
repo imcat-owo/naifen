@@ -426,10 +426,19 @@ struct ChatMessageRow: View {
     /// Long-message test: measured line count once layout has run, character
     /// count before that. The 3.5 threshold sits between 3 and 4 whole lines,
     /// so rounding in the measured height cannot flip a 3-line bubble.
+    /// Line height comes from the same 13pt base `Theme.Font.body()` renders
+    /// (scaled by UIFontMetrics for Dynamic Type, floored at 11pt, exactly as
+    /// `Theme.Font.scaledSize` does) — NOT the 17pt system `.body` style,
+    /// whose ~22pt line height would undercount lines and give long messages
+    /// the pill radius instead of the Porcelain Card radius.
     private var userBubbleIsLong: Bool {
         if userBubbleSize.height > 0 {
             let textHeight = userBubbleSize.height - Theme.Spacing.sm * 2
-            let lineHeight = UIFont.preferredFont(forTextStyle: .body).lineHeight
+            // Keep this 13 in sync with Theme.Font.body()'s base (and
+            // FontSettings.defaultBodySize); the 11pt floor matches
+            // Theme.Font's sans floor.
+            let scaledSize = max(UIFontMetrics(forTextStyle: .body).scaledValue(for: 13), 11)
+            let lineHeight = UIFont.systemFont(ofSize: scaledSize).lineHeight
             if lineHeight > 0 { return textHeight / lineHeight > ChatMessageLayout.longBubbleLineThreshold }
         }
         return userDisplayText.count > ChatMessageLayout.longBubbleCharThreshold
@@ -680,7 +689,7 @@ struct ChatMessageRow: View {
                     .font(Theme.Font.bodyEmphasized())
                     .foregroundStyle(Theme.Color.accent)
                 AssistantSoulName()
-                    .font(.body.weight(.semibold))
+                    .font(Theme.Font.bodyEmphasized())
                     .foregroundStyle(Theme.Color.ink)
             }
             .padding(.top, Theme.Spacing.xs)
@@ -934,7 +943,7 @@ struct ChatMessageRow: View {
         HStack(alignment: .center, spacing: Theme.Spacing.sm) {
             HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.caption)
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.accent)
                 // [T-error-detail-visible issue #368] Was lineLimit(2), which
                 // could not show the reason at all: a group failure composes one
@@ -953,7 +962,7 @@ struct ChatMessageRow: View {
                 // stale-height family in CollectionViewMessageListV3). A static
                 // limit is measured correctly at first layout and cannot desync.
                 Text(error)
-                    .font(.caption)
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.ink)
                     .lineLimit(8)
                     .fixedSize(horizontal: false, vertical: true)
@@ -972,7 +981,7 @@ struct ChatMessageRow: View {
 
             if autoRetryAttempt > 0 {
                 Text("Retry in \(autoRetryCountdown)s (\(autoRetryAttempt)/\(AIChatViewModel.retryDelays.count))")
-                    .font(.caption.weight(.semibold))
+                    .font(Theme.Font.caption().weight(.semibold))
                     .foregroundStyle(Theme.Color.ink)
                     .padding(.horizontal, Theme.Spacing.md)
                     .padding(.vertical, Theme.Spacing.xs)
@@ -982,9 +991,9 @@ struct ChatMessageRow: View {
                 Button(action: onRetry) {
                     HStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: "arrow.clockwise")
-                            .font(.caption.weight(.semibold))
+                            .font(Theme.Font.caption().weight(.semibold))
                         Text("Retry")
-                            .font(.caption.weight(.semibold))
+                            .font(Theme.Font.caption().weight(.semibold))
                     }
                     .foregroundStyle(Theme.Color.ink)
                     .padding(.horizontal, Theme.Spacing.md)
@@ -992,7 +1001,8 @@ struct ChatMessageRow: View {
                     .background(Theme.Color.ink.opacity(0.15))
                     .clipShape(Capsule())
                 }
-                .frame(minHeight: ChatMessageLayout.minTapTarget)
+                .frame(minWidth: ChatMessageLayout.minTapTarget,
+                       minHeight: ChatMessageLayout.minTapTarget)
             }
         }
         .padding(Theme.Spacing.sm)
@@ -1005,10 +1015,10 @@ struct ChatMessageRow: View {
         HStack(alignment: .center, spacing: Theme.Spacing.sm) {
             HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: "pause.circle.fill")
-                    .font(.caption)
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.accent)
                 Text("Interrupted — tap Resume to continue")
-                    .font(.caption)
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.ink)
             }
 
@@ -1018,9 +1028,9 @@ struct ChatMessageRow: View {
                 Button(action: onResume) {
                     HStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: "play.fill")
-                            .font(.caption.weight(.semibold))
+                            .font(Theme.Font.caption().weight(.semibold))
                         Text("Resume")
-                            .font(.caption.weight(.semibold))
+                            .font(Theme.Font.caption().weight(.semibold))
                     }
                     .foregroundStyle(Theme.Color.bubbleUserText)
                     .padding(.horizontal, Theme.Spacing.md)
@@ -1028,7 +1038,8 @@ struct ChatMessageRow: View {
                     .background(Theme.Color.bubbleUser)
                     .clipShape(Capsule())
                 }
-                .frame(minHeight: ChatMessageLayout.minTapTarget)
+                .frame(minWidth: ChatMessageLayout.minTapTarget,
+                       minHeight: ChatMessageLayout.minTapTarget)
             }
         }
         .padding(Theme.Spacing.sm)
