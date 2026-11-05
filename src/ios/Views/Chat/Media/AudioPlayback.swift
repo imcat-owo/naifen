@@ -389,11 +389,11 @@ struct MinisAudioPlayerView: View {
                 } label: {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                         .font(.caption2)
-                        .foregroundColor(ChatColors.secondaryText)
+                        .foregroundColor(Theme.Color.ink2)
                 }
                 .buttonStyle(.plain)
             }
-            .foregroundColor(ChatColors.secondaryText)
+            .foregroundColor(Theme.Color.ink)
 
             HStack(spacing: 10) {
                 Button {
@@ -421,7 +421,7 @@ struct MinisAudioPlayerView: View {
 
                     Text(formatTime(player.duration))
                         .font(.caption2)
-                        .foregroundColor(ChatColors.secondaryText)
+                        .foregroundColor(Theme.Color.ink)
                         .monospacedDigit()
                 } else {
                     // Idle state — show empty slider
@@ -431,14 +431,14 @@ struct MinisAudioPlayerView: View {
 
                     Text(formatTime(0))
                         .font(.caption2)
-                        .foregroundColor(ChatColors.secondaryText)
+                        .foregroundColor(Theme.Color.ink)
                         .monospacedDigit()
                 }
             }
         }
         .padding(10)
         .frame(maxWidth: 320, minHeight: controlsHeight)
-        .background(ChatColors.secondaryBg)
+        .background(Theme.Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .sheet(isPresented: $showPreview) {
             MinisAudioPreviewView(fileURL: fileURL)
@@ -453,10 +453,10 @@ struct MinisAudioPlayerView: View {
             Text(url.lastPathComponent).lineLimit(1)
         }
         .font(.caption)
-        .foregroundColor(ChatColors.secondaryText)
+        .foregroundColor(Theme.Color.ink)
         .padding(10)
         .frame(maxWidth: 320, minHeight: controlsHeight)
-        .background(ChatColors.secondaryBg)
+        .background(Theme.Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
