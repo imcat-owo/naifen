@@ -92,9 +92,13 @@ struct SessionStackRow: View {
         // backdrop renders in every state and `appliedWallpaperId != nil`
         // would wrongly hide the DEFAULT wallpaper behind rows. If an off
         // state is ever added to the slot, gate this one place on it.
-        // The opaque fallback is the List-level
-        // `.background(Theme.Color.background)` (W-B), plus the backdrop's
-        // own Theme base layer — clear rows never open a white hole.
+        // Wired state (Phase 3 rows + W-D): `.homeWallpaperBackground()`
+        // is adopted on BOTH lists (stack + split, after each
+        // `.toolbar { sidebarToolbarContent }`), and the List-level opaque
+        // `.background(Theme.Color.background)` (W-B) is removed — it
+        // would hide the wallpaper entirely. The backdrop's own
+        // scheme-background base + 85%→60% scrim is the ground, so clear
+        // rows never open a white hole.
         // Folder rows keep their opaque sampled-glass card by design.
         .listRowBackground(Group {
             if inFolder {
