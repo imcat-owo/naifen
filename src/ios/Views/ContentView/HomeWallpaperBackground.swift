@@ -26,12 +26,11 @@
 // `.scrollContentBackground(.hidden)` directly on the List chain
 // instead (same call, one line, in SessionList.swift).
 //
-// ADOPTION — one line per list, by the SessionList owner
-// (SessionList.swift is NOT this file's scope; do not force-edit it):
-//   - stack (iPhone): `ContentView+SessionList.swift:303`, add
+// ADOPTION — done in Phase 3 W-A merge f28d866 (one line per list):
+//   - stack (iPhone): `ContentView+SessionList.swift:326`, added
 //     `.homeWallpaperBackground()` right after
 //     `.toolbar { sidebarToolbarContent }`, before the closing `)`.
-//   - split (iPad): `ContentView+SessionList.swift:392`, same modifier
+//   - split (iPad): `ContentView+SessionList.swift:430`, same modifier
 //     right after `.toolbar { sidebarToolbarContent }`.
 // Both lists already host the empty state as an `.overlay`, so the
 // restyled empty state sits over the wallpaper + scrim with no change.
