@@ -575,7 +575,7 @@ struct ContentView: View {
                 if let toast = forceSyncToast {
                     ForceSyncToastBanner(text: toast)
                         .transition(.move(edge: .top).combined(with: .opacity))
-                        .padding(.top, 8)
+                        .padding(.top, Theme.Spacing.sm)
                 }
             }
             .animation(.easeInOut(duration: Theme.Motion.base), value: forceSyncToast)
