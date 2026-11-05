@@ -74,7 +74,7 @@ struct SessionStackRow: View {
         .overlay {
             if isRegeneratingTitle {
                 ZStack {
-                    Color(.systemBackground).opacity(0.7)
+                    Theme.Color.background.opacity(0.7)
                     ProgressView()
                 }
             }
@@ -85,7 +85,7 @@ struct SessionStackRow: View {
             if inFolder {
                 FolderMemberRowBackground(isLast: isLastInFolder)
             } else {
-                Color(.systemBackground)
+                Theme.Color.background
             }
         })
         .contextMenu {
@@ -115,7 +115,10 @@ struct SessionSplitRow: View {
     let isLastInFolder: Bool
     let menuActions: SessionMenuActionChannel
 
-    private static let highlightFill = Color(red: 183/255.0, green: 175/255.0, blue: 150/255.0).opacity(0.3)
+    // Selection band: pale-pink surface-2. Ink text on it is the locked
+    // capsule pairing (8.00:1 light / 11.16:1 dark); the old warm-beige
+    // rgb(183,175,150) fill is gone.
+    private static let highlightFill = Theme.Color.surface2
 
     var body: some View {
         let _ = HomeListPerf.rowBuilt()
@@ -132,7 +135,7 @@ struct SessionSplitRow: View {
         .overlay {
             if isRegeneratingTitle {
                 ZStack {
-                    Color(.systemBackground).opacity(0.7)
+                    Theme.Color.background.opacity(0.7)
                     ProgressView()
                 }
             }
@@ -160,20 +163,20 @@ struct SessionSplitRow: View {
                     if isHighlighted {
                         UnevenRoundedRectangle(
                             topLeadingRadius: 0,
-                            bottomLeadingRadius: isLastInFolder ? 16 : 0,
-                            bottomTrailingRadius: isLastInFolder ? 16 : 0,
+                            bottomLeadingRadius: isLastInFolder ? Theme.Radius.card : 0,
+                            bottomTrailingRadius: isLastInFolder ? Theme.Radius.card : 0,
                             topTrailingRadius: 0,
                             style: .continuous
                         )
                         .fill(Self.highlightFill)
-                        .padding(.horizontal, 6)
-                        .padding(.bottom, isLastInFolder ? 4 : 0)
+                        .padding(.horizontal, Theme.Spacing.xs)
+                        .padding(.bottom, isLastInFolder ? Theme.Spacing.xs : 0)
                     }
                 } else {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: Theme.Radius.thinking, style: .continuous)
                         .fill(isHighlighted ? Self.highlightFill : Color.clear)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, Theme.Spacing.xs)
+                        .padding(.vertical, Theme.Spacing.xs)
                 }
             }
         )
@@ -195,10 +198,15 @@ extension ChatSession {
 /// row is the hit area and dims while pressed, standing in for the cell
 /// highlight the hidden NavigationLink used to get. A custom style also keeps
 /// List from tinting the row's text with the accent colour.
+/// Press uses the theme press spring (response 0.3 / damping 0.6) and a
+/// selection haptic on press-down only (condition form, same as
+/// AIChatView+ComposerControls).
 struct SessionRowPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .contentShape(Rectangle())
-            .overlay(Color(.systemFill).opacity(configuration.isPressed ? 1 : 0).allowsHitTesting(false))
+            .overlay(Theme.Color.accent.opacity(configuration.isPressed ? 0.12 : 0).allowsHitTesting(false))
+            .animation(Theme.Motion.press, value: configuration.isPressed)
+            .sensoryFeedback(.selection, trigger: configuration.isPressed) { _, new in new }
     }
 }
