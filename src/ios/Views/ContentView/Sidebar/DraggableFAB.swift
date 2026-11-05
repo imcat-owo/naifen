@@ -24,8 +24,11 @@ struct DraggableFAB<Label: View>: View {
     var onTap: () -> Void
     @ViewBuilder var label: () -> Label
 
+    /// Flips on every tap so the selection feedback below fires once per tap.
+    @State private var tapFeedback = false
+
     private let fabSize: CGFloat = 56
-    private let edgePadding: CGFloat = 16
+    private let edgePadding: CGFloat = Theme.Spacing.lg
 
     var body: some View {
         GeometryReader { geo in
@@ -39,8 +42,10 @@ struct DraggableFAB<Label: View>: View {
                 .frame(width: fabSize, height: fabSize)
                 .position(x: restingX + dragOffset, y: fabSize / 2)
                 .onTapGesture {
+                    tapFeedback.toggle()
                     onTap()
                 }
+                .sensoryFeedback(.selection, trigger: tapFeedback)
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 10)
                         .onChanged { value in
@@ -53,7 +58,7 @@ struct DraggableFAB<Label: View>: View {
                             // For inverted FAB: dropping on left means the *other* FAB goes right
                             let newFabOnLeft = inverted ? !droppedOnLeft : droppedOnLeft
                             let changed = fabOnLeft != newFabOnLeft
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                            withAnimation(Theme.Motion.spring) {
                                 fabOnLeft = newFabOnLeft
                                 dragOffset = 0
                             }
