@@ -911,9 +911,10 @@ struct AIChatView: View {
                     .font(.subheadline.weight(.medium))
                     // [Phase 2 milk-pink] Milk-pink dark chip, not the
                     // system-blue AccentColor (plan: DO-NOT-USE). Ink
-                    // chip + surface text passes at ~8.7:1 in both modes;
-                    // white on the milk-pink accent would fail (3.14:1
-                    // light), so the accent never carries text.
+                    // chip + surface text passes at 8.83:1 in light mode
+                    // and 13.1:1 in dark mode; white on the milk-pink
+                    // accent would fail (3.14:1 light), so the accent
+                    // never carries text.
                     .foregroundStyle(Theme.Color.surface)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)

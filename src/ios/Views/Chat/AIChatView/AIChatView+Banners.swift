@@ -52,9 +52,12 @@ extension AIChatView {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.circle.fill")
                         .font(.title2)
-                        // [Phase 2 milk-pink] Rose icon, ink message —
-                        // no pure .red.
-                        .foregroundStyle(Theme.Color.accent)
+                        // [Phase 2 milk-pink] Ink icon, ink message —
+                        // no pure .red. Ink clears the 3:1 large-graphic
+                        // bar on surface (8.83:1); the rose accent (2.94:1)
+                        // does not. The error is already conveyed by the
+                        // adjacent ink text.
+                        .foregroundStyle(Theme.Color.ink)
                     Text(msg)
                         .font(.subheadline)
                         .foregroundStyle(Theme.Color.ink)
@@ -129,8 +132,11 @@ extension AIChatView {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.caption)
-                // [Phase 2 milk-pink] Rose icon, ink text — no pure .red.
-                .foregroundStyle(Theme.Color.accent)
+                // [Phase 2 milk-pink] Ink icon, ink text — no pure .red.
+                // Ink clears the 3:1 large-graphic bar on surface (8.83:1);
+                // the rose accent (2.94:1) does not. The error is already
+                // conveyed by the adjacent ink text.
+                .foregroundStyle(Theme.Color.ink)
             Text(error)
                 .font(.caption)
                 .foregroundStyle(Theme.Color.ink)

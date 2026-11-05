@@ -244,8 +244,10 @@ extension AIChatView {
         // thinking badge) share one ~46pt nav-bar band, so no row can
         // hold a 44pt hit area — 3 x 44pt cannot fit, and any vertical
         // expansion would steal taps from the adjacent row. Hit areas
-        // stay text-sized, as before; the plan's header-row exception
-        // (block #9) applies.
+        // stay text-sized, as before. This exception stands on the
+        // geometry above alone — not on the plan's header-row exception
+        // (block #9), which covers the assistant header row, not these
+        // nav-title rows.
         return VStack(spacing: legacyLayout ? -3 : -2) {
             Button {
                 if let s = titlePillSession { titlePillEditSession = s }
