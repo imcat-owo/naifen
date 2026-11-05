@@ -489,6 +489,11 @@ extension AIChatView {
                     .fill(Theme.Color.accent.opacity(0.35 * fallbackPulseOpacity))
             )
             .onChange(of: vm.fallbackTrigger) { _ in
+                // [Phase 2 milk-pink] Reduce Motion: no pulse — the rose
+                // fill stays at its resting opacity (0, transparent) and
+                // never travels. The pulse itself is pre-existing
+                // behaviour, kept, not removed.
+                guard !UIAccessibility.isReduceMotionEnabled else { return }
                 // 3× pulse: fade in then out, repeated 3 times
                 fallbackPulseOpacity = 0
                 withAnimation(.easeInOut(duration: 0.35)) {
@@ -553,23 +558,31 @@ extension AIChatView {
         // thinking disabled): the pill then reads icon + "Off" as a tap target
         // for enabling deep thinking. Dim the icon in that state — matches the
         // 0.4 Off-row convention in ThinkingLevelSheetView.
-        HStack(spacing: 2) {
-            Image("ThinkingIcon")
-                .resizable()
-                .frame(width: 6, height: 6)
-                .opacity(level.isEnabled ? 1.0 : 0.4)
-            Text(level.displayName)
-                .font(Theme.Font.meta())
-        }
-        .foregroundStyle(Theme.Color.ink)
-        .padding(.horizontal, 4)
-        .padding(.vertical, 1)
-        // [Phase 2 milk-pink] Pill-tag language: pale-pink fill,
-        // ink text — not a grey secondary fill.
-        .background(Capsule().fill(Theme.Color.surface2))
-        .onTapGesture {
+        // [Phase 2 milk-pink] A Button, not an onTapGesture: the badge
+        // gets the press spring + feedback like the other nav/composer
+        // controls. The pill keeps its visual size; the frame widens the
+        // hit area to 44pt.
+        return Button {
             showThinkingLevelSheet = true
+        } label: {
+            HStack(spacing: 2) {
+                Image("ThinkingIcon")
+                    .resizable()
+                    .frame(width: 6, height: 6)
+                    .opacity(level.isEnabled ? 1.0 : 0.4)
+                Text(level.displayName)
+                    .font(Theme.Font.meta())
+            }
+            .foregroundStyle(Theme.Color.ink)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 1)
+            // [Phase 2 milk-pink] Pill-tag language: pale-pink fill,
+            // ink text — not a grey secondary fill.
+            .background(Capsule().fill(Theme.Color.surface2))
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Capsule())
         }
+        .dressUpPress()
         .sheet(isPresented: $showThinkingLevelSheet) {
             ThinkingLevelSheetView(
                 currentLevel: level,
