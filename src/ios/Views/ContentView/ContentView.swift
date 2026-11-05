@@ -789,38 +789,7 @@ struct ContentView: View {
             AlarmListView()
         }
         .sheet(item: $activeToolSheet) { sheet in
-            switch sheet {
-            case .settings:
-                SettingsSheet(showTerminal: $showTerminal)
-            case .rootfsManagement:
-                NavigationStack {
-                    RootfsManagementView()
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Done") { activeToolSheet = nil }
-                                    .font(Theme.Font.bodyEmphasized())
-                                    .foregroundStyle(Theme.Color.ink)
-                            }
-                        }
-                }
-            case .browser:
-                BrowserSheetView(pool: browserPool)
-            case .browserManagement:
-                NavigationStack {
-                    BrowserManagementView(pool: browserPool)
-                }
-            case .syncMigrationDetail:
-                NavigationStack {
-                    SyncMigrationDetailView()
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Done") { activeToolSheet = nil }
-                                    .font(Theme.Font.bodyEmphasized())
-                                    .foregroundStyle(Theme.Color.ink)
-                            }
-                        }
-                }
-            }
+            toolSheetView(for: sheet)
         }
         // Something else is taking over the screen (an incoming share, a
         // WebApp deep link, a `.minisbak` opened from Files). iOS will not
@@ -1503,5 +1472,52 @@ struct ContentView: View {
             print("[DELETE] Sheet appeared. singleDeleteInfo is \(deleteInfoDescription)")
         }
         .presentationDetents([.medium])
+    }
+
+    // Tool-sheet switch, extracted so the .sheet content closure stays
+    // under the type checker's limit (CI run 8, Archive exit 65, :798).
+    // Every case is verbatim from the inline switch it replaces.
+    @ViewBuilder
+    private func toolSheetView(for sheet: ToolSheet) -> some View {
+        switch sheet {
+        case .settings:
+            SettingsSheet(showTerminal: $showTerminal)
+        case .rootfsManagement:
+            rootfsManagementSheet
+        case .browser:
+            BrowserSheetView(pool: browserPool)
+        case .browserManagement:
+            NavigationStack {
+                BrowserManagementView(pool: browserPool)
+            }
+        case .syncMigrationDetail:
+            syncMigrationDetailSheet
+        }
+    }
+
+    private var rootfsManagementSheet: some View {
+        NavigationStack {
+            RootfsManagementView()
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { activeToolSheet = nil }
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundStyle(Theme.Color.ink)
+                    }
+                }
+        }
+    }
+
+    private var syncMigrationDetailSheet: some View {
+        NavigationStack {
+            SyncMigrationDetailView()
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { activeToolSheet = nil }
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundStyle(Theme.Color.ink)
+                    }
+                }
+        }
     }
 }
