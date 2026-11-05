@@ -727,7 +727,11 @@ struct SelectableMarkdownView: UIViewRepresentable {
         // fade the revealed range in word-by-word. Decoupled from fastPathTaken
         // so a full-replace token still animates. A scene-deferred / background
         // frame never reaches here; isNewMessage / rotation already cancelAll'd.
-        if let revealRange = fadeRevealRange,
+        // [Phase 2 milk-pink] Reduce Motion: skip the word fade entirely —
+        // the text is already in storage at full opacity, so it appears
+        // instantly with no fade. No other rendering logic touched.
+        if !UIAccessibility.isReduceMotionEnabled,
+           let revealRange = fadeRevealRange,
            let liveStorage = textView.textStorage as? NSTextStorage {
             context.coordinator.fadeTextView = textView
             context.coordinator.fadeAnimator.scheduleAnimation(for: revealRange, in: liveStorage)
