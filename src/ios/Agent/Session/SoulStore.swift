@@ -558,8 +558,11 @@ struct SoulIconView: View {
                     )
             }
             // Milk-pink ring, 2pt + 2pt clear gap, on every branch.
-            // Path diameter size + 2 * gap + ring width: inner edge sits
-            // exactly one gap outside the disc, outer edge at footprint.
+            // Ring frame is size + 2 * gap + ring width (Ø42 at the 36pt
+            // chat avatar); footprint is size + 2 * (gap + ring width)
+            // (Ø44). The stroke is centred on the ring path, so the 2pt
+            // stroke spans Ø40–Ø44: inner edge exactly one gap outside
+            // the Ø36 disc, outer edge exactly on the footprint.
             Circle()
                 .stroke(Theme.Color.avatarRing, lineWidth: Self.ringWidth)
                 .frame(width: size + 2 * Self.ringGap + Self.ringWidth,
