@@ -19,7 +19,9 @@
 //   UIViewRepresentable bound to a message model — it cannot render a
 //   static sample string. The card uses the same tokens instead
 //   (`bubbleAI` fill, `bubbleAIBorder` hairline, ink text, 16pt
-//   Porcelain radius, card shadow) with plain `Text` in `Theme.Font`.
+//   Porcelain radius, card shadow) with plain `Text` at the same size
+//   the live row uses (`.system(size: FontSettings.shared.scaled(16.5))`,
+//   as in `ChatMessageViews` — NOT `Theme.Font.body()` at 13pt).
 // - Avatar: `SoulIconView` IS shared — the card uses the same renderer
 //   the chat header uses, with the same default icon. The pendant is an
 //   overlay only; the renderer itself is untouched. Note the renderer
@@ -72,11 +74,13 @@ struct ShopUserBubbleSample: View {
 /// An assistant sample: bubble-less text on the porcelain surface, the
 /// same tokens the live assistant surface uses. Plain `Text` because
 /// `SelectableMarkdownView` cannot render a static sample (see header).
+/// Text size matches the live assistant row: 16.5pt scaled, the same
+/// expression `ChatMessageViews` uses.
 struct ShopAssistantSample: View {
     var body: some View {
         HStack {
             Text(ShopSampleText.bubbleSentence)
-                .font(Theme.Font.body())
+                .font(.system(size: FontSettings.shared.scaled(16.5)))
                 .foregroundStyle(Theme.Color.bubbleAIText)
                 .padding(.horizontal, Theme.Spacing.lg)
                 .padding(.vertical, Theme.Spacing.md)
