@@ -832,22 +832,7 @@ struct ContentView: View {
             if activeToolSheet != nil { activeToolSheet = nil }
         }
         .sheet(item: $sessionToDelete) { session in
-            DeleteConfirmSheet(info: $singleDeleteInfo, isLoading: false) {
-                print("[DELETE] onDelete called for session: \(session.id)")
-                deleteSession(session)
-                sessionToDelete = nil
-                singleDeleteInfo = nil
-            }
-            .onAppear {
-                let deleteInfoDescription: String
-                if let info = singleDeleteInfo {
-                    deleteInfoDescription = "non-nil, sessionCount=\(info.sessionCount)"
-                } else {
-                    deleteInfoDescription = "nil"
-                }
-                print("[DELETE] Sheet appeared. singleDeleteInfo is \(deleteInfoDescription)")
-            }
-            .presentationDetents([.medium])
+            singleDeleteSheet(for: session)
         }
         .sheet(item: $sessionToEdit) { session in
             SessionEditSheet(session: session) { newTitle, newCategory in
@@ -1497,5 +1482,26 @@ struct ContentView: View {
                 .font(Theme.Font.body())
                 .foregroundStyle(Theme.Color.ink)
         }
+    }
+
+    // Single-session delete sheet, extracted so the .sheet content closure
+    // stays under the type checker's limit (CI run 5, Archive exit 65).
+    private func singleDeleteSheet(for session: ChatSession) -> some View {
+        DeleteConfirmSheet(info: $singleDeleteInfo, isLoading: false) {
+            print("[DELETE] onDelete called for session: \(session.id)")
+            deleteSession(session)
+            sessionToDelete = nil
+            singleDeleteInfo = nil
+        }
+        .onAppear {
+            let deleteInfoDescription: String
+            if let info = singleDeleteInfo {
+                deleteInfoDescription = "non-nil, sessionCount=\(info.sessionCount)"
+            } else {
+                deleteInfoDescription = "nil"
+            }
+            print("[DELETE] Sheet appeared. singleDeleteInfo is \(deleteInfoDescription)")
+        }
+        .presentationDetents([.medium])
     }
 }
