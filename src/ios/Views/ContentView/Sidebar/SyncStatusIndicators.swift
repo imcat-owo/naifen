@@ -24,7 +24,7 @@ struct PulseRotateIcon: View {
     @State private var rotation: Double = 0
     var body: some View {
         Image(systemName: "arrow.triangle.2.circlepath")
-            .font(.system(size: 11, weight: .semibold))
+            .font(Theme.Font.caption().weight(.semibold))
             .foregroundStyle(.primary)
             .rotationEffect(.degrees(rotation))
             .task { await pulseLoop() }
@@ -66,24 +66,24 @@ struct PulseRotateIcon: View {
 struct ForceSyncToastBanner: View {
     let text: String
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.sm) {
             Image(systemName: "icloud.and.arrow.up")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white)
+                .font(Theme.Font.bodyEmphasized())
+                .foregroundStyle(Theme.Color.ink)
             Text(text)
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.accentColor.opacity(0.92))
+            RoundedRectangle(cornerRadius: Theme.Radius.seal, style: .continuous)
+                .fill(Theme.Color.surface2)
         )
-        .shadow(color: .black.opacity(0.18), radius: 8, y: 3)
-        .padding(.horizontal, 16)
+        .themeShadow(Theme.Shadow.card)
+        .padding(.horizontal, Theme.Spacing.lg)
         .frame(maxWidth: 480)
     }
 }

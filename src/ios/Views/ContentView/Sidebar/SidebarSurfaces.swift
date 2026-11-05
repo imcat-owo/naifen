@@ -84,7 +84,7 @@ struct FolderHeaderVisibilityProbe: View {
 private struct FolderSegmentBorder: Shape {
     enum Kind { case top, middle, bottom }
     let kind: Kind
-    var radius: CGFloat = 16
+    var radius: CGFloat = Theme.Radius.card
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
@@ -117,17 +117,16 @@ private struct FolderSegmentBorder: Shape {
     }
 }
 
-/// Edge highlight for the simulated glass: bright hairline in dark mode
-/// (the reference system-folder look), a subtle dark line in light mode
-/// (white would vanish on the light page).
-private let folderEdgeHighlight = Color(UIColor { traits in
-    traits.userInterfaceStyle == .dark
-        ? UIColor(white: 1, alpha: 0.30)
-        : UIColor(white: 0, alpha: 0.08)
-})
+/// Edge highlight for the folder card: bright hairline in dark mode (the
+/// reference system-folder look), a subtle dark line in light mode (white
+/// would vanish on the light page). Derived from Theme.Color.ink, which is
+/// near-white in dark mode and deep rose-brown in light mode, so one token
+/// gives both sides. Lives on FolderSurface as a computed property (which
+/// reads colorScheme), not as a file-scope let, so it resolves from Theme
+/// only.
 
 /// Background for the expanded FAB search bar. Liquid Glass capsule on iOS 26+,
-/// the original opaque capsule + hand-rolled shadow below it.
+/// the milk-pink surface capsule + Theme card shadow below it.
 ///
 /// A modifier rather than a background view because the bar's content has to sit
 /// INSIDE the glass: `.glassEffect` styles the view it is applied to, so the
@@ -141,9 +140,9 @@ struct SearchBarSurface: ViewModifier {
             content.glassEffect(.regular, in: .capsule)
         } else {
             content
-                .background(Color(UIColor.secondarySystemBackground))
+                .background(Theme.Color.surface)
                 .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 2)
+                .themeShadow(Theme.Shadow.card)
         }
     }
 }
@@ -181,54 +180,50 @@ private struct FolderSurface: ViewModifier {
     enum Kind { case lone, top, middle, bottom }
     let kind: Kind
 
-    /// The collapsed card's ACTUAL rendered color, eyedropper-sampled from
-    /// device screenshots. Dark: RGB 18/18/18 — re-sampled with a probe
-    /// build rendering REAL glass over a pure-black list with no pinned rows
-    /// behind it (24 points, zero variance). The earlier 57/57/60 was
-    /// contaminated: that screenshot's card had blurred colorful content
-    /// showing through the glass, and the too-light constant is what read as
-    /// a heavy solid slab against the black page. True glass sits nearly on
-    /// the background and lets the edge hairline do the lifting — that IS
-    /// the lightweight look. Light: RGB 252/252/252 (sampled over a clean
-    /// light background, unaffected).
-    /// Used for the expanded segments on iOS 26 instead of per-row
-    /// glassEffect: glass pieces cannot merge across List rows (edge lines
-    /// between every segment — twice rejected), and in THIS context glass
-    /// has nothing to blur behind it (the container sits on the flat list
-    /// background), so its rendered output IS effectively this constant
-    /// color. Sampling it gives pixel-level brightness parity with the
-    /// collapsed card, perfectly seamless tiling, and zero perf risk —
-    /// chosen by the user over a preference-propagation spike.
-    static let sampledGlassColor = Color(UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 18/255.0, green: 18/255.0, blue: 18/255.0, alpha: 1)
-            : UIColor(red: 252/255.0, green: 252/255.0, blue: 252/255.0, alpha: 1)
-    })
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// Edge highlight for the folder card: bright hairline in dark mode,
+    /// subtle dark line in light mode. Theme.Color.ink is near-white in
+    /// dark mode and deep rose-brown in light mode, so one token gives
+    /// both sides.
+    private var edgeHighlight: Color {
+        colorScheme == .dark ? Theme.Color.ink.opacity(0.30) : Theme.Color.ink.opacity(0.08)
+    }
+
+    /// The collapsed card's fill. The old eyedropper-sampled constants
+    /// (dark RGB 18/18/18, light 252/252/252 — sampled from device
+    /// screenshots of real glass over a flat list) are retired: the
+    /// milk-pink set gives the folder card the card-surface token, so the
+    /// fill stays one source of truth with every other card. The
+    /// lightweight look the sampling chased (fill nearly on the
+    /// background, edge hairline doing the lifting) is kept by the
+    /// hairline in the overlay below.
+    static let folderFill = Theme.Color.surface
 
     private var shape: AnyShape {
         switch kind {
         case .lone:
-            return AnyShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            return AnyShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
         case .top:
             return AnyShape(UnevenRoundedRectangle(
-                topLeadingRadius: 16, bottomLeadingRadius: 0,
-                bottomTrailingRadius: 0, topTrailingRadius: 16, style: .continuous))
+                topLeadingRadius: Theme.Radius.card, bottomLeadingRadius: 0,
+                bottomTrailingRadius: 0, topTrailingRadius: Theme.Radius.card, style: .continuous))
         case .middle:
             return AnyShape(Rectangle())
         case .bottom:
             return AnyShape(UnevenRoundedRectangle(
-                topLeadingRadius: 0, bottomLeadingRadius: 16,
-                bottomTrailingRadius: 16, topTrailingRadius: 0, style: .continuous))
+                topLeadingRadius: 0, bottomLeadingRadius: Theme.Radius.card,
+                bottomTrailingRadius: Theme.Radius.card, topTrailingRadius: 0, style: .continuous))
         }
     }
 
     func body(content: Content) -> some View {
         Group {
             // Two states, two deliberate treatments (user decision):
-            // - COLLAPSED lone card: the sampled constant. glassEffect is a
+            // - COLLAPSED lone card: the Surface token. glassEffect is a
             //   live material and a collapsed card scrolls past heterogeneous
             //   content (blurred colorful pinned rows), so live glass
-            //   flickered frame to frame; the constant is what that glass
+            //   flickered frame to frame; the token fill is what that glass
             //   rendered over the flat background anyway.
             // - EXPANDED segments: a real material for translucency. Member
             //   rows sit over the STABLE list background only — nothing
@@ -238,15 +233,15 @@ private struct FolderSurface: ViewModifier {
             //   tier; ultraThin ran too dark here before).
             if kind == .lone {
                 if #available(iOS 26.0, *) {
-                    content.background(shape.fill(Self.sampledGlassColor))
+                    content.background(shape.fill(Self.folderFill))
                 } else {
-                    content.background(shape.fill(Color(UIColor.secondarySystemBackground)))
+                    content.background(shape.fill(Theme.Color.surface))
                 }
             } else {
                 if #available(iOS 26.0, *) {
                     content.background(shape.fill(.regularMaterial))
                 } else {
-                    content.background(shape.fill(Color(UIColor.secondarySystemBackground)))
+                    content.background(shape.fill(Theme.Color.surface))
                 }
             }
         }
@@ -261,21 +256,21 @@ private struct FolderSurface: ViewModifier {
                 // definition — the same highlight the expanded segments tile,
                 // as a full perimeter here.
                 if #available(iOS 26.0, *) {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(folderEdgeHighlight, lineWidth: 0.75)
+                    RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                        .stroke(edgeHighlight, lineWidth: 0.75)
                 } else {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 0.5)
+                    RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                        .stroke(Theme.Color.line, lineWidth: 0.5)
                 }
             case .top:
                 FolderSegmentBorder(kind: .top)
-                    .stroke(folderEdgeHighlight, lineWidth: 0.75)
+                    .stroke(edgeHighlight, lineWidth: 0.75)
             case .middle:
                 FolderSegmentBorder(kind: .middle)
-                    .stroke(folderEdgeHighlight, lineWidth: 0.75)
+                    .stroke(edgeHighlight, lineWidth: 0.75)
             case .bottom:
                 FolderSegmentBorder(kind: .bottom)
-                    .stroke(folderEdgeHighlight, lineWidth: 0.75)
+                    .stroke(edgeHighlight, lineWidth: 0.75)
             }
         }
     }
@@ -288,9 +283,9 @@ struct FolderCardBackground: ViewModifier {
     private var dropShape: AnyShape {
         isExpanded
             ? AnyShape(UnevenRoundedRectangle(
-                topLeadingRadius: 16, bottomLeadingRadius: 0,
-                bottomTrailingRadius: 0, topTrailingRadius: 16, style: .continuous))
-            : AnyShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                topLeadingRadius: Theme.Radius.card, bottomLeadingRadius: 0,
+                bottomTrailingRadius: 0, topTrailingRadius: Theme.Radius.card, style: .continuous))
+            : AnyShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
     }
 
     func body(content: Content) -> some View {
@@ -299,8 +294,8 @@ struct FolderCardBackground: ViewModifier {
             .overlay {
                 if isDropTarget {
                     ZStack {
-                        dropShape.fill(Color.accentColor.opacity(0.15))
-                        dropShape.stroke(Color.accentColor, lineWidth: 1.5)
+                        dropShape.fill(Theme.Color.accent.opacity(0.15))
+                        dropShape.stroke(Theme.Color.accent, lineWidth: 1.5)
                     }
                 }
             }
@@ -316,8 +311,8 @@ struct FolderMemberRowBackground: View {
     var body: some View {
         Color.clear
             .modifier(FolderSurface(kind: isLast ? .bottom : .middle))
-            .padding(.horizontal, 6)
-            .padding(.bottom, isLast ? 4 : 0)
+            .padding(.horizontal, Theme.Spacing.sm)
+            .padding(.bottom, isLast ? Theme.Spacing.xs : 0)
     }
 }
 
