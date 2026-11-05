@@ -119,9 +119,15 @@ extension ContentView {
                     .font(Theme.Font.displayExtraLarge())
                     .foregroundStyle(Theme.Color.ink2)
                 Text("No Conversation Selected")
-                    .font(.title3.bold())
+                    // [Phase 3 milk-pink] title3 bold (20pt semibold) →
+                    // displaySmall (20pt, same size and .title3 anchor;
+                    // nearest Theme role, no exact title role exists).
+                    .font(Theme.Font.displaySmall())
                 Text("Select a conversation or start a new one")
-                    .font(.subheadline)
+                    // [Phase 3 milk-pink] subheadline (15pt) → body
+                    // (13pt sans, nearest Theme role; the global dial
+                    // scales it to 15pt at max).
+                    .font(Theme.Font.body())
                     .foregroundStyle(Theme.Color.ink)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

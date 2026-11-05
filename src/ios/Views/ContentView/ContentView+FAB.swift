@@ -228,8 +228,12 @@ extension ContentView {
                         // [Phase 3 milk-pink] 22pt semibold → displaySmall
                         // (20pt, nearest Theme role; glyph precedent:
                         // ChatSendButton maps glyphs to display roles).
-                        // Ink glyph: 6.14:1 light / 8.83:1 dark on the
-                        // milk-pink fill, 8.74:1 / 15.11:1 on tinted glass.
+                        // Ink glyph (not accent): 6.14:1 light / 8.83:1 dark
+                        // on the milk-pink fill. 8.74:1 / 15.11:1 is ink on
+                        // the solid background, NOT a tinted-glass
+                        // measurement — the tinted-glass composite over a
+                        // real list backdrop is unverified until a
+                        // device/screenshot check (see the tint note above).
                         .font(Theme.Font.displaySmall())
                         .foregroundStyle(Theme.Color.ink)
                 }
@@ -332,7 +336,8 @@ extension ContentView {
                             Image(systemName: "magnifyingglass")
                                 // [Phase 3 milk-pink] 22pt semibold → displaySmall
                                 // (20pt, nearest Theme role). Ink on surface:
-                                // 8.74:1 light / 15.11:1 dark.
+                                // 8.83:1 light / 13.10:1 dark. (8.74:1 / 15.11:1
+                                // is ink on background, not on surface.)
                                 .font(Theme.Font.displaySmall())
                                 .foregroundStyle(Theme.Color.ink)
                         }

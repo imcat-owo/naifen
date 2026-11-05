@@ -253,10 +253,21 @@ extension ContentView {
     /// exists in the bar. The title grows 18.5 → 20pt (displaySmall);
     /// a 20pt Fraunces line (~24pt) still fits the ~46pt inline band
     /// (`.navigationBarTitleDisplayMode(.inline)`,
-    /// `ContentView+SessionList.swift:302,391`) with room, and the title
-    /// buttons are separate toolbar items at system bar-button sizing, so
-    /// no hit-area exception and no height change are needed here. No
-    /// chat file was touched for this adjudication.
+    /// `ContentView+SessionList.swift:302,391`) with room, and no height
+    /// change is needed here. No chat file was touched for this
+    /// adjudication.
+    ///
+    /// CORRECTION (W-C review): the hit-area claim this note used to
+    /// make — that the title buttons are separate toolbar items at
+    /// system bar-button sizing — is FALSE for the sync-indicator
+    /// button. It is an overlay Button INSIDE the principal item
+    /// (`.overlay(alignment: .leading)`, offset -27,
+    /// `ContentView+SidebarToolbar.swift:328-336`), not a toolbar
+    /// item: an 11pt caption() glyph with 4pt padding
+    /// (`Theme.Spacing.xs`) gives a ~19x19pt hit area, with
+    /// `.buttonStyle(.plain)` and no dressUpPress. OPEN ITEM:
+    /// sync-indicator hit area ~19pt (below the 44pt bar) with no
+    /// press feedback; its behavior and size are unchanged by this fix.
     @ToolbarContentBuilder
     var sidebarToolbarContent: some ToolbarContent {
         ToolbarItem(placement: .principal) {
