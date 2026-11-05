@@ -157,7 +157,7 @@ for line in out.split(separator: "\n") where line.hasPrefix("RESULT") {
 
 print("\n2. Wiring")
 check("estimateTextBlockHeight follows the renderer basis (16.5 x scale, width - 32) through MarkdownHeightEstimate",
-      listSrc.contains("let base = FontSettings.shared.scaledMessage(16.5)")
+      listSrc.contains("let base = FontSettings.shared.scaled(16.5)")
       && listSrc.contains("let textWidth = max(width - 32, 100)")
       && listSrc.contains("return estimate.height(of: content)"))
 check("the old half-em line model is gone", !listSrc.contains("let cpl = tw / (scale * 0.5)"))
