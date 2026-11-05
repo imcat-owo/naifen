@@ -57,17 +57,18 @@ struct ExportPreviewSheet: View {
                 } else if isLoadingPreview {
                     Spacer()
                     ProgressView()
+                        .tint(Theme.Color.ink)
                     Spacer()
                 } else {
                     ScrollView {
                         Text(previewText)
-                            .font(.system(size: 13, design: .monospaced))
-                            .foregroundStyle(Color(UIColor.label))
+                            .font(Theme.Font.mono())
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(12)
+                            .padding(Theme.Spacing.md)
                             .textSelection(.enabled)
                     }
-                    .background(Color(UIColor.secondarySystemBackground))
+                    .background(Theme.Color.surface)
                 }
 
                 Divider()
@@ -77,7 +78,7 @@ struct ExportPreviewSheet: View {
                     Text(fileSize)
                         .font(.caption)
                         .foregroundStyle(.tertiary)
-                        .padding(.top, 6)
+                        .padding(.top, Theme.Spacing.sm)
                 }
 
                 // Action buttons
@@ -104,9 +105,10 @@ struct ExportPreviewSheet: View {
                         showFilePicker = true
                     }
                 }
-                .padding(.vertical, 12)
-                .background(Color(UIColor.systemBackground))
+                .padding(.vertical, Theme.Spacing.md)
+                .background(Theme.Color.bubbleAI)
             }
+            .background(Theme.Color.bubbleAI)
             .navigationTitle(AppLocalized("Export Preview"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -140,6 +142,7 @@ struct ExportPreviewSheet: View {
                 }
             }
         }
+        .presentationBackground(Theme.Color.bubbleAI)
     }
 
     @ViewBuilder
@@ -161,7 +164,7 @@ struct ExportPreviewSheet: View {
         }()
 
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 summaryRow(AppLocalized("Format"), s.format)
                 summaryRow(AppLocalized("Sessions"), "\(s.sessionCount)")
                 summaryRow(AppLocalized("Messages"), "\(s.totalMessages)")
@@ -169,10 +172,10 @@ struct ExportPreviewSheet: View {
                 summaryRow(AppLocalized("Attachments"), "\(s.attachmentCount)")
                 summaryRow(AppLocalized("Estimated size"), sizeStr)
             }
-            .padding(16)
+            .padding(Theme.Spacing.lg)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(Theme.Color.surface)
     }
 
     private func summaryRow(_ key: String, _ value: String) -> some View {
@@ -180,10 +183,10 @@ struct ExportPreviewSheet: View {
             Text(key)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Spacer(minLength: 12)
+            Spacer(minLength: Theme.Spacing.md)
             Text(value)
                 .font(.subheadline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Theme.Color.ink)
                 .multilineTextAlignment(.trailing)
         }
     }
@@ -247,14 +250,16 @@ struct ExportPreviewSheet: View {
 
     private func actionButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: Theme.Spacing.xs) {
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(.title3)
                 Text(label)
                     .font(.caption2)
             }
             .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
         }
+        .dressUpPress()
     }
 }
 
