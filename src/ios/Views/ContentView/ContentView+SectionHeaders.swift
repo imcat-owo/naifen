@@ -213,7 +213,7 @@ extension ContentView {
                         if searchResultsActive,
                            SearchKeywords.firstHit(in: group.label, terms: SearchKeywords.terms(searchQuery)) != nil {
                             Text(SessionRow.highlightedAttributedString(
-                                text: group.label, query: searchQuery, baseColor: Theme.Color.ink)))
+                                text: group.label, query: searchQuery, baseColor: Theme.Color.ink))
                         } else {
                             Text(group.label).foregroundStyle(Theme.Color.ink)
                         }
