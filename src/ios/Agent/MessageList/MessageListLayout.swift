@@ -1062,9 +1062,10 @@ final class MessageListLayout: UICollectionViewLayout {
 
 // MARK: - [T-scroll-estimate-fidelity] Header metrics and cross-load height memo
 
-/// Height of the assistant header row (AssistantHeaderV3): the 22 pt soul icon
-/// beside the semibold body-font name, `.padding(.top, 4)`. 26 pt at the default
-/// text size; Dynamic Type grows it with the name's line height.
+/// Height of the assistant header row (AssistantHeaderV3): the 36 pt soul icon
+/// beside the semibold body-font name, `.padding(.top, 4)`. 48 pt at the default
+/// text size (44 pt icon footprint + 4 pt top padding); Dynamic Type grows it
+/// with the name's line height.
 enum AssistantHeaderMetrics {
     static func formulaHeight() -> CGFloat {
         let body = UIFont.preferredFont(forTextStyle: .body)

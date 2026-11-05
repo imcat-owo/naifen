@@ -76,14 +76,6 @@ struct BridgedAssistantHeaderV3: View {
         // ~31 name at 13pt semibold, by character-width estimate) —
         // >= 44pt in both dimensions. The old ~28-30pt row and its
         // "deliberately NOT 44pt" exception are gone with the 22pt squircle.
-        //
-        // NOTE (follow-up, other file): MessageListLayout.swift
-        // AssistantHeaderMetrics.formulaHeight() still estimates this row
-        // as ceil(max(22, name.lineHeight)) + 4 = 26pt; it must move to
-        // ceil(max(44, name.lineHeight)) + 4 = 48pt or headers will grow
-        // as they scroll into view. The learned-height cache
-        // self-corrects after first measure, so this is estimate
-        // fidelity only, not a layout break.
         .contentShape(Rectangle())
         .onTapGesture { onOpenSoulSettings?() }
         .accessibilityElement(children: .combine)
