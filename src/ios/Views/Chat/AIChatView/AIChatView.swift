@@ -45,7 +45,7 @@
 //        language, compact summary, token usage
 //    AIChatView/Overlays/   Face ID lock gate, empty-chat directory timeline,
 //        session loading card
-//    AIChatView/Support/    ChatColors, SystemResourceMonitor, sheet item
+//    AIChatView/Support/    SystemResourceMonitor, sheet item
 //        targets, ViewWillDisappearHook, UIView helper
 //
 //  Rules that keep this split working
@@ -752,7 +752,7 @@ struct AIChatView: View {
             // Full-screen kernel boot overlay
             kernelBootOverlay
         })
-        .background(ChatColors.background)
+        .background(Theme.Color.background)
         .onDrop(of: [.image, .movie, .fileURL, .data], isTargeted: $isDropTargeted) { providers in
             handleDropProviders(providers)
             return true
