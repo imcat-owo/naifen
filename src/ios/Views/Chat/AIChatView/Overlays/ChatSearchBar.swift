@@ -30,7 +30,7 @@ struct ChatSearchBar: View {
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink2)
                 TextField(AppLocalized("Search this chat"), text: $search.query)
                     .textFieldStyle(.plain)
                     .font(.system(size: 15))
@@ -53,7 +53,7 @@ struct ChatSearchBar: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 14))
-                            .foregroundStyle(ChatColors.tertiaryText)
+                            .foregroundStyle(Theme.Color.ink2)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(AppLocalized("Clear"))
@@ -101,7 +101,7 @@ struct ChatSearchBar: View {
             Text(verbatim: ChatSearchNavigation.counterText(index: search.currentIndex, count: search.matchCount,
                                                             truncated: search.isTruncated))
                 .font(.system(size: 13).monospacedDigit())
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(1)
                 .fixedSize()
                 .accessibilityLabel(search.currentIndex.map { AppLocalized("Result \($0 + 1) of \(search.matchCount)") } ?? "")
@@ -109,7 +109,7 @@ struct ChatSearchBar: View {
         } else {
             Text(AppLocalized("No results"))
                 .font(.system(size: 13))
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(1)
                 .fixedSize()
                 .accessibilityIdentifier("chatSearchCounter")
@@ -124,7 +124,7 @@ struct ChatSearchBar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(hasResults ? Color.accentColor : ChatColors.tertiaryText)
+        .foregroundStyle(hasResults ? Color.accentColor : Theme.Color.ink2)
         .disabled(!hasResults)
         .accessibilityLabel(label)
     }
