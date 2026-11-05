@@ -117,17 +117,22 @@ struct SettingsSheet: View {
                         Label {
                             Text(AppLocalized("Sub Agents"))
                         } icon: {
-                            // [T-agent-icon] Same violet and glyph the agent block
+                            // [T-agent-icon] Same glyph the agent block
                             // and tool sheet use in chat, so the settings row reads
                             // as the same feature. `glyph` is the bare figure pair
                             // meant for a caller that already draws the disc — the
                             // wider person.2.wave.2 reached the edge of the 21pt
                             // circle at this section's icon size.
+                            // Disc is surface-2 with an ink glyph, not white on
+                            // the accent: white on accent is 3.14:1 light /
+                            // 1.47:1 dark (fails the 3:1 non-text bar in dark);
+                            // ink on surface-2 is 8.00:1 light / 11.16:1 dark
+                            // (WCAG, Tokens.swift hexes).
                             Image(systemName: HelperAccent.glyph)
                                 .font(.system(size: 9))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Theme.Color.ink)
                                 .frame(width: 21, height: 21)
-                                .background(HelperAccent.color, in: Circle())
+                                .background(Theme.Color.surface2, in: Circle())
                         }
                     }
                     NavigationLink {
