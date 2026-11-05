@@ -7,14 +7,14 @@ import SwiftUI
 /// [T-ios-longpress-menu-preview-background] The message cells are hosted with a
 /// clear background (host.view / cell backgroundColor = .clear), and the message
 /// `.contextMenu`s are attached either to a zero-size `Color.clear` overlay
-/// (assistant block/footer) or to a bubble whose fill is the translucent
-/// `tertiarySystemFill` (user). Without an explicit `preview:`, SwiftUI snapshots
+/// (assistant block/footer) or to a flat milk-pink bubble (user). Without an
+/// explicit `preview:`, SwiftUI snapshots
 /// that (transparent) attached view, so the long-press preview platter shows
 /// through to the messages below — the reported "transparent preview" bug.
 ///
 /// Supplying this as the `.contextMenu(preview:)` gives the platter an opaque
-/// `systemBackground` rounded card with the message text, so it reads as a
-/// floating card. System colors only, so dark mode stays correct.
+/// porcelain rounded card with the message text, so it reads as a
+/// floating card. Theme colors only, so dark mode stays correct.
 ///
 /// [T-ios-longpress-preview-full-content-card] The earlier version hard-capped
 /// the text at 1500 chars with a trailing "…", which is what users saw as a
@@ -47,7 +47,7 @@ struct MessageContextMenuPreview: View {
     /// the `Text` was given the WHOLE reply, and the `GeometryReader` below
     /// forces SwiftUI to typeset all of it through CoreText — on the main
     /// thread — just to produce `contentSize`. Cost is super-linear in length.
-    /// Measured at this exact font (16.5pt) and wrap width (360 - 2*16 = 328pt):
+    /// Measured at this exact font (Theme.Font.body()) and wrap width (360 - 2*16 = 328pt):
     ///
     ///      4,000 chars   0.25s
     ///      8,000 chars   0.98s
@@ -77,10 +77,10 @@ struct MessageContextMenuPreview: View {
             // width comes from the ScrollView's width (the outer .frame below),
             // which starts at the cap and shrinks to the measured content.
             Text(shown)
-                .font(.system(size: FontSettings.shared.scaled(16.5)))
+                .font(Theme.Font.body())
                 .foregroundStyle(Theme.Color.ink)
                 .multilineTextAlignment(.leading)
-                .padding(16)
+                .padding(Theme.Spacing.lg)
                 .background(
                     // Measure the laid-out text size so the platter can hug
                     // content (short) or cap + wrap/scroll (long).
@@ -105,34 +105,25 @@ struct MessageContextMenuPreview: View {
 
 /// Background for the long-press preview platter.
 ///
-/// Matches `UserBubbleSurface` so lifting a bubble doesn't jump from Liquid
-/// Glass to a flat colour card — the shape (`RoundedRectangle(cornerRadius: 18)`,
+/// Flat milk-pink porcelain card — no Liquid Glass. The bubble this platter
+/// lifts from is flat now (see `UserBubbleSurface`), so the platter stays
+/// flat too. The shape (`RoundedRectangle(cornerRadius: Theme.Radius.user)`,
 /// non-`.continuous`) is deliberately the same one the bubble and the row's
 /// `.contentShape(.contextMenuPreview, …)` already use.
 ///
 /// **The opaque base stays.** [T-ios-longpress-menu-preview-background] exists
 /// because the platter was showing through to the messages underneath: cells are
 /// hosted on a clear background and the menus hang off either a zero-size
-/// `Color.clear` overlay or a `tertiarySystemFill` bubble, so SwiftUI's snapshot
-/// of the attached view was effectively transparent. Glass is a translucent
-/// material, so using it ALONE would risk re-opening exactly that bug. Painting
-/// it over `Theme.Color.background` keeps the platter opaque no matter what the
-/// system composites behind it, while the material still supplies the glass
-/// highlight and edge that make it read as continuous with the bubble.
+/// `Color.clear` overlay or a flat bubble, so SwiftUI's snapshot of the
+/// attached view was effectively transparent. The opaque `Theme.Color.surface`
+/// fill keeps the platter solid no matter what the system composites behind it.
 private struct ContextMenuPreviewSurface: ViewModifier {
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 18)
+        RoundedRectangle(cornerRadius: Theme.Radius.user)
     }
 
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content
-                // Opaque floor first — see the note above.
-                .background(shape.fill(Theme.Color.background))
-                .glassEffect(.regular, in: shape)
-        } else {
-            content.background(Theme.Color.background)
-        }
+        content.background(shape.fill(Theme.Color.surface))
     }
 }
 
@@ -141,24 +132,25 @@ private struct ContextMenuPreviewSurface: ViewModifier {
 ///
 /// Two states that must stay tellable apart at a glance:
 ///
-///  - **Sent** (`isQueued == false`) — Liquid Glass on iOS 26+. These bubbles
-///    scroll over other messages, images and code blocks, so the material has
-///    genuinely varied content to sample; this is the case glass is for, the
-///    same as the tool-status bar and unlike `FolderSurface`, which had to fall
-///    back to a sampled constant for want of anything behind it.
-///  - **Queued** (`isQueued == true`) — deliberately NOT glass, on either OS.
-///    Glass reads as a settled, physical surface, which is the opposite of what
-///    a not-yet-sent message means. It keeps the existing empty fill + dashed
-///    border, so "queued" still looks provisional next to the solid glass of
-///    everything already sent.
+///  - **Sent** (`isQueued == false`) — flat milk-pink fill
+///    (`Theme.Color.bubbleUser`). Liquid Glass was the old sent state; glass
+///    is current-state material and is re-derived here as a flat surface.
+///    Text uses its own slot (`Theme.Color.bubbleUserText`, 6.14:1 light /
+///    8.83:1 dark).
+///  - **Queued** (`isQueued == true`) — deliberately NOT a solid fill, on
+///    either OS. It keeps the existing empty fill + dashed border, so
+///    "queued" still looks provisional next to the solid fill of everything
+///    already sent.
 ///
-/// The text is the modified content rather than an `.overlay`, which is what
-/// keeps it above the material: `.glassEffect` composites the material over the
-/// view it modifies, so an overlaid label would be painted underneath it and
-/// disappear (the FAB regression).
-/// [T-multi-select-share] True while chat rows are drawn for the share picker or an
-/// export: surfaces that only the live compositor can draw (Liquid Glass) fall back
-/// to their plain fill, so an offscreen `layer.render` still shows them.
+/// Shape: short messages are a full pill (radius = half the bubble height,
+/// measured at layout time by the row); long messages fall back to the
+/// Porcelain Card radius (`Theme.Radius.card`), never an ellipse, never
+/// clipped text. The radius arrives as `cornerRadius`, computed by the row.
+/// [T-multi-select-share] The `chatSnapshotRendering` environment value is
+/// still SET by the share/export renderer, but the bubble no longer reads it:
+/// the fill is flat on every path now, so there is no live-compositor surface
+/// left for an offscreen `layer.render` to miss. The key stays defined here
+/// because the exporter sets it; remove both together in a later cleanup.
 private struct ChatSnapshotRenderingKey: EnvironmentKey {
     static let defaultValue = false
 }
@@ -172,14 +164,18 @@ extension EnvironmentValues {
 
 private struct UserBubbleSurface: ViewModifier {
     let isQueued: Bool
-    @Environment(\.chatSnapshotRendering) private var snapshotRendering
+    /// Corner radius for this bubble, computed by the row from the measured
+    /// bubble size: half the bubble height (full pill) for short messages,
+    /// `Theme.Radius.card` for long ones.
+    let cornerRadius: CGFloat
 
-    /// Matches `.contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18))`
-    /// on the row exactly — including the default (non-`.continuous`) corner
-    /// style. A `.continuous` bubble against a circular-arc preview clip would
-    /// show the corners subtly change shape as the long-press lift begins.
+    /// Matches `.contentShape(.contextMenuPreview, …)` on the row exactly —
+    /// the row passes this same radius there, including the default
+    /// (non-`.continuous`) corner style. A `.continuous` bubble against a
+    /// circular-arc preview clip would show the corners subtly change shape
+    /// as the long-press lift begins.
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 18)
+        RoundedRectangle(cornerRadius: cornerRadius)
     }
 
     func body(content: Content) -> some View {
@@ -192,9 +188,8 @@ private struct UserBubbleSurface: ViewModifier {
                         .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
                         .foregroundStyle(Theme.Color.ink2.opacity(0.5))
                 )
-        } else if #available(iOS 26.0, *), !snapshotRendering {
-            content.glassEffect(.regular, in: shape)
         } else {
+            // Flat milk-pink surface — no Liquid Glass anywhere on the bubble.
             content.background(shape.fill(Theme.Color.bubbleUser))
         }
     }
@@ -208,12 +203,78 @@ private struct PreviewContentSizeKey: PreferenceKey {
     }
 }
 
+// MARK: - Chat row layout constants (this file only)
+
+/// Named layout values for the chat rows — no bare literals in the bodies
+/// below. 44pt is the HIG minimum tap target; 72% is the plan's user-bubble
+/// width cap; 120 chars / 3.5 lines is the plan's long-bubble threshold
+/// (>3 lines / ~120 chars falls back to the Porcelain Card radius).
+private enum ChatMessageLayout {
+    static let minTapTarget: CGFloat = 44
+    static let userBubbleMaxWidthFraction: CGFloat = 0.72
+    static let longBubbleCharThreshold: Int = 120
+    static let longBubbleLineThreshold: CGFloat = 3.5
+}
+
+/// Carries the laid-out user-bubble size (text + padding, width-capped) up
+/// to the row, so the pill radius and the long-message fallback are derived
+/// from the real layout instead of guessed from the string.
+private struct UserBubbleSizeKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
+    }
+}
+
+/// The ONE date-group capsule.
+///
+/// Per-message row timestamps do not exist upstream (only the hidden
+/// usage-reveal clock), and none are added here: messages are grouped by
+/// calendar day under a single centered capsule. Locked pairing — ink text
+/// on surface-2 (8.00:1 light / 11.16:1 dark). ink-2 and ink-3 are forbidden
+/// at this size. `Theme.Font.meta()` floors to 11pt (see Tokens.swift); the
+/// locked part is the color pairing, which holds at any size. There is no
+/// second capsule style for dates.
+private struct DateGroupCapsule: View {
+    let date: Date
+
+    private static let dayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        f.timeStyle = .none
+        return f
+    }()
+
+    private var label: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return AppLocalized("Today") }
+        if calendar.isDateInYesterday(date) { return AppLocalized("Yesterday") }
+        return Self.dayFormatter.string(from: date)
+    }
+
+    var body: some View {
+        Text(label)
+            .font(Theme.Font.meta())
+            .foregroundStyle(Theme.Color.ink)
+            // Pill-tag padding from the plan (§B.5): H12 / V6.
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.vertical, 6)
+            .background(Theme.Color.surface2)
+            .clipShape(Capsule())
+    }
+}
+
 // MARK: - Chat Message Row
 
 struct ChatMessageRow: View {
     @ObservedObject var message: ChatMessage
     /// Only the actively streaming message needs vm access (for typing indicator & stop button).
     let isActiveMessage: Bool
+    /// Set by the list host on the first message of each calendar day: the
+    /// row draws the single centered date-group capsule above itself.
+    /// Defaults to false so existing call sites compile unchanged; the
+    /// first-of-day computation lives in the list host, not in this file.
+    var showDateHeader: Bool = false
     var commandStartTime: Date?
     var onStop: (() -> Void)?
     var onRetry: (() -> Void)?
@@ -248,6 +309,9 @@ struct ChatMessageRow: View {
     @State private var usageContentVisible = false
     /// Row frame in window coordinates — used to gate token-usage tap to bottom zone.
     @State private var rowFrameInWindow: CGRect = .zero
+    /// Measured user-bubble size (text + padding, width-capped) — drives the
+    /// pill radius and the long-message fallback for this row's bubble.
+    @State private var userBubbleSize: CGSize = .zero
     private let usageTapLogger = AppLogger(category: "UsageTap")
     /// ID of the block currently highlighted after a copy action.
     @State private var highlightedBlockId: UUID?
@@ -315,6 +379,17 @@ struct ChatMessageRow: View {
     }
 
     var body: some View {
+        VStack(alignment: .center, spacing: Theme.Spacing.sm) {
+            if showDateHeader {
+                DateGroupCapsule(date: message.timestamp)
+            }
+            messageContent
+        }
+    }
+
+    /// The row itself, without the date-group capsule above it.
+    @ViewBuilder
+    private var messageContent: some View {
         switch message.role {
         case .user:
             if let callback = message.agentCallback {
@@ -336,22 +411,51 @@ struct ChatMessageRow: View {
         }
     }
 
+    /// Corner radius for this row's user bubble, derived from the measured
+    /// layout: full pill (half the bubble height) for short messages,
+    /// Porcelain Card radius for long ones (>3 lines / ~120 chars). Before
+    /// the first measurement lands, the character count decides and the
+    /// radius falls back to `Theme.Radius.user`, so the bubble never renders
+    /// with a zero radius or clipped text.
+    private var userBubbleCornerRadius: CGFloat {
+        if userBubbleIsLong { return Theme.Radius.card }
+        if userBubbleSize.height > 0 { return userBubbleSize.height / 2 }
+        return Theme.Radius.user
+    }
+
+    /// Long-message test: measured line count once layout has run, character
+    /// count before that. The 3.5 threshold sits between 3 and 4 whole lines,
+    /// so rounding in the measured height cannot flip a 3-line bubble.
+    private var userBubbleIsLong: Bool {
+        if userBubbleSize.height > 0 {
+            let textHeight = userBubbleSize.height - Theme.Spacing.sm * 2
+            let lineHeight = UIFont.preferredFont(forTextStyle: .body).lineHeight
+            if lineHeight > 0 { return textHeight / lineHeight > ChatMessageLayout.longBubbleLineThreshold }
+        }
+        return userDisplayText.count > ChatMessageLayout.longBubbleCharThreshold
+    }
+
+    /// 72% screen-width cap for the user bubble.
+    private var maxUserBubbleWidth: CGFloat {
+        UIScreen.main.bounds.width * ChatMessageLayout.userBubbleMaxWidthFraction
+    }
+
     // MARK: Compact Divider Row
 
     private var compactDividerRow: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.sm) {
             VStack { Divider() }
-            HStack(spacing: 5) {
+            HStack(spacing: Theme.Spacing.xs) {
                 if message.isCompactLoading {
                     ProgressView()
                         .scaleEffect(0.6)
-                        .frame(width: 12, height: 12)
+                        .frame(width: Theme.Spacing.md, height: Theme.Spacing.md)
                 } else {
                     Image(systemName: "arrow.down.right.and.arrow.up.left")
-                        .font(.system(size: 10))
+                        .font(Theme.Font.meta())
                 }
                 SearchHighlightText(message.content, key: searchKey())
-                    .font(.system(size: 12, weight: .medium))
+                    .font(Theme.Font.bodyEmphasized())
                 if !message.isCompactLoading && message.compactSummary != nil {
                     Button {
                         let summary = message.compactSummary ?? ""
@@ -362,18 +466,20 @@ struct ChatMessageRow: View {
                         }
                     } label: {
                         Image(systemName: "info.circle")
-                            .font(.system(size: 12))
+                            .font(Theme.Font.body())
                     }
                     .buttonStyle(.plain)
+                    .frame(minWidth: ChatMessageLayout.minTapTarget,
+                           minHeight: ChatMessageLayout.minTapTarget)
                 }
             }
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Theme.Color.ink)
             .lineLimit(1)
             .fixedSize()
             VStack { Divider() }
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        .padding(.horizontal, Theme.Spacing.xxl)
+        .padding(.vertical, Theme.Spacing.lg)
         .sheet(isPresented: $showCompactSummary) {
             CompactSummarySheet(summary: message.compactSummary ?? "", onRevert: onRevertCompact)
         }
@@ -383,22 +489,22 @@ struct ChatMessageRow: View {
 
     /// Shared divider-style row for system info messages.
     private func systemDividerRow(icon: String?, loading: Bool, compact: Bool) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.sm) {
             VStack { Divider() }
-            HStack(spacing: 5) {
+            HStack(spacing: Theme.Spacing.xs) {
                 if loading {
                     ProgressView()
                         .scaleEffect(0.6)
-                        .frame(width: 12, height: 12)
+                        .frame(width: Theme.Spacing.md, height: Theme.Spacing.md)
                 } else if let icon {
                     Image(systemName: icon)
-                        .font(.system(size: 10))
+                        .font(Theme.Font.meta())
                 }
                 SearchHighlightText(message.content, key: searchKey())
-                    .font(.system(size: 12, weight: .medium))
+                    .font(Theme.Font.bodyEmphasized())
                     .multilineTextAlignment(.center)
             }
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Theme.Color.ink)
             // [T-browser-download-ux-v4] No .lineLimit(1).fixedSize() here:
             // fixedSize forced the text to its full ideal width, so a long
             // systemInfo line (e.g. pre-v3 "Downloaded … to /var/minis/… —
@@ -410,8 +516,8 @@ struct ChatMessageRow: View {
             .layoutPriority(1)
             VStack { Divider() }
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, compact ? 16 : 6)
+        .padding(.horizontal, Theme.Spacing.xxl)
+        .padding(.vertical, compact ? Theme.Spacing.lg : Theme.Spacing.sm)
     }
 
     // MARK: User Row
@@ -429,7 +535,7 @@ struct ChatMessageRow: View {
         HStack {
             Spacer(minLength: 60)
 
-            VStack(alignment: .trailing, spacing: 6) {
+            VStack(alignment: .trailing, spacing: Theme.Spacing.sm) {
                 // User-attached files above the text bubble
                 if !message.attachments.isEmpty {
                     UserAttachmentList(attachments: message.attachments, searchMessageId: message.id)
@@ -439,13 +545,26 @@ struct ChatMessageRow: View {
                 }
 
                 if !userDisplayText.isEmpty {
-                    HStack(spacing: 6) {
+                    HStack(spacing: Theme.Spacing.sm) {
                         SearchHighlightText(userDisplayText, key: searchKey())
-                            .font(.system(size: FontSettings.shared.scaled(16.5)))
-                            .foregroundStyle(Theme.Color.ink)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .modifier(UserBubbleSurface(isQueued: message.isQueued))
+                            .font(Theme.Font.body())
+                            .foregroundStyle(Theme.Color.bubbleUserText)
+                            .padding(.horizontal, Theme.Spacing.md)
+                            .padding(.vertical, Theme.Spacing.sm)
+                            .modifier(UserBubbleSurface(isQueued: message.isQueued,
+                                                       cornerRadius: userBubbleCornerRadius))
+                            // Measure the laid-out bubble (text + padding,
+                            // width-capped) so the pill radius and the
+                            // long-message fallback derive from real layout.
+                            .background(
+                                GeometryReader { geo in
+                                    Color.clear
+                                        .preference(key: UserBubbleSizeKey.self, value: geo.size)
+                                }
+                            )
+                            .onPreferenceChange(UserBubbleSizeKey.self) { userBubbleSize = $0 }
+                            // Width hugs the text, capped at 72% of the screen.
+                            .frame(maxWidth: maxUserBubbleWidth, alignment: .trailing)
 
                         if message.isQueued {
                             if let onWithdraw {
@@ -453,9 +572,11 @@ struct ChatMessageRow: View {
                                     onWithdraw()
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundStyle(.red)
+                                        .font(Theme.Font.bodyEmphasized())
+                                        .foregroundStyle(Theme.Color.accent)
                                 }
+                                .frame(minWidth: ChatMessageLayout.minTapTarget,
+                                       minHeight: ChatMessageLayout.minTapTarget)
                             }
                         }
                     }
@@ -467,9 +588,11 @@ struct ChatMessageRow: View {
             // stays a full Rectangle (so the whole row is long-pressable), but
             // the context-menu PREVIEW must clip to the bubble's rounded shape —
             // otherwise the lifted preview shows square corners while the bubble
-            // is RoundedRectangle(cornerRadius: 18). iOS 16+ lets us specify the
-            // preview clip shape independently from the interaction shape.
-            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18))
+            // is rounded. iOS 16+ lets us specify the preview clip shape
+            // independently from the interaction shape. The radius is the same
+            // measured one the bubble itself uses (pill for short messages,
+            // Porcelain Card for long ones).
+            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: userBubbleCornerRadius))
             .contextMenu {
                 Button {
                     UIPasteboard.general.string = message.content
@@ -532,8 +655,8 @@ struct ChatMessageRow: View {
                 MessageContextMenuPreview(text: message.content)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 4)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.xs)
         // [T-ios-delete-from-message] Suffix deletion is irreversible and takes
         // the following replies with it, so it gets an explicit confirmation
         // rather than firing straight off the menu.
@@ -550,24 +673,17 @@ struct ChatMessageRow: View {
     // MARK: Assistant Row
 
     private var assistantRow: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             // Assistant label
-            HStack(spacing: 6) {
+            HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color(red: 0.72, green: 0.69, blue: 0.59),
-                                     Color(red: 0.6, green: 0.6, blue: 0.55)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .font(Theme.Font.bodyEmphasized())
+                    .foregroundStyle(Theme.Color.accent)
                 AssistantSoulName()
                     .font(.body.weight(.semibold))
                     .foregroundStyle(Theme.Color.ink)
             }
-            .padding(.top, 4)
+            .padding(.top, Theme.Spacing.xs)
 
             ForEach(message.blocks) { block in
                 AssistantBlockView(
@@ -584,14 +700,14 @@ struct ChatMessageRow: View {
                         guard inZone else { return }
 
                         if showUsage {
-                            withAnimation(.easeInOut(duration: 0.15)) { usageContentVisible = false }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            withAnimation(.easeInOut(duration: Theme.Motion.base)) { usageContentVisible = false }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.base) {
                                 showUsage = false
                             }
                         } else {
                             showUsage = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                withAnimation(.easeInOut(duration: 0.2)) { usageContentVisible = true }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.fast) {
+                                withAnimation(.easeInOut(duration: Theme.Motion.base)) { usageContentVisible = true }
                             }
                         }
                     } : nil,
@@ -639,7 +755,7 @@ struct ChatMessageRow: View {
                     // the clock shipped twice without ever being on screen.
                     if showUsage, let completedAt = message.completedAt {
                         Text(Self.completedAtFormatter.string(from: completedAt))
-                            .font(.system(size: 10, design: .monospaced))
+                            .font(Theme.Font.mono())
                             .foregroundStyle(Theme.Color.ink)
                             .opacity(usageContentVisible ? 1 : 0)
                     }
@@ -647,8 +763,22 @@ struct ChatMessageRow: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
+        // Porcelain surface: bubble-less text on the white card — 16pt radius,
+        // 1pt hairline border, soft shadow. Distinct from the user pill at a
+        // glance. Inner padding keeps the text off the card edge.
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.Radius.card)
+                .fill(Theme.Color.bubbleAI)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.Radius.card)
+                .strokeBorder(Theme.Color.bubbleAIBorder, lineWidth: 1)
+        )
+        .themeShadow(Theme.Shadow.card)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.sm)
         // [T-ios-geometry-observer-crash] THE crasher from the v1.8b13 IPS:
         // onChange(of: geo.frame(in: .global)) wrote state inside the
         // geometry-observer path and tripped the async renderer
@@ -761,18 +891,20 @@ struct ChatMessageRow: View {
 
     @ViewBuilder
     private func usageCapsule(_ usage: TokenUsage) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Theme.Spacing.xs) {
             Image(systemName: "speedometer")
-                .font(.system(size: 9))
+                .font(Theme.Font.meta())
             Text(usageSummary(usage))
-                .font(.system(size: 10, design: .monospaced))
+                .font(Theme.Font.mono())
         }
         .foregroundStyle(Theme.Color.ink)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
+        .padding(.horizontal, Theme.Spacing.sm)
+        .padding(.vertical, Theme.Spacing.xs)
         .background(Theme.Color.bubbleUser.opacity(0.6))
         .clipShape(Capsule())
-        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+        // Fade only: streaming is this screen's one signature motion, and
+        // fade is the Reduce Motion fallback — no scale entrance here.
+        .transition(.opacity)
     }
 
     private func usageSummary(_ u: TokenUsage) -> String {
@@ -799,11 +931,11 @@ struct ChatMessageRow: View {
 
     @ViewBuilder
     private func inlineError(_ error: String) -> some View {
-        HStack(alignment: .center, spacing: 8) {
-            HStack(spacing: 6) {
+        HStack(alignment: .center, spacing: Theme.Spacing.sm) {
+            HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Theme.Color.accent)
                 // [T-error-detail-visible issue #368] Was lineLimit(2), which
                 // could not show the reason at all: a group failure composes one
                 // "⚠️ <model> (<instance>): <reason>" line per attempted entry and
@@ -822,7 +954,7 @@ struct ChatMessageRow: View {
                 // limit is measured correctly at first layout and cannot desync.
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(8)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
@@ -841,66 +973,68 @@ struct ChatMessageRow: View {
             if autoRetryAttempt > 0 {
                 Text("Retry in \(autoRetryCountdown)s (\(autoRetryAttempt)/\(AIChatViewModel.retryDelays.count))")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.secondary.opacity(0.12))
+                    .foregroundStyle(Theme.Color.ink)
+                    .padding(.horizontal, Theme.Spacing.md)
+                    .padding(.vertical, Theme.Spacing.xs)
+                    .background(Theme.Color.surface2)
                     .clipShape(Capsule())
             } else if let onRetry {
                 Button(action: onRetry) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: "arrow.clockwise")
                             .font(.caption.weight(.semibold))
                         Text("Retry")
                             .font(.caption.weight(.semibold))
                     }
                     .foregroundStyle(Theme.Color.ink)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, Theme.Spacing.md)
+                    .padding(.vertical, Theme.Spacing.xs)
                     .background(Theme.Color.ink.opacity(0.15))
                     .clipShape(Capsule())
                 }
+                .frame(minHeight: ChatMessageLayout.minTapTarget)
             }
         }
-        .padding(10)
+        .padding(Theme.Spacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.red.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(Theme.Color.surface2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.thinking))
     }
 
     private var resumeBanner: some View {
-        HStack(alignment: .center, spacing: 8) {
-            HStack(spacing: 6) {
+        HStack(alignment: .center, spacing: Theme.Spacing.sm) {
+            HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: "pause.circle.fill")
                     .font(.caption)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.Color.accent)
                 Text("Interrupted — tap Resume to continue")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.Color.ink)
             }
 
             Spacer()
 
             if let onResume {
                 Button(action: onResume) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: "play.fill")
                             .font(.caption.weight(.semibold))
                         Text("Resume")
                             .font(.caption.weight(.semibold))
                     }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.orange)
+                    .foregroundStyle(Theme.Color.bubbleUserText)
+                    .padding(.horizontal, Theme.Spacing.md)
+                    .padding(.vertical, Theme.Spacing.xs)
+                    .background(Theme.Color.bubbleUser)
                     .clipShape(Capsule())
                 }
+                .frame(minHeight: ChatMessageLayout.minTapTarget)
             }
         }
-        .padding(10)
+        .padding(Theme.Spacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.orange.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(Theme.Color.surface2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.thinking))
     }
 
     // [T-ios-typing-indicator-scope] The local `hasVisibleContent` that used to
