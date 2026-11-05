@@ -207,7 +207,7 @@ struct ChatSendButton: View {
                 returnModeMenu(primaryAction: { if canSend { onSend() } }) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 34))
-                        .foregroundStyle(canSend ? Theme.Color.ink : Theme.Color.inkDisabled)
+                        .foregroundStyle(canSend ? Theme.Color.ink : Theme.Color.ink2)
                 }
                 .accessibilityLabel(Text("Send", comment: "VoiceOver label for the send button"))
             }
