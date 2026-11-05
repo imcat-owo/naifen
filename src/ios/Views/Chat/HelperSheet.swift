@@ -132,10 +132,10 @@ struct HelperTranscriptPage: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .background(ChatColors.background)
+            .background(Theme.Color.background)
             // [T-agent-transcript-navbar] The same nav bar the main chat has:
             // liquid-glass with content behind the bar on iOS 26, opaque
-            // ChatColors.background on iOS 16–18 (NavBarStyleModifier), and
+            // Theme.Color.background on iOS 16–18 (NavBarStyleModifier), and
             // the 46 pt principal frame so the two-row title is never clipped
             // (NavTitleFrameModifier).
             .modifier(NavBarStyleModifier(topSafeAreaInset: $topSafeAreaInset, measuresSafeArea: false))
@@ -337,7 +337,7 @@ struct HelperTranscriptPage: View {
                     Text(tier)
                         .font(.system(size: 10, weight: .semibold, design: .monospaced))
                         .padding(.horizontal, 6).padding(.vertical, 1)
-                        .background(ChatColors.secondaryBg)
+                        .background(Theme.Color.surface)
                         .clipShape(Capsule())
                         .fixedSize()
                 }
@@ -347,7 +347,7 @@ struct HelperTranscriptPage: View {
                 if let model = identity, let line = model.thumbnailLine(max: 28) {
                     Text(line)
                         .font(.system(size: 11))
-                        .foregroundStyle(model.hasEffective ? ChatColors.secondaryText : ChatColors.tertiaryText)
+                        .foregroundStyle(model.hasEffective ? Theme.Color.ink : Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .layoutPriority(-1)
@@ -383,7 +383,7 @@ private struct HelperElapsedLabel: View {
     var body: some View {
         Text(text)
             .font(.system(size: 11, design: .monospaced))
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink)
             .fixedSize()
             .onReceive(clock) { now = $0 }
     }
