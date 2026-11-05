@@ -427,7 +427,7 @@ extension ContentView {
                 // the boundary isn't judged off-screen by a sub-point rounding
                 // difference, and so a corrected header lands visibly inside the
                 // edge rather than flush against it.
-                let slack: CGFloat = 8
+                let slack: CGFloat = Theme.Spacing.sm
                 let isAboveViewport = headerY < topEdge + slack
                 let isBelowViewport = headerY > bottomEdge - slack
 
@@ -509,20 +509,22 @@ extension ContentView {
     /// icon + name (leading) scrolls the list back to the group's header;
     /// the trailing filled-circle chevron collapses the group. Split per the
     /// redesign — the whole-bar-collapses behavior made "where am I" and
-    /// "close this" the same target.
+    /// "close this" the same target. Milk-pink Theme chrome (tabBar ground,
+    /// line hairline, card shadow); the chevron is a 44pt target around a
+    /// 32pt visual disc.
     private func folderMiniBar(for folder: ChatFolder, scrollProxy: ScrollViewProxy) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.sm) {
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     scrollProxy.scrollTo("folderHeader-\(folder.id)", anchor: .top)
                 }
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: Theme.Spacing.sm) {
                     FolderComposedIcon(glyphs: folderMiniBarGlyphs(folder.id), diameter: 30)
                     // Folder names are user data — verbatim.
                     Text(folder.name)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(UIColor.label))
+                        .font(Theme.Font.bodyEmphasized())
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                 }
                 // Widen the tap zone to everything left of the chevron.
@@ -545,24 +547,29 @@ extension ContentView {
                     toggleFolderCollapsed(folder.id)
                 } label: {
                     Image(systemName: "chevron.up")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color(UIColor.secondaryLabel))
-                        .frame(width: 32, height: 32)
-                        .background(Circle().fill(Color(UIColor.tertiarySystemFill)))
+                        .font(Theme.Font.bodyEmphasized())
+                        .foregroundStyle(Theme.Color.ink)
+                        .frame(width: Theme.Spacing.xxxl, height: Theme.Spacing.xxxl)
+                        .background(Circle().fill(Theme.Color.surface2))
+                        // 44pt hit area (HIG minimum) around the 32pt disc.
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text("Collapse Group"))
             }
         }
-        .padding(.leading, 10)
-        .padding(.trailing, 8)
-        .frame(height: 48)
+        .padding(.leading, Theme.Spacing.md)
+        .padding(.trailing, Theme.Spacing.sm)
+        .frame(height: Theme.Spacing.huge)
+        // No Theme token for a max-width cap; 320 keeps the bar from
+        // spanning iPad widths.
         .frame(maxWidth: 320)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 0.5))
-        .shadow(color: Color.black.opacity(0.15), radius: 8, y: 2)
-        .padding(.top, 8)
-        .padding(.horizontal, 24)
+        .background(Theme.Color.tabBar, in: Capsule())
+        .overlay(Capsule().stroke(Theme.Color.line, lineWidth: 0.5))
+        .themeShadow(Theme.Shadow.card)
+        .padding(.top, Theme.Spacing.sm)
+        .padding(.horizontal, Theme.Spacing.xxl)
     }
 
     /// [T-ios-session-list-equatable-jank] Rebuild the id→ChatSession cache.

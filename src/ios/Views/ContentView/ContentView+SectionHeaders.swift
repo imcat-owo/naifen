@@ -22,13 +22,16 @@ extension ContentView {
                 selectedIds.insert(session.id)
             }
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: Theme.Spacing.md) {
                 Image(systemName: selectedIds.contains(session.id) ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22))
-                    .foregroundStyle(selectedIds.contains(session.id) ? Color.accentColor : Color(UIColor.tertiaryLabel))
+                    .font(Theme.Font.bodyEmphasized())
+                    // Selected check in ink (accent at 2.91:1 fails even the
+                    // 3:1 non-text bar); unselected ring in ink-2, a graphic
+                    // at 4.09:1 light, not text.
+                    .foregroundStyle(selectedIds.contains(session.id) ? Theme.Color.ink : Theme.Color.ink2)
                 SessionRow(session: session)
             }
-            .padding(.leading, 16)
+            .padding(.leading, Theme.Spacing.lg)
         }
         .buttonStyle(.plain)
     }
@@ -47,43 +50,43 @@ extension ContentView {
                     selectedIds.formUnion(groupIds)
                 }
             } label: {
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.sm) {
                     Image(systemName: allSelected ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 18))
-                        .foregroundStyle(allSelected ? Color.accentColor : Color(UIColor.tertiaryLabel))
+                        .font(Theme.Font.bodyEmphasized())
+                        .foregroundStyle(allSelected ? Theme.Color.ink : Theme.Color.ink2)
                     // group.label is a stable English key (used for logic like
                     // == "Pinned"); localize only at display via LocalizedStringKey.
                     // Folder names are user data — render verbatim, not as a key.
                     if group.folderId != nil {
                         Text(group.label)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(UIColor.secondaryLabel))
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundStyle(Theme.Color.ink)
                     } else {
                         Text(LocalizedStringKey(group.label))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(UIColor.secondaryLabel))
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundStyle(Theme.Color.ink)
                     }
                 }
                 .textCase(nil)
             }
             .buttonStyle(.plain)
         } else if index > 0 || group.label == "Pinned" {
-            HStack(spacing: 4) {
+            HStack(spacing: Theme.Spacing.xs) {
                 if group.label == "Pinned" {
                     Image(systemName: "pin.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .font(Theme.Font.meta())
+                        .foregroundStyle(Theme.Color.accent)
                 }
                 // group.label stays an English key for logic; LocalizedStringKey
                 // resolves the display string per system language.
                 Text(LocalizedStringKey(group.label))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(UIColor.secondaryLabel))
+                    .font(Theme.Font.bodyEmphasized())
+                    .foregroundStyle(Theme.Color.ink)
             }
             .textCase(nil)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(dropTargetFolderId == "" ? Color.accentColor.opacity(0.18) : Color.clear)
+                RoundedRectangle(cornerRadius: Theme.Radius.thinking, style: .continuous)
+                    .fill(dropTargetFolderId == "" ? Theme.Color.accent.opacity(0.18) : Color.clear)
             )
             // Dropping on a date-bucket header moves the sessions OUT of any
             // folder — the drag gesture works both directions, otherwise
@@ -165,7 +168,7 @@ extension ContentView {
         // With a bare tap gesture the long-press belongs to the contextMenu
         // alone; the accessibility action keeps the card activatable for
         // AX clients and the debug tap harness.
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.sm) {
                 FolderComposedIcon(glyphs: group.glyphs)
                     // Same overlay corners as SessionRow: spinner ring for
                     // running, bottom-trailing badge for paused, top-trailing
@@ -176,18 +179,18 @@ extension ContentView {
                     // guessing which row it refers to.
                     .overlay {
                         if group.isCollapsed && group.anyActive {
-                            SpinningRing(color: group.glyphs.first?.color ?? .gray)
+                            SpinningRing(color: group.glyphs.first?.color ?? Theme.Color.accent)
                                 .frame(width: 42, height: 42)
                         }
                     }
                     .overlay(alignment: .bottomTrailing) {
                         if group.isCollapsed && group.anyPaused {
                             ZStack {
-                                Circle().fill(Color(UIColor.systemBackground))
-                                    .frame(width: 16, height: 16)
+                                Circle().fill(Theme.Color.background)
+                                    .frame(width: Theme.Spacing.lg, height: Theme.Spacing.lg)
                                 Image(systemName: "exclamationmark.circle.fill")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(.orange)
+                                    .font(Theme.Font.body())
+                                    .foregroundStyle(Theme.Color.accent)
                             }
                             .offset(x: 2, y: 2)
                         }
@@ -195,13 +198,13 @@ extension ContentView {
                     .overlay(alignment: .topTrailing) {
                         if group.isCollapsed && group.anyUnread {
                             Circle()
-                                .fill(Color.red)
-                                .frame(width: 8, height: 8)
+                                .fill(Theme.Color.accent)
+                                .frame(width: Theme.Spacing.sm, height: Theme.Spacing.sm)
                                 .offset(x: -1, y: 1)
                         }
                     }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     // Folder names are user data — verbatim Text, never a
                     // LocalizedStringKey lookup.
                     // [T-search-folder-expand] A folder-name hit is highlighted
@@ -210,12 +213,12 @@ extension ContentView {
                         if searchResultsActive,
                            SearchKeywords.firstHit(in: group.label, terms: SearchKeywords.terms(searchQuery)) != nil {
                             Text(SessionRow.highlightedAttributedString(
-                                text: group.label, query: searchQuery, baseColor: Color(UIColor.label)))
+                                text: group.label, query: searchQuery, baseColor: Theme.Color.ink)))
                         } else {
-                            Text(group.label).foregroundStyle(Color(UIColor.label))
+                            Text(group.label).foregroundStyle(Theme.Color.ink)
                         }
                     }
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(Theme.Font.bodyEmphasized())
                         .lineLimit(1)
                     Group {
                         if searchResultsActive {
@@ -230,31 +233,31 @@ extension ContentView {
                             Text("Empty group")
                         }
                     }
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(UIColor.secondaryLabel))
+                    .font(Theme.Font.body())
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                 }
 
                 Spacer(minLength: 1)
 
-                VStack(alignment: .trailing, spacing: 6) {
+                VStack(alignment: .trailing, spacing: Theme.Spacing.sm) {
                     if let date = group.latestDate {
                         Text(SessionRow.relativeDateImpl(date))
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color(UIColor.tertiaryLabel))
+                            .font(Theme.Font.body())
+                            .foregroundStyle(Theme.Color.ink)
                     }
-                    HStack(spacing: 4) {
+                    HStack(spacing: Theme.Spacing.xs) {
                         if group.isFolderPinned {
                             Image(systemName: "pin.fill")
-                                .font(.system(size: 10))
-                                .foregroundStyle(Color(UIColor.tertiaryLabel))
+                                .font(Theme.Font.meta())
+                                .foregroundStyle(Theme.Color.accent)
                         }
                         // [T-search-folder-expand] No fold chevron in a result
                         // set: folders stay open there, so it would do nothing.
                         if !searchResultsActive {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.tertiaryLabel))
+                                .font(Theme.Font.caption().weight(.semibold))
+                                .foregroundStyle(Theme.Color.ink)
                                 .rotationEffect(.degrees(group.isCollapsed ? -90 : 0))
                         }
                     }
@@ -263,9 +266,13 @@ extension ContentView {
             // Inner 10 + outer 6 = 16pt — the same lead as SessionRow's
             // horizontal padding, so the folder icon's left edge and (via the
             // shared 44pt icon frame + 8pt spacing) the folder TITLE both sit
-            // exactly on the session rows' alignment grid.
+            // exactly on the session rows' alignment grid. The 10 is
+            // arithmetically forced (16 lead minus the 6pt highlight inset,
+            // which matches the splitList selection highlight) and has no
+            // Theme.Spacing token; the vertical 10 below is the free one and
+            // is on the grid.
             .padding(.horizontal, 10)
-            .padding(.vertical, 10)
+            .padding(.vertical, Theme.Spacing.md)
             .textCase(nil)
             .contentShape(Rectangle())
             // Mini-bar trigger: only an EXPANDED, populated group needs its
@@ -290,11 +297,13 @@ extension ContentView {
             // 6pt matches the splitList selection highlight's horizontal
             // inset, so the folder container and a selected member row share
             // the same left/right edges instead of the container overhanging.
+            // No Theme.Spacing token is 6pt; changing this alone would break
+            // that match — it moves only together with SessionListRows.
             .padding(.horizontal, 6)
-            .padding(.top, 4)
+            .padding(.top, Theme.Spacing.xs)
             // Expanded: no bottom gap — the card welds onto the first member
             // row's container segment.
-            .padding(.bottom, (group.isCollapsed || group.ids.isEmpty) ? 4 : 0)
+            .padding(.bottom, (group.isCollapsed || group.ids.isEmpty) ? Theme.Spacing.xs : 0)
         .onTapGesture {
             if let fid = group.folderId { toggleFolderCollapsed(fid, scrollProxy: scrollProxy) }
         }
