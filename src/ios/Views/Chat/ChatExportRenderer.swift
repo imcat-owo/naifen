@@ -74,7 +74,7 @@ enum ChatExportContent {
     static func tableChunks(_ markdown: String, contentWidth: CGFloat, base: CGFloat) -> [ChatShareTableChunk]? {
         let chunks = ChatShareMarkdownChunker.split(markdown)
         guard chunks.contains(where: \.isTable) else { return nil }
-        let theme = SelectableMarkdownTheme(baseFontSize: FontSettings.shared.scaledMessage(16.5))
+        let theme = SelectableMarkdownTheme(baseFontSize: FontSettings.shared.scaled(16.5))
         return chunks.map { chunk in
             guard chunk.isTable,
                   case .table(let alignments, let rows)? = MarkdownContent(chunk.text).blocks.first
