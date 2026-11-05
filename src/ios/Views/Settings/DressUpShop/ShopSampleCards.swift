@@ -229,10 +229,11 @@ struct ShopInspirationSample: View {
     }
 }
 
-/// A wallpaper sample: the bundled milk-pink wallpaper asset, shown
-/// uncropped at native aspect. The full-bleed proof (blur-stretch
-/// fallback, scrim, safe area) lives in `WallpaperBackdrop`, used by
-/// the shop's wallpaper preview — this thumb is only the picker tile.
+/// A wallpaper sample: the bundled milk-pink wallpaper asset, scaled
+/// to fill the tile and cropped to its frame (`.fill` + `.clipped()`).
+/// The full-bleed proof (blur-stretch fallback, scrim, safe area) lives
+/// in `WallpaperBackdrop`, used by the shop's wallpaper preview — this
+/// thumb is only the picker tile.
 struct ShopWallpaperSample: View {
     var body: some View {
         Image("WallpaperMilkPink")
