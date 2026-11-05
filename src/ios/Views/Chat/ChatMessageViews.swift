@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Context-menu preview
 
@@ -709,14 +710,28 @@ struct ChatMessageRow: View {
                         guard inZone else { return }
 
                         if showUsage {
-                            withAnimation(.easeInOut(duration: Theme.Motion.base)) { usageContentVisible = false }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.base) {
+                            // [Phase 2 milk-pink] Reduce Motion: hide
+                            // instantly, no 0.20s fade and no staged delay.
+                            if UIAccessibility.isReduceMotionEnabled {
+                                usageContentVisible = false
                                 showUsage = false
+                            } else {
+                                withAnimation(.easeInOut(duration: Theme.Motion.base)) { usageContentVisible = false }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.base) {
+                                    showUsage = false
+                                }
                             }
                         } else {
-                            showUsage = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.fast) {
-                                withAnimation(.easeInOut(duration: Theme.Motion.base)) { usageContentVisible = true }
+                            // [Phase 2 milk-pink] Reduce Motion: show
+                            // instantly, no 0.20s fade and no staged delay.
+                            if UIAccessibility.isReduceMotionEnabled {
+                                showUsage = true
+                                usageContentVisible = true
+                            } else {
+                                showUsage = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Motion.fast) {
+                                    withAnimation(.easeInOut(duration: Theme.Motion.base)) { usageContentVisible = true }
+                                }
                             }
                         }
                     } : nil,
