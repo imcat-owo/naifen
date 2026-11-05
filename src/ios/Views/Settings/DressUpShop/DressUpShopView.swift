@@ -2,7 +2,7 @@
 //
 // Upstream has NO shop. This is the shop: one milk-pink set, six
 // categories, real sample cards, try-then-apply, saved sets, and the
-// wallpaper picker + full-screen preview.
+// wallpaper picker + sheet preview.
 //
 // TRY / APPLY FLOW: tap a sample card to try it on — the preview at the
 // top swaps to that item on the try-on spring (interruptible; a new tap
@@ -13,7 +13,7 @@
 // dead buttons, no placeholders.
 // All tap targets are at least the 44pt HIG minimum.
 //
-// SHEETS: the wallpaper full-screen preview uses the native sheet
+// SHEETS: the wallpaper preview uses the native sheet
 // (`.dressUpSheet`, system drag contract). The custom modal sheet
 // (`.dressUpModalSheet`) is not needed here — the native sheet is
 // enough — so it is not attached anywhere on this screen.
@@ -22,7 +22,7 @@
 // (`.tryOnSwap`). Everything else stays quiet.
 //
 // WALLPAPER PREVIEW: the inline wallpaper tile is only a picker tile.
-// The full-bleed proof is the full-screen preview sheet, where
+// The full-bleed proof is the preview sheet, where
 // `WallpaperBackdrop` is the bottom ZStack layer with its own
 // `.ignoresSafeArea()` — full-bleed incl. the bottom safe area and
 // under the translucent tab bar, with the blur-stretch fallback and
@@ -49,7 +49,7 @@ struct DressUpShopView: View {
     @State private var triedItem: ShopItem?
     /// Which wallpaper the preview sheet shows.
     @State private var previewWallpaper: PreviewWallpaper = .bundled
-    /// Full-screen wallpaper preview sheet.
+    /// Wallpaper preview sheet.
     @State private var showWallpaperPreview = false
     /// Photo picker for a custom wallpaper upload.
     @State private var showPhotoPicker = false
@@ -217,7 +217,7 @@ struct DressUpShopView: View {
                     previewWallpaper = customWallpaperImage.map { .custom($0) } ?? .bundled
                     showWallpaperPreview = true
                 } label: {
-                    Text("Preview Full Screen")
+                    Text("Preview Wallpaper")
                         .font(Theme.Font.bodyEmphasized())
                         .foregroundStyle(Theme.Color.ink)
                         .frame(maxWidth: .infinity, minHeight: Self.minTapTarget)
@@ -252,7 +252,7 @@ struct DressUpShopView: View {
         }
     }
 
-    /// Full-screen wallpaper preview: the backdrop as the bottom ZStack
+    /// Wallpaper preview sheet: the backdrop as the bottom ZStack
     /// layer, full-bleed, with sample chat rows on top of the scrim.
     /// This is the full-bleed proof — the inline tile above is not.
     private var wallpaperPreviewSheet: some View {
