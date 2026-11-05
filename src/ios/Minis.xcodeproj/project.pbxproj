@@ -98,6 +98,8 @@
 		E51000001 /* MinisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51000011 /* MinisApp.swift */; };
 		THM000001 /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000011 /* Tokens.swift */; };
 		THM000002 /* ThemeModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = THM000012 /* ThemeModifier.swift */; };
+		FNT000001 /* Fraunces-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FNT000011 /* Fraunces-SemiBold.ttf */; };
+		FNT000002 /* Fraunces-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FNT000012 /* Fraunces-Regular.ttf */; };
 		E51000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E51000013 /* Assets.xcassets */; };
 		E51000004 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E51000014 /* Preview Assets.xcassets */; };
 		E52000001 /* LLMTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52000011 /* LLMTypes.swift */; };
@@ -870,6 +872,8 @@
 		E51000011 /* MinisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinisApp.swift; sourceTree = "<group>"; };
 		THM000011 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
 		THM000012 /* ThemeModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeModifier.swift; sourceTree = "<group>"; };
+		FNT000011 /* Fraunces-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file.ttf; path = Fraunces-SemiBold.ttf; sourceTree = "<group>"; };
+		FNT000012 /* Fraunces-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file.ttf; path = Fraunces-Regular.ttf; sourceTree = "<group>"; };
 		E51000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E51000014 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E52000011 /* LLMTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTypes.swift; sourceTree = "<group>"; };
@@ -1704,6 +1708,15 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
+		FNT000030 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				FNT000011 /* Fraunces-SemiBold.ttf */,
+				FNT000012 /* Fraunces-Regular.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		E51000031 /* Minis */ = {
 			isa = PBXGroup;
 			children = (
@@ -1731,6 +1744,7 @@
 				E54000030 /* Debug */,
 				E5CR00100 /* Diagnostics */,
 				THM000030 /* Theme */,
+				FNT000030 /* Fonts */,
 				E51000013 /* Assets.xcassets */,
 				E51000033 /* Preview Content */,
 				AA71B0212F44BEB200A28A5E /* Launch Screen.storyboard */,
@@ -2995,6 +3009,8 @@
 				E5JB00003 /* jieba.dict.utf8 in Resources */,
 				E5VC0000C /* zh_background_wordfreq.txt in Resources */,
 				E5JB00004 /* hmm_model.utf8 in Resources */,
+				FNT000001 /* Fraunces-SemiBold.ttf in Resources */,
+				FNT000002 /* Fraunces-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

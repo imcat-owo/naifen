@@ -1,0 +1,41 @@
+Fraunces — bundled display font (OFL 1.1)
+==========================================
+
+Files in this folder
+- Fraunces-SemiBold.ttf — PostScript name "Fraunces-SemiBold", weight 600.
+  Used by Theme.Font display roles (Tokens.swift checks exactly this name).
+- Fraunces-Regular.ttf — PostScript name "Fraunces-Regular", weight 400.
+  Bundled for future body-serif use; no code references it yet.
+- OFL.txt — verbatim SIL Open Font License 1.1 (also embedded in each
+  font's name table, ID 13).
+
+Source (preferred source, OFL)
+- https://github.com/google/fonts/tree/main/ofl/fraunces
+- Variable font: ofl/fraunces/Fraunces[SOFT,WONK,opsz,wght].ttf
+  (downloaded 2026-11-05; 360,440 bytes)
+- License: ofl/fraunces/OFL.txt (copied here verbatim)
+- Upstream project: https://github.com/undercasetype/Fraunces
+
+How the static files were produced
+- google/fonts ships Fraunces ONLY as a variable font; there is no static
+  SemiBold/Regular file in the repo (no static/ directory).
+- The variable font's own named instances resolve to PostScript names like
+  "Fraunces_600wght", NOT "Fraunces-SemiBold", so the variable file was NOT
+  bundled as-is — Tokens.swift looks up "Fraunces-SemiBold" and would not
+  find it.
+- Each static file was pinned from the variable font at that instance's own
+  coordinates (fontTools varLib.instancer):
+  SemiBold: wght=600 opsz=9 SOFT=0 WONK=1; Regular: wght=400 opsz=9 SOFT=0
+  WONK=1. The instancer left stale default names ("Fraunces-9ptBlack"), so
+  the name table was corrected to the instance's canonical names
+  (family "Fraunces", subfamily "SemiBold"/"Regular", PostScript names
+  "Fraunces-SemiBold"/"Fraunces-Regular", OS/2 weight 600/400, no bold or
+  italic flags). Verified with fc-scan and fontTools after the fix.
+- This is a permitted OFL modification (instancing + name correction); the
+  OFL text and copyright notice are preserved in OFL.txt and in each file.
+
+Registration
+- src/ios/Info.plist: UIAppFonts lists both files.
+- src/ios/Minis.xcodeproj/project.pbxproj: both files are in the Minis
+  target's Resources phase (Fonts group, FNT000* IDs). The license note and
+  OFL.txt are deliberately NOT in the target — they are not app resources.
