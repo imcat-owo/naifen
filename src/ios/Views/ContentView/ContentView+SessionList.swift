@@ -149,16 +149,19 @@ extension ContentView {
                 searchFolderPages[fid, default: 1] += 1
             }
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(Theme.Font.caption().weight(.semibold))
+                    // Small accent glyph only — accent is never text, so the
+                    // label below stays ink.
+                    .foregroundStyle(Theme.Color.accent)
                 Text("Show \(min(group.hiddenMatchCount, Self.searchFolderPageSize)) more (\(group.hiddenMatchCount) left)")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(Theme.Font.bodyEmphasized())
+                    .foregroundStyle(Theme.Color.ink)
                 Spacer(minLength: 0)
             }
-            .foregroundStyle(Color.accentColor)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, Theme.Spacing.lg)
+            .padding(.vertical, Theme.Spacing.md)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -268,8 +271,8 @@ extension ContentView {
                         sectionHeader(index: index, group: group)
                     } else if group.showsGroupsHeader {
                         Text("Groups")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(UIColor.secondaryLabel))
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundStyle(Theme.Color.ink)
                             .textCase(nil)
                     }
                 }
@@ -277,6 +280,13 @@ extension ContentView {
 
         }
         .listStyle(.plain)
+        // Milk-pink list chrome: Theme ground behind the rows (the system
+        // grouped/plain background is gone) and a 44pt minimum row height
+        // set on the List itself (HIG minimum) — never .frame(height: 44)
+        // on a row.
+        .scrollContentBackground(.hidden)
+        .background(Theme.Color.background)
+        .environment(\.defaultMinListRowHeight, 44)
         #if DEBUG
         // TEMPORARY scroll-phase markers to bracket the jitter window in the
         // log. Pair with the [ROWH] probe: a [ROWH] line appearing during
@@ -288,8 +298,15 @@ extension ContentView {
         .overlay { if didInitialLoad, filteredSessions.isEmpty, !isSearching { emptyState } }
         .overlay(alignment: .top) { folderMiniBarOverlay(scrollProxy) }
         .safeAreaInset(edge: .bottom) {
-            if isSelecting { selectionToolbar }
-            else if !hidesFABForOnboarding(listIsEmpty: filteredSessions.isEmpty) { fabRow }
+            // Chrome container only: the selection toolbar / FAB content
+            // inside belongs to another worker (FAB + search). The inset
+            // itself gets the Theme ground so the bottom chrome reads milk
+            // pink instead of system chrome.
+            Group {
+                if isSelecting { selectionToolbar }
+                else if !hidesFABForOnboarding(listIsEmpty: filteredSessions.isEmpty) { fabRow }
+            }
+            .background(Theme.Color.background)
         }
         // [T-home-fab-keyboard-inset] Mirror of the voice panel's structural
         // immunity (604a9947 / T-voice-bg-fg-gap): with the inline search bar
@@ -362,8 +379,8 @@ extension ContentView {
                         sectionHeader(index: index, group: group)
                     } else if group.showsGroupsHeader {
                         Text("Groups")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(UIColor.secondaryLabel))
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundStyle(Theme.Color.ink)
                             .textCase(nil)
                     }
                 }
@@ -371,6 +388,12 @@ extension ContentView {
 
         }
         .listStyle(.plain)
+        // Milk-pink list chrome: Theme ground behind the rows and a 44pt
+        // minimum row height set on the List itself (HIG minimum) — never
+        // .frame(height: 44) on a row.
+        .scrollContentBackground(.hidden)
+        .background(Theme.Color.background)
+        .environment(\.defaultMinListRowHeight, 44)
         .navigationSplitViewColumnWidth(min: 340, ideal: 380, max: 500)
         // [T-macos27-liquid-glass-navbar] See MacOS27GlassWorkaround. Applied to
         // the Mac sidebar List only; the iPhone compact list (the other branch
@@ -380,8 +403,15 @@ extension ContentView {
         .overlay { if didInitialLoad, displaySessions.isEmpty, !isSearching { emptyState } }
         .overlay(alignment: .top) { folderMiniBarOverlay(scrollProxy) }
         .safeAreaInset(edge: .bottom) {
-            if isSelecting { selectionToolbar }
-            else if !hidesFABForOnboarding(listIsEmpty: displaySessions.isEmpty) { fabRow }
+            // Chrome container only: the selection toolbar / FAB content
+            // inside belongs to another worker (FAB + search). The inset
+            // itself gets the Theme ground so the bottom chrome reads milk
+            // pink instead of system chrome.
+            Group {
+                if isSelecting { selectionToolbar }
+                else if !hidesFABForOnboarding(listIsEmpty: displaySessions.isEmpty) { fabRow }
+            }
+            .background(Theme.Color.background)
         }
         // [T-home-fab-keyboard-inset] Same structural immunity as the compact
         // list above — see that call site for the full rationale. On iPad the
