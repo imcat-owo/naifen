@@ -38,20 +38,32 @@ extension NSAttributedString.Key {
 
 /// [T-inline-code-dark-bg-ios] Inline-code span background, shared by the
 /// theme and the layout manager's fillBackgroundRectArray (the actual paint
-/// site) so the two can never drift. Light stays EXACTLY .systemGray6
-/// (#F2F2F7); dark lifts to #3A3A3C (systemGray4's dark value) — systemGray6
-/// resolves to #1C1C1E in dark, indistinguishable from the near-black chat
-/// background, which made inline code read as bare orange text.
-let minisInlineCodeBackgroundColor = UIColor { traits in
-    traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0x3A / 255.0, green: 0x3A / 255.0, blue: 0x3C / 255.0, alpha: 1)
-        : .systemGray6
-}
+/// site) so the two can never drift. Milk-pink Surface2 token in both modes
+/// (light #FFE7E8 / dark #4A3036); ink text on it is 8.00:1 light /
+/// 11.16:1 dark. Replaces the old .systemGray6 / #3A3A3C pair — the old
+/// dark value existed only because systemGray6 resolved to near-black
+/// #1C1C1E in dark; the token resolves per mode now, so no per-mode
+/// literal is needed.
+let minisInlineCodeBackgroundColor = UIColor(Theme.Color.surface2)
 
 /// Mirrors the `.minisChat` MarkdownUI theme using UIKit types.
+/// Every color and radius comes from Theme.* — no system color literals,
+/// no hex, no magic numbers — except inlineCodeCornerRadius, which is
+/// layout-owned (see its comment) and must stay 5 until the paint sites
+/// are wired to the theme. Text colors are ink only: ink-2 is 4.09:1
+/// for body in light mode (fails 4.5:1) and accent is 2.91:1 as text, so
+/// blockquote secondary text, links and inline code all collapse to ink;
+/// links keep their existing single underline and inline code keeps its
+/// Surface2 pill, which carry the distinction instead of a hue.
 struct SelectableMarkdownTheme {
     let baseFontSize: CGFloat
-    let codeBlockCornerRadius: CGFloat = 8
+    // Code block is a card surface; inline code is a pill. The code-block
+    // radius is the Theme.Radius.card token.
+    let codeBlockCornerRadius: CGFloat = Theme.Radius.card
+    // Layout owns this value: the paint sites hardcode 5
+    // (MinisLayoutManager.swift:39, used at :346; TableCellViews.swift:398)
+    // and nothing reads this slot, so it must stay 5 here. Do not change
+    // it without wiring those sites to read the theme (open follow-up).
     let inlineCodeCornerRadius: CGFloat = 5
 
     init(baseFontSize: CGFloat? = nil) {
@@ -59,20 +71,27 @@ struct SelectableMarkdownTheme {
     }
 
     var baseFont: UIFont { .systemFont(ofSize: baseFontSize) }
-    var labelColor: UIColor { .label }
-    var secondaryLabelColor: UIColor { .secondaryLabel }
-    var accentColor: UIColor { .systemOrange }
-    var linkColor: UIColor { .systemBlue }
-    var codeBlockBackground: UIColor {
-        UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.15, alpha: 1) : .black }
-    }
-    var codeBlockTextColor: UIColor {
-        UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.55, green: 0.95, blue: 0.55, alpha: 1) : .systemGreen }
-    }
+    var labelColor: UIColor { UIColor(Theme.Color.ink) }
+    // Same as labelColor on purpose: this colors blockquote body text at
+    // base size, where ink-2 fails 4.5:1 in light mode. The accent bar +
+    // indent carry the quote distinction, not a lighter ink.
+    var secondaryLabelColor: UIColor { UIColor(Theme.Color.ink) }
+    // Ink, not blue: accent fails 4.5:1 as text. The existing single
+    // underline marks links.
+    var linkColor: UIColor { UIColor(Theme.Color.ink) }
+    // Pale-pink Surface2 block (light #FFE7E8 / dark #4A3036) with dark ink
+    // text: 8.00:1 light / 11.16:1 dark. Replaces black bg / green text.
+    var codeBlockBackground: UIColor { UIColor(Theme.Color.surface2) }
+    var codeBlockTextColor: UIColor { UIColor(Theme.Color.ink) }
     var inlineCodeBackground: UIColor { minisInlineCodeBackgroundColor }
-    var inlineCodeColor: UIColor { .systemOrange }
-    var blockquoteBarColor: UIColor { UIColor.systemOrange.withAlphaComponent(0.5) }
-    var tableBorderColor: UIColor { UIColor.label.withAlphaComponent(0.25) }
+    // Ink on the Surface2 pill (8.00:1 light / 11.16:1 dark); the pill,
+    // not a hue, marks code spans. Replaces .systemOrange.
+    var inlineCodeColor: UIColor { UIColor(Theme.Color.ink) }
+    // Decorative bar, not text — the one place accent is used at full
+    // strength. Replaces .systemOrange at 0.5 alpha.
+    var blockquoteBarColor: UIColor { UIColor(Theme.Color.accent) }
+    // Hairline token. Replaces .label at 0.25 alpha.
+    var tableBorderColor: UIColor { UIColor(Theme.Color.line) }
 
     func headingFont(level: Int) -> UIFont {
         let size: CGFloat
@@ -85,7 +104,10 @@ struct SelectableMarkdownTheme {
         case 6: size = baseFontSize * 0.85; weight = .semibold
         default: size = baseFontSize; weight = .semibold // H4 and fallback
         }
-        return .systemFont(ofSize: size, weight: weight)
+        // Serif resolution lives in Theme.Font (uiSerif) — the single
+        // serif path. This UIKit theme cannot consume SwiftUI.Font, so
+        // headings call the UIKit mirror there, not a local copy.
+        return Theme.Font.uiSerif(size: size, weight: weight)
     }
 
     var inlineCodeFont: UIFont { inlineCodeFont(matching: nil) }

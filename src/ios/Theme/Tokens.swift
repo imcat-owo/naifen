@@ -161,6 +161,21 @@ enum Theme {
         static func displayLarge() -> SwiftUI.Font { serif(size: 28, relativeTo: .title1) }
         static func displayExtraLarge() -> SwiftUI.Font { serif(size: 32, relativeTo: .largeTitle) }
 
+        // UIKit mirror of serif(): bundled display face when present,
+        // declared system-serif fallback otherwise. For UIKit callers (e.g. the
+        // markdown theme's headings) that cannot consume SwiftUI.Font.
+        // No Dynamic Type scaling here — callers pass an already-scaled size.
+        static func uiSerif(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+            if let fraunces = UIFont(name: frauncesSemiBold, size: size) {
+                return fraunces
+            }
+            let fallback = UIFont.systemFont(ofSize: size, weight: weight)
+            if let serifDescriptor = fallback.fontDescriptor.withDesign(.serif) {
+                return UIFont(descriptor: serifDescriptor, size: size)
+            }
+            return fallback
+        }
+
         // Body — SF Pro / PingFang SC, 13pt default, whole 10–15 dial scales together
         // The 13pt base IS the one global dial's default (FontSettings.bodySize):
         // the app root applies the dial as .dynamicTypeSize and UIFontMetrics
@@ -181,6 +196,11 @@ enum Theme {
 
         // MARK: - Private helpers
 
+        // Single source of the Fraunces display-face name: both serif()
+        // and uiSerif() resolve through this constant, so the name string
+        // appears exactly once in code.
+        private static let frauncesSemiBold = "Fraunces-SemiBold"
+
         private static func scaledSize(_ base: CGFloat, for style: UIFont.TextStyle, cap: CGFloat? = nil) -> CGFloat {
             let scaled = UIFontMetrics(forTextStyle: style).scaledValue(for: base)
             let capped = cap.map { min(scaled, $0) } ?? scaled
@@ -189,8 +209,8 @@ enum Theme {
 
         private static func serif(size: CGFloat, relativeTo style: UIFont.TextStyle) -> SwiftUI.Font {
             let scaled = scaledSize(size, for: style, cap: 36)
-            if UIFont(name: "Fraunces-SemiBold", size: scaled) != nil {
-                return SwiftUI.Font.custom("Fraunces-SemiBold", size: scaled)
+            if UIFont(name: frauncesSemiBold, size: scaled) != nil {
+                return SwiftUI.Font.custom(frauncesSemiBold, size: scaled)
             }
             return SwiftUI.Font.system(size: scaled, weight: .semibold, design: .serif)
         }
