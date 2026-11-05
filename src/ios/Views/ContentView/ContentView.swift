@@ -839,7 +839,13 @@ struct ContentView: View {
                 singleDeleteInfo = nil
             }
             .onAppear {
-                print("[DELETE] Sheet appeared. singleDeleteInfo is \(singleDeleteInfo == nil ? "nil" : "non-nil, sessionCount=\(singleDeleteInfo!.sessionCount)")")
+                let deleteInfoDescription: String
+                if let info = singleDeleteInfo {
+                    deleteInfoDescription = "non-nil, sessionCount=\(info.sessionCount)"
+                } else {
+                    deleteInfoDescription = "nil"
+                }
+                print("[DELETE] Sheet appeared. singleDeleteInfo is \(deleteInfoDescription)")
             }
             .presentationDetents([.medium])
         }

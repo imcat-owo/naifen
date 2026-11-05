@@ -284,7 +284,7 @@ extension AIChatView {
         .buttonStyle(SlashPressButtonStyle())
         // [Phase 2 composer] Feedback on open only: the plain trigger fires
         // on dismiss too, including programmatic dismiss.
-        .sensoryFeedback(.selection, trigger: vm.showSlashMenu) { _, isOpen in isOpen }
+        .dressUpHaptic(.selection, trigger: vm.showSlashMenu) { _, isOpen in isOpen }
     }
 
     /// "Exit Edit Mode" capsule shown while editing a past message.

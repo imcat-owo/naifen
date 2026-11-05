@@ -131,6 +131,6 @@ struct WebLoadErrorOverlay: View {
         .padding(28)
         .frame(maxWidth: 360)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.background)
+        .background(BackgroundStyle.background)
     }
 }

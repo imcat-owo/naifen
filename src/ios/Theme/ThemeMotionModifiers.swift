@@ -29,6 +29,71 @@
 
 import SwiftUI
 
+// MARK: - Availability helpers (deployment target iOS 16.0)
+//
+// `SensoryFeedback` / `.sensoryFeedback` are iOS 17+, `PhaseAnimator` is
+// iOS 17+, and `.presentationBackground` is iOS 16.4+. The helpers below
+// keep every call site compiling on iOS 16: haptics simply do not fire
+// there, the sheet background falls back to the system default, and the
+// thinking dots stay static. No behaviour change on iOS 17+.
+
+/// iOS 16-safe haptic kind. Mirrors the `SensoryFeedback` cases this
+/// codebase uses, so call sites keep writing `.selection` / `.success` /
+/// `.warning` / `.impact` unchanged.
+enum DressUpFeedback {
+    case selection
+    case success
+    case warning
+    case impact
+
+    @available(iOS 17, *)
+    var sensoryFeedback: SensoryFeedback {
+        switch self {
+        case .selection: return .selection
+        case .success: return .success
+        case .warning: return .warning
+        case .impact: return .impact
+        }
+    }
+}
+
+extension View {
+    /// Fire `feedback` when `trigger` changes. No-op on iOS 16.
+    @ViewBuilder
+    func dressUpHaptic<V: Equatable>(_ feedback: DressUpFeedback, trigger: V) -> some View {
+        if #available(iOS 17, *) {
+            self.sensoryFeedback(feedback.sensoryFeedback, trigger: trigger)
+        } else {
+            self
+        }
+    }
+
+    /// Fire `feedback` when `trigger` changes and `condition` allows it.
+    /// No-op on iOS 16.
+    @ViewBuilder
+    func dressUpHaptic<V: Equatable>(
+        _ feedback: DressUpFeedback,
+        trigger: V,
+        condition: @escaping (V, V) -> Bool
+    ) -> some View {
+        if #available(iOS 17, *) {
+            self.sensoryFeedback(feedback.sensoryFeedback, trigger: trigger, condition: condition)
+        } else {
+            self
+        }
+    }
+
+    /// Sheet background colour. System default on iOS 16.0–16.3.
+    @ViewBuilder
+    func dressUpPresentationBackground(_ color: Color) -> some View {
+        if #available(iOS 16.4, *) {
+            self.presentationBackground(color)
+        } else {
+            self
+        }
+    }
+}
+
 // MARK: - Signature budget
 
 private struct DressUpSignatureKey: EnvironmentKey {
@@ -61,9 +126,9 @@ struct DressUpPressButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.theme) private var theme
 
-    var feedback: SensoryFeedback
+    var feedback: DressUpFeedback
 
-    init(feedback: SensoryFeedback = .selection) {
+    init(feedback: DressUpFeedback = .selection) {
         self.feedback = feedback
     }
 
@@ -75,7 +140,7 @@ struct DressUpPressButtonStyle: ButtonStyle {
                 DressUpMotion.animation(for: .press, reduceMotion: reduceMotion),
                 value: configuration.isPressed
             )
-            .sensoryFeedback(feedback, trigger: configuration.isPressed)
+            .dressUpHaptic(feedback, trigger: configuration.isPressed)
     }
 
     private func pressedScale(configuration: Configuration) -> CGFloat {
@@ -99,7 +164,7 @@ extension View {
     ///   .selection for select / try-on, .success for confirm / apply,
     ///   .impact for a destructive action. It fires on press-down and on
     ///   release (a down/up pair, like a physical key).
-    func dressUpPress(feedback: SensoryFeedback = .selection) -> some View {
+    func dressUpPress(feedback: DressUpFeedback = .selection) -> some View {
         buttonStyle(DressUpPressButtonStyle(feedback: feedback))
     }
 }
@@ -120,7 +185,7 @@ extension View {
             content()
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
-                .presentationBackground(Theme.Color.background)
+                .dressUpPresentationBackground(Theme.Color.background)
         }
     }
 
@@ -303,7 +368,7 @@ struct DressUpModalSheet<Content: View>: View {
 /// incoming and outgoing previews differ in size.
 /// Signature: .tryOnSwap.
 /// Reduce Motion: crossfade only, no scale, no spring travel.
-struct DressUpTryOnPreview<Selection: Equatable, Content: View>: View {
+struct DressUpTryOnPreview<Selection: Hashable, Content: View>: View {
     let selection: Selection
     @ViewBuilder var content: (Selection) -> Content
 
@@ -358,15 +423,25 @@ struct ThinkingDotsView: View {
             if reduceMotion {
                 staticDots
             } else {
-                PhaseAnimator(
-                    DotPhase.allCases,
-                    animation: DressUpMotion.thinkingDotsAnimation()
-                ) { phase in
-                    phasedDots(phase: phase)
-                }
+                animatedDots
             }
         }
         .accessibilityHidden(true)
+    }
+
+    /// Animated dots. `PhaseAnimator` is iOS 17+; on iOS 16 the dots
+    /// stay static, same as the Reduce Motion fallback.
+    @ViewBuilder
+    private var animatedDots: some View {
+        if #available(iOS 17, *) {
+            PhaseAnimator(
+                DotPhase.allCases,
+                content: { phase in phasedDots(phase: phase) },
+                animation: { _ in DressUpMotion.thinkingDotsAnimation() }
+            )
+        } else {
+            staticDots
+        }
     }
 
     private enum DotPhase: CaseIterable {

@@ -45,7 +45,7 @@ struct DraggableFAB<Label: View>: View {
                     tapFeedback.toggle()
                     onTap()
                 }
-                .sensoryFeedback(.selection, trigger: tapFeedback)
+                .dressUpHaptic(.selection, trigger: tapFeedback)
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 10)
                         .onChanged { value in

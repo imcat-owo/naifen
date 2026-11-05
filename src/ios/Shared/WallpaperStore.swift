@@ -191,7 +191,7 @@ struct WallpaperBackdrop: View {
     /// A custom uploaded image. Pass `WallpaperStore.isUndersized(_:)`.
     init(image: UIImage, undersized: Bool) {
         source = .custom(image)
-        undersized = undersized
+        self.undersized = undersized
     }
 
     var body: some View {

@@ -142,7 +142,7 @@ struct ExportPreviewSheet: View {
                 }
             }
         }
-        .presentationBackground(Theme.Color.bubbleAI)
+        .dressUpPresentationBackground(Theme.Color.bubbleAI)
     }
 
     @ViewBuilder

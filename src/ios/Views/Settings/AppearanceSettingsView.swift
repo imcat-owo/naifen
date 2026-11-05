@@ -78,12 +78,19 @@ private struct FontDialRow: View {
         Self.minSize + CGFloat(currentIndex) * Self.step
     }
 
+    /// Pinned to `FloatingPointFormatStyle<Double>`: a bare `.number`
+    /// is ambiguous (Double / Float / Float16 candidates).
+    private var dialSizeText: String {
+        let style: FloatingPointFormatStyle<Double> = .number.precision(.fractionLength(1))
+        return "\(dialSize.formatted(style)) pt"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(LocalizedStringKey("Font Size"))
                 Spacer()
-                Text("\(dialSize.formatted(.number.precision(.fractionLength(1)))) pt")
+                Text(dialSizeText)
                     .foregroundStyle(.secondary)
             }
             HStack(spacing: 12) {

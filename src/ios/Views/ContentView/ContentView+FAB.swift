@@ -361,6 +361,6 @@ extension ContentView {
         // so press feedback for it belongs inside DraggableFAB.swift —
         // recorded as an open item, not faked here with a navigation trigger
         // that would also fire on session-row taps.
-        .sensoryFeedback(.selection, trigger: showSearchBar) { _, new in new }
+        .dressUpHaptic(.selection, trigger: showSearchBar) { _, new in new }
     }
 }

@@ -226,6 +226,6 @@ struct SessionRowPressStyle: ButtonStyle {
             .contentShape(Rectangle())
             .overlay(Theme.Color.accent.opacity(configuration.isPressed ? 0.12 : 0).allowsHitTesting(false))
             .animation(Theme.Motion.press, value: configuration.isPressed)
-            .sensoryFeedback(.selection, trigger: configuration.isPressed) { _, new in new }
+            .dressUpHaptic(.selection, trigger: configuration.isPressed) { _, new in new }
     }
 }

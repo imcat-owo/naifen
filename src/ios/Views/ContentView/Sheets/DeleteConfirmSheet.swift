@@ -109,7 +109,7 @@ struct DeleteConfirmSheet: View {
             .navigationTitle("Confirm Deletion")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .presentationBackground(Theme.Color.bubbleAI)
+        .dressUpPresentationBackground(Theme.Color.bubbleAI)
     }
 
     private func infoRow(title: String, value: String) -> some View {

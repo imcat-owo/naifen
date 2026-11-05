@@ -92,7 +92,7 @@ struct MicButton: View {
                         onTap()
                     }
             )
-            .sensoryFeedback(.selection, trigger: micActivated)
+            .dressUpHaptic(.selection, trigger: micActivated)
             .accessibilityAddTraits(.isButton)
             .accessibilityLabel(isVoiceActive
                 ? Text("Switch to text input", comment: "Mic button exits voice mode")

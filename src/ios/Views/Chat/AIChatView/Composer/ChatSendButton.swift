@@ -231,9 +231,9 @@ struct ChatSendButton: View {
         // spring lives in ComposerPressButtonStyle (Button paths only — the
         // iOS 26 Menu owns its own press); feedback is trigger-based here so
         // it fires exactly once per tap on both paths.
-        .sensoryFeedback(.success, trigger: sendFeedbackTrigger)
-        .sensoryFeedback(.selection, trigger: enqueueFeedbackTrigger)
-        .sensoryFeedback(.warning, trigger: stopFeedbackTrigger)
+        .dressUpHaptic(.success, trigger: sendFeedbackTrigger)
+        .dressUpHaptic(.selection, trigger: enqueueFeedbackTrigger)
+        .dressUpHaptic(.warning, trigger: stopFeedbackTrigger)
         // [T-stop-confirm] Close the confirmation when what it would stop
         // is gone. Observed on the publisher rather than via onChange so a
         // turn that ends and is immediately followed by a queued one
