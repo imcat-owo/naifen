@@ -30,24 +30,24 @@ extension AIChatView {
         switch vm.kernelStatus {
         case .booting:
             ZStack {
-                ChatColors.background
+                Theme.Color.background
                     .ignoresSafeArea()
                 VStack(spacing: 16) {
                     // Same three-dot language as SessionLoadingCard — this
                     // overlay can appear right after the loading card on a
                     // cold entry, so a system spinner here read as "the old
                     // spinner came back".
-                    LoadingDotsView(dotSize: 9, color: ChatColors.secondaryText)
+                    LoadingDotsView(dotSize: 9, color: Theme.Color.ink2)
                         .frame(height: 20)
                     Text("Booting Kernel")
                         .font(.subheadline)
-                        .foregroundStyle(ChatColors.secondaryText)
+                        .foregroundStyle(Theme.Color.ink)
                 }
             }
             .transition(.opacity)
         case .failed(let msg):
             ZStack {
-                ChatColors.background
+                Theme.Color.background
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.circle.fill")
@@ -135,7 +135,7 @@ extension AIChatView {
             Button { vm.errorMessage = nil } label: {
                 Image(systemName: "xmark")
                     .font(.caption)
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink2)
                     // [T-error-card] A ~14 pt glyph was the whole target. The
                     // hit shape grows 16 pt on every side (≈ 46 x 45 pt, past
                     // the 44 pt minimum) while layout and look stay the same.
