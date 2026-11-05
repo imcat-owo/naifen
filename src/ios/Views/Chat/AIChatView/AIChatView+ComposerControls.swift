@@ -200,8 +200,10 @@ extension AIChatView {
                                   : Theme.Color.ink.opacity(0.10))
             )
             // [Phase 2 composer] 44pt hit area: the capsule keeps its visual
-            // height; the frame widens the tappable rect.
-            .frame(minHeight: 44)
+            // height; the frame widens the tappable rect. minWidth covers
+            // the icon-only fallback (label dropped): without it the capsule
+            // is ~36pt wide when the glyph stands alone.
+            .frame(minWidth: 44, minHeight: 44)
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -252,7 +254,9 @@ extension AIChatView {
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Circle())
         }
-        .sensoryFeedback(.selection, trigger: vm.showSlashMenu)
+        // [Phase 2 composer] Feedback on open only: the plain trigger fires
+        // on dismiss too, including programmatic dismiss.
+        .sensoryFeedback(.selection, trigger: vm.showSlashMenu) { _, isOpen in isOpen }
     }
 
     /// "Exit Edit Mode" capsule shown while editing a past message.
