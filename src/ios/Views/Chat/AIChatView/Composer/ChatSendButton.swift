@@ -117,7 +117,7 @@ struct ChatSendButton: View {
                 ZStack {
                     Image(systemName: "circle.fill")
                         .font(.system(size: 34))
-                        .foregroundStyle(ChatColors.sendButtonDisabled)
+                        .foregroundStyle(Theme.Color.ink2)
                     ProgressView()
                         .controlSize(.small)
                 }
@@ -127,7 +127,7 @@ struct ChatSendButton: View {
                 returnModeMenu(primaryAction: onEnqueue) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 34))
-                        .foregroundStyle(ChatColors.sendButton)
+                        .foregroundStyle(Theme.Color.ink)
                 }
                 .accessibilityLabel(Text("Add to queue", comment: "VoiceOver label for the send button while a reply is generating"))
                 .accessibilityHint(Text("Queues this message to send after the current reply finishes", comment: "VoiceOver hint for the queue button"))
@@ -207,7 +207,7 @@ struct ChatSendButton: View {
                 returnModeMenu(primaryAction: { if canSend { onSend() } }) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 34))
-                        .foregroundStyle(canSend ? ChatColors.sendButton : ChatColors.sendButtonDisabled)
+                        .foregroundStyle(canSend ? Theme.Color.ink : Theme.Color.inkDisabled)
                 }
                 .accessibilityLabel(Text("Send", comment: "VoiceOver label for the send button"))
             }
