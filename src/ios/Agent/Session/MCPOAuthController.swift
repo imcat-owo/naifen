@@ -44,7 +44,7 @@ struct MCPOAuthConfig: Codable, Hashable {
     var tokenEndpoint: String = ""
     /// Space-separated scopes, e.g. "openid email https://www.googleapis.com/auth/calendar".
     var scopes: String?
-    /// Custom redirect URI. Default minis-mcp://oauth/callback; Google installed
+    /// Custom redirect URI. Default naifen-mcp://oauth/callback; Google installed
     /// apps need the reversed-client-id scheme (com.googleusercontent.apps.X:/oauth2redirect).
     var redirectURI: String?
 }

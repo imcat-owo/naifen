@@ -169,10 +169,10 @@
 		</dict>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>Minis Share</string>
+			<string>Naifen Share</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>minis</string>
+				<string>naifen</string>
 			</array>
 		</dict>
 		<dict>
@@ -180,7 +180,7 @@
 			<string>MCP OAuth Callback</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>minis-mcp</string>
+				<string>naifen-mcp</string>
 			</array>
 		</dict>
 	</array>

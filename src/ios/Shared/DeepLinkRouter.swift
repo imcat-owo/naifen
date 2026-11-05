@@ -46,8 +46,12 @@ enum DeepLinkRouter {
 
     @MainActor
     static func handle(url: URL, shareCoordinator: ShareCoordinator) {
-        guard url.scheme == "minis", let host = url.host else {
-            deepLinkLog.info("ignored — non-minis or missing host: \(url.absoluteString)")
+        // Accept the clone's registered `naifen` scheme; keep `minis` as a
+        // fallback for in-app-constructed links. (The in-process `minis://`
+        // virtual-filesystem scheme handled by the WKWebView scheme handler
+        // is untouched — this router only sees external onOpenURL links.)
+        guard ["minis", "naifen"].contains(url.scheme), let host = url.host else {
+            deepLinkLog.info("ignored — non-minis/non-naifen or missing host: \(url.absoluteString)")
             return
         }
         let coord = DeepLinkCoordinator.shared
