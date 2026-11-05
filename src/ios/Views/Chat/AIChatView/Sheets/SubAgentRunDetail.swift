@@ -385,7 +385,13 @@ struct SubAgentCollapsibleText: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             if long {
                 Button {
-                    withAnimation(.easeInOut(duration: 0.15)) { expanded.toggle() }
+                    // [Phase 2 milk-pink] Reduce Motion: expand instantly,
+                    // no 0.15s fade.
+                    if UIAccessibility.isReduceMotionEnabled {
+                        expanded.toggle()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.15)) { expanded.toggle() }
+                    }
                 } label: {
                     Text(expanded ? AppLocalized("Show less") : AppLocalized("Show more"))
                         .font(.system(size: 12, weight: .medium))
