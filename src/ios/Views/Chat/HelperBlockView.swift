@@ -654,7 +654,7 @@ struct HelperBlockView: View {
                 if let model = info.model, let line = model.compactLine() {
                     Text(line)
                         .font(.system(size: 11))
-                        .foregroundStyle(model.hasEffective ? Theme.Color.ink : Theme.Color.ink)
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .layoutPriority(-1)

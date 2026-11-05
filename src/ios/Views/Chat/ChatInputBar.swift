@@ -30,7 +30,7 @@ struct SwipeToSendHint: View {
             let capsuleSpan = max(0.0001, armFraction - capsuleStart)
             let capsuleAlpha = max(0, min(1, (progress - capsuleStart) / capsuleSpan))
             // `Theme.Color.ink` (was the `UIColor.label` send-button fill;
-            // auto-inverts: black in light, white in dark). For this floating hint we
+            // ink is #5B3F41 in light, #FBF8EA in dark). For this floating hint we
             // need a clearly-contrasting *glyph on top of the circle* and
             // *text on top of the capsule* — both must use the inverse
             // (`UIColor.systemBackground`), otherwise dark mode renders

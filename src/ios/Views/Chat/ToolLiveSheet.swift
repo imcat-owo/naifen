@@ -2760,7 +2760,7 @@ struct ToolLiveSheet: View {
                         if let started = block.toolStartTime {
                             Text(MinisStepTimestampFormatter.string(from: started))
                                 .font(.system(size: 9, design: .monospaced))
-                                .foregroundStyle(Theme.Color.ink.opacity(0.75))
+                                .foregroundStyle(Theme.Color.ink)
                         }
                     }
                 }

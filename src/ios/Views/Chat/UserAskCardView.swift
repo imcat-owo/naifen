@@ -877,7 +877,7 @@ private struct UserAskPendingCard: View {
                     .lineLimit(1)
             }
             .font(.system(size: t.secondary))
-            .foregroundStyle(note.isEmpty ? Theme.Color.ink : Theme.Color.ink)
+            .foregroundStyle(Theme.Color.ink)
             .padding(.vertical, 7)
             .frame(minHeight: UserAskTypography.minTapHeight)
             .contentShape(Rectangle())
@@ -894,7 +894,7 @@ private struct UserAskPendingCard: View {
                     .frame(width: t.icon + 4)
                 Text(label)
                     .font(.system(size: t.optionTitle, weight: selected ? .semibold : .regular))
-                    .foregroundStyle(selected ? Theme.Color.ink : Theme.Color.ink)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(2)
                 Spacer(minLength: 0)
                 if let trailingIcon {
@@ -1954,7 +1954,7 @@ struct UserAskSummaryView: View {
                         if !row.value.isEmpty {
                             Text(row.value)
                                 .font(.system(size: t.question, weight: .medium))
-                                .foregroundStyle(row.muted ? Theme.Color.ink : Theme.Color.ink)
+                                .foregroundStyle(Theme.Color.ink)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
