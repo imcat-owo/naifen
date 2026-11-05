@@ -236,6 +236,9 @@ struct MinisApp: App {
                 SpeechPlayerControl()
                 AppLockOverlay()
             }
+                // Theme (milk pink, Phase 1): applied exactly once, here at
+                // the app root. Do not call .withTheme() anywhere else.
+                .withTheme()
                 .onReceive(SessionLockStore.shared.$appIsLocked) { locked in
                     guard !locked, let url = pendingURLWhileLocked else { return }
                     pendingURLWhileLocked = nil

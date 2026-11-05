@@ -1,7 +1,7 @@
 // EnvironmentKey-driven theme injection, so screens read the theme from the
 // environment instead of reaching for tokens through string literals.
-// Apply once at the app root via .withTheme(). NOT wired into the app yet —
-// wiring at the app root is a Phase 1 task, not a token task.
+// Applied once at the app root via .withTheme() (MinisApp.swift,
+// WindowGroup). Do not call it anywhere else.
 
 import SwiftUI
 
