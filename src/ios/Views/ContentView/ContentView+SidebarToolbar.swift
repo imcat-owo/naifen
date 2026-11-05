@@ -117,85 +117,95 @@ extension ContentView {
     }
 
     /// Tiny indicator next to the "Minis" title showing the sync state.
+    /// [Phase 3 milk-pink] Status is monochrome ink by design (word +
+    /// glyph carry meaning; plan-level status-token decision from Phase 2
+    /// W-B): the green up-to-date and orange paused glyphs are ink now,
+    /// 8.74:1 light / 15.11:1 dark on the bar.
     @ViewBuilder
     private func titleSyncIndicator(for state: SyncSubtitleState?) -> some View {
         switch state {
         case .none, .upToDate:
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.green)
+                .font(Theme.Font.caption().weight(.semibold))
+                .foregroundStyle(Theme.Color.ink)
         case .paused:
             Image(systemName: "pause.circle.fill")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.orange)
+                .font(Theme.Font.caption().weight(.semibold))
+                .foregroundStyle(Theme.Color.ink)
         case .migrating, .syncing:
             PulseRotateIcon()
         case .waiting:
             Image(systemName: "clock")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .font(Theme.Font.caption().weight(.semibold))
+                .foregroundStyle(Theme.Color.ink)
         }
     }
 
+    /// [Phase 3 milk-pink] NOTE: currently uncalled — no call site renders
+    /// this pill (`migrationSubtitle` only feeds the title overlay
+    /// indicator). Migrated anyway so a revival is already themed: text is
+    /// ink (11pt caption cannot be ink-2 in light mode, 4.09:1), pill fill
+    /// is surface-2 (the locked ink-on-surface-2 pairing, 8.00:1 light /
+    /// 11.16:1 dark). 9pt/8pt glyph sizes floor to 11pt via `meta()`.
     @ViewBuilder
     private func syncSubtitleView(_ state: SyncSubtitleState) -> some View {
-        HStack(spacing: 5) {
+        HStack(spacing: Theme.Spacing.xs) {
             switch state {
             case .paused:
                 Image(systemName: "pause.circle.fill")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.meta().weight(.semibold))
+                    .foregroundStyle(Theme.Color.ink)
                 Text("Sync paused")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.caption())
+                    .foregroundStyle(Theme.Color.ink)
             case .migrating(let pct, let byType):
                 Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.meta().weight(.semibold))
+                    .foregroundStyle(Theme.Color.ink)
                 Text("\(pct)%")
-                    .font(.caption2.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.caption().weight(.semibold).monospacedDigit())
+                    .foregroundStyle(Theme.Color.ink)
                 ForEach(byType.indices, id: \.self) { i in
                     syncTypeChip(label: byType[i].label, count: byType[i].count)
                 }
             case .syncing(let byType):
                 Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.meta().weight(.semibold))
+                    .foregroundStyle(Theme.Color.ink)
                 ForEach(byType.indices, id: \.self) { i in
                     syncTypeChip(label: byType[i].label, count: byType[i].count)
                 }
             case .upToDate:
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(.green)
+                    .font(Theme.Font.meta().weight(.bold))
+                    .foregroundStyle(Theme.Color.ink)
                 Text("Up to date")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.caption())
+                    .foregroundStyle(Theme.Color.ink)
             case .waiting:
                 Image(systemName: "clock")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.meta().weight(.semibold))
+                    .foregroundStyle(Theme.Color.ink)
                 Text("Waiting")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.caption())
+                    .foregroundStyle(Theme.Color.ink)
             }
         }
         .lineLimit(1)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(Color.secondary.opacity(0.12), in: Capsule())
+        .padding(.horizontal, Theme.Spacing.sm)
+        .padding(.vertical, Theme.Spacing.xs)
+        .background(Theme.Color.surface2, in: Capsule())
     }
 
     @ViewBuilder
     private func syncTypeChip(label: String, count: Int) -> some View {
-        HStack(spacing: 3) {
+        HStack(spacing: Theme.Spacing.xs) {
             Text(label)
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .font(Theme.Font.meta().weight(.semibold))
+                .foregroundStyle(Theme.Color.ink)
             Text(formatCompact(count))
-                .font(.caption2.monospacedDigit())
-                .foregroundStyle(.secondary)
+                .font(Theme.Font.caption().monospacedDigit())
+                .foregroundStyle(Theme.Color.ink)
         }
     }
 
@@ -230,6 +240,34 @@ extension ContentView {
         return scaled.withRenderingMode(.alwaysTemplate)
     }()
 
+    /// [Phase 3 milk-pink — nav-title height trade adjudication]
+    /// Phase 2 W-D's trade does NOT apply to this home toolbar. The chat
+    /// trade is three tappable rows (title, model picker, thinking badge)
+    /// in one VStack sharing a single ~46pt nav-bar band
+    /// (`AIChatView+NavigationTitle.swift:244`, "three rows share one
+    /// ~46pt band"), hand-computed, needing a real-device check. Home has
+    /// ONE row in the principal slot: the title Text alone. The sync
+    /// indicator rides as a zero-layout overlay (`.overlay(alignment:
+    /// .leading)`, offset -27) and the migration subtitle pill
+    /// (`syncSubtitleView`) is currently uncalled — no second or third row
+    /// exists in the bar. The title grows 18.5 → 20pt (displaySmall);
+    /// a 20pt Fraunces line (~24pt) still fits the ~46pt inline band
+    /// (`.navigationBarTitleDisplayMode(.inline)`,
+    /// `ContentView+SessionList.swift:302,391`) with room, and no height
+    /// change is needed here. No chat file was touched for this
+    /// adjudication.
+    ///
+    /// CORRECTION (W-C review): the hit-area claim this note used to
+    /// make — that the title buttons are separate toolbar items at
+    /// system bar-button sizing — is FALSE for the sync-indicator
+    /// button. It is an overlay Button INSIDE the principal item
+    /// (`.overlay(alignment: .leading)`, offset -27,
+    /// `ContentView+SidebarToolbar.swift:328-336`), not a toolbar
+    /// item: an 11pt caption() glyph with 4pt padding
+    /// (`Theme.Spacing.xs`) gives a ~19x19pt hit area, with
+    /// `.buttonStyle(.plain)` and no dressUpPress. OPEN ITEM:
+    /// sync-indicator hit area ~19pt (below the 44pt bar) with no
+    /// press feedback; its behavior and size are unchanged by this fix.
     @ToolbarContentBuilder
     var sidebarToolbarContent: some ToolbarContent {
         ToolbarItem(placement: .principal) {
@@ -239,7 +277,12 @@ extension ContentView {
                 // vs a short SOUL name) and shares the bar with Cancel and
                 // Select All, so the narrow sidebar column squeezes it harder.
                 Text(selectedIds.isEmpty ? "Select Sessions" : "\(selectedIds.count) Selected")
-                    .font(.headline)
+                    // [Phase 3 milk-pink] Same display title as the idle
+                    // SOUL name below — one principal slot, one typeface.
+                    // 17pt headline → displaySmall (20pt Fraunces); the
+                    // 0.85 minimum scale factor absorbs the squeeze in the
+                    // narrow sidebar column (20 x 0.85 = 17).
+                    .font(Theme.Font.displaySmall())
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -267,8 +310,13 @@ extension ContentView {
                 // drop a .soulMdChanged notification that arrives during the gap.
                 // This Text now only READS `soulName`.
                 let titleLabel = Text(soulName)
-                    .font(.system(size: 18.5, weight: .semibold))
-                    .foregroundStyle(.primary)
+                    // [Phase 3 milk-pink] Display title: 18.5pt semibold →
+                    // displaySmall (20pt Fraunces via Theme.Font). One row in
+                    // the ~46pt inline band — see the nav-title adjudication
+                    // note on `sidebarToolbarContent`; the chat trade (three
+                    // rows sharing one band) does not apply here.
+                    .font(Theme.Font.displaySmall())
+                    .foregroundStyle(Theme.Color.ink)
                     // A custom SOUL name can be long, and the width claim below
                     // hands this label the whole column — without a limit a long
                     // name would wrap to two lines inside an inline bar or push
@@ -282,7 +330,7 @@ extension ContentView {
                             } label: {
                                 titleSyncIndicator(for: migrationSubtitle)
                                     .contentShape(Rectangle())
-                                    .padding(4)
+                                    .padding(Theme.Spacing.xs)
                             }
                             .buttonStyle(.plain)
                             .offset(x: -27)
@@ -343,12 +391,14 @@ extension ContentView {
                     isSelecting = false
                     selectedIds.removeAll()
                 }
+                .dressUpPress()
             } else {
                 Button {
                     activeToolSheet = .settings
                 } label: {
                     Image(systemName: "gear")
                 }
+                .dressUpPress()
             }
         }
         ToolbarItem(placement: .topBarTrailing) {
@@ -360,13 +410,17 @@ extension ContentView {
                         selectedIds = Set(sessions.map(\.id))
                     }
                 }
+                .dressUpPress()
             } else if hasAlarms {
                 Button {
                     showAlarmList = true
                 } label: {
                     Image(systemName: "alarm")
-                        .font(.system(size: 15, weight: .medium))
+                        // [Phase 3 milk-pink] 15pt medium → bodyEmphasized
+                        // (13pt semibold, nearest Theme role).
+                        .font(Theme.Font.bodyEmphasized())
                 }
+                .dressUpPress()
             }
         }
         ToolbarItem(placement: .topBarTrailing) {

@@ -110,15 +110,25 @@ extension ContentView {
                     draftLog.info("🔑DRAFT detailView DISAPPEAR id=\(id)")
                 }
         } else {
-            VStack(spacing: 12) {
+            VStack(spacing: Theme.Spacing.md) {
                 Image(systemName: "bubble.left.and.bubble.right")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.secondary)
+                    // [Phase 3 milk-pink] 48pt → displayExtraLarge (32pt,
+                    // nearest Theme role; glyph precedent: ChatSendButton
+                    // maps glyphs to display roles). Decorative glyph in
+                    // ink-2: 4.09:1 light passes the 3:1 non-text bar.
+                    .font(Theme.Font.displayExtraLarge())
+                    .foregroundStyle(Theme.Color.ink2)
                 Text("No Conversation Selected")
-                    .font(.title3.bold())
+                    // [Phase 3 milk-pink] title3 bold (20pt semibold) →
+                    // displaySmall (20pt, same size and .title3 anchor;
+                    // nearest Theme role, no exact title role exists).
+                    .font(Theme.Font.displaySmall())
                 Text("Select a conversation or start a new one")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    // [Phase 3 milk-pink] subheadline (15pt) → body
+                    // (13pt sans, nearest Theme role; the global dial
+                    // scales it to 15pt at max).
+                    .font(Theme.Font.body())
+                    .foregroundStyle(Theme.Color.ink)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }

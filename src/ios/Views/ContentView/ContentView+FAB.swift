@@ -16,33 +16,25 @@ extension ContentView {
 
 
 
-    /// Brand fill for the new-chat FAB. On iOS 26 this becomes the glass TINT
-    /// rather than an opaque fill, so the button keeps its colour identity while
-    /// the system material supplies the depth. Below 26 it stays the flat fill
-    /// it has always been.
-    private static let newChatBrandColor = Color(UIColor { $0.userInterfaceStyle == .dark
-        ? UIColor(red: 80/255, green: 76/255, blue: 66/255, alpha: 1)
-        : UIColor(red: 183/255, green: 175/255, blue: 150/255, alpha: 1) })
+    /// Brand fill for the new-chat FAB: the milk-pink user-bubble token.
+    /// Replaces the hardcoded warm beige (light 183/175/150, dark 80/76/66).
+    /// On iOS 26 this is the fallback only — the disc renders as tinted
+    /// glass (see `newChatGlassTint`); below 26 it is the flat fill.
+    /// Ink glyph on this fill: 6.14:1 light / 8.83:1 dark — PASS.
+    private static let newChatBrandColor = Theme.Color.bubbleUser
 
     /// Glass TINT for the new-chat FAB — deliberately NOT `newChatBrandColor`.
     ///
-    /// Tinting with the raw brand colour at full strength produced an opaque
-    /// disc with no refraction at all (measured on device: ring pixel std 1.1
-    /// against ~20 for untinted glass), which is what read as "not glass".
-    /// Simply lowering that colour's alpha fixed light mode but vanished in
-    /// dark: the dark brand value (80/76/66) sits so close to the near-black
-    /// page that 0.15–0.25 alpha yielded a warmth (R−B) of only 1.6–3.1,
-    /// indistinguishable from the untinted button.
-    ///
-    /// So the dark variant is lifted and warmed rather than just faded. At
-    /// alpha 0.30 the measured result is better than the old opaque version on
-    /// BOTH axes in dark mode — warmth 22.6 vs 14.0 (more brand identity) with
-    /// ring std 9.3 vs 1.1 (real show-through) — and light mode keeps a warm
-    /// cast (warmth 9.9) while staying visibly translucent.
-    /// `Glass.tint` honours the colour's alpha, so the strength is baked in here.
-    private static let newChatGlassTint = Color(UIColor { $0.userInterfaceStyle == .dark
-        ? UIColor(red: 196/255, green: 176/255, blue: 120/255, alpha: 0.30)
-        : UIColor(red: 183/255, green: 175/255, blue: 150/255, alpha: 0.30) })
+    /// The old beige tint's device measurements (warmth / ring-pixel std)
+    /// were for the beige values and are retired with them; they are NOT
+    /// re-measured for pink here — no device run exists on this VM. What is
+    /// preserved is the STRUCTURE that made the old tint work: a lifted,
+    /// warmed hue at 0.30 alpha, because `Glass.tint` honours the colour's
+    /// alpha and full-strength tinting reads as an opaque disc. The milk-pink
+    /// accent is the lifted rose for this role: at 0.30 it keeps a visible
+    /// pink cast while the glass still refracts. The pale bubble fill at
+    /// 0.30 would be nearly invisible, so the accent — not the fill — tints.
+    private static let newChatGlassTint = Theme.Color.accent.opacity(0.30)
 
     /// Clear/dismiss control inside the expanded search capsule.
     ///
@@ -58,13 +50,18 @@ extension ContentView {
     /// itself a solid background, the very thing that clashed with the glass.
     /// Sub-26 keeps the original filled-circle look, where there is no glass for
     /// it to fight with.
+    ///
+    /// Press: `.dressUpPress()` (press spring 0.3 / 0.6 + `.selection`
+    /// feedback, Reduce Motion fade) — a plain scale/opacity style, NOT a
+    /// glass style, so it does not reintroduce the glass-on-glass problem.
+    /// Hit area is the full 44pt: the glyph is 13pt, the frame is 44x44.
     @ViewBuilder
     private var searchClearButton: some View {
         if #available(iOS 26.0, *) {
             Button { dismissSearch() } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.bodyEmphasized())
+                    .foregroundStyle(Theme.Color.ink2)
                     // [T-ios-search-bar-glass-hit-hole] The frame alone was not
                     // a tap target: with `.buttonStyle(.plain)` and no fill,
                     // hit-testing follows the DRAWN GLYPH, so only the ~13pt
@@ -73,46 +70,20 @@ extension ContentView {
                     // `contentShape` makes the whole box tappable; the glyph is
                     // unchanged, so this is hit area only, no visual change.
                     // The bar is 56pt tall, so 44 fits without growing it.
-                    .frame(width: 32, height: 44)
+                    // [Phase 3 milk-pink] Width widened 32 → 44: the clear
+                    // action is a full 44x44 target now, not a 32pt-wide one.
+                    .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .dressUpPress()
         } else {
             Button { dismissSearch() } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-                    .frame(width: 32, height: 44)
+                    .foregroundStyle(Theme.Color.ink2)
+                    .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-        }
-    }
-
-    /// Glyph colour for the new-chat FAB.
-    ///
-    /// Was hardcoded `.white`, which worked when the button was an opaque
-    /// mid-tone brand disc. Once the fill became 0.30-alpha glass the light-mode
-    /// surface turned pale and a white glyph nearly vanished into it.
-    ///
-    /// Note this can't simply be `Color(UIColor.label)` like the search FAB uses:
-    /// that FAB is glass on 26+ AND `secondarySystemBackground` below it, both
-    /// light-ish surfaces, so `label` is right in every case. The new-chat FAB's
-    /// sub-26 fallback is still the OPAQUE brand colour (183/175/150 light,
-    /// 80/76/66 dark) — mid-tone in light mode, where `label` (near-black) has
-    /// less contrast than the white that shipped there for years. So the choice
-    /// is made per rendering path: adaptive on glass, unchanged white on the
-    /// opaque fallback.
-    private static var newChatIconColor: Color {
-        if #available(iOS 26.0, *) {
-            // Translucent glass: follow the interface style. Not pure black in
-            // light mode — the brand surface is warm, so a slightly softened
-            // near-black sits better on it than #000 while still reading clearly.
-            return Color(UIColor { $0.userInterfaceStyle == .dark
-                ? UIColor.white
-                : UIColor(white: 0.13, alpha: 1) })
-        } else {
-            // Opaque brand disc, as before.
-            return .white
+            .dressUpPress()
         }
     }
 
@@ -128,8 +99,9 @@ extension ContentView {
     /// iOS 26+: `.glassEffect(.regular[.tint], in: .circle)`. The old manual
     /// `.shadow` is dropped on that path on purpose — Liquid Glass renders its
     /// own shadow/edge, and stacking the hand-rolled one on top reads as a dark
-    /// halo rather than depth. Sub-26 keeps the original opaque circle AND its
-    /// shadow, unchanged.
+    /// halo rather than depth. Sub-26 keeps the original opaque circle, with
+    /// its shadow now the one Theme card shadow (`Theme.Shadow.card`) instead
+    /// of the two hand-rolled opacities (0.2 new-chat / 0.15 search).
     ///
     /// Unlike `FolderSurface`, live glass is safe here: the FAB floats in a
     /// `safeAreaInset` over a stable backdrop and never scrolls past
@@ -156,7 +128,6 @@ extension ContentView {
     private static func fabCircleSurface<Icon: View>(
         tint: Color?,
         fallbackFill: Color,
-        fallbackShadowOpacity: Double,
         @ViewBuilder icon: () -> Icon
     ) -> some View {
         if #available(iOS 26.0, *) {
@@ -201,7 +172,7 @@ extension ContentView {
             Circle()
                 .fill(fallbackFill)
                 .overlay { icon() }
-                .shadow(color: .black.opacity(fallbackShadowOpacity), radius: 8, x: 0, y: 4)
+                .themeShadow(Theme.Shadow.card)
         }
     }
 
@@ -248,15 +219,23 @@ extension ContentView {
             } label: {
                 Self.fabCircleSurface(
                     tint: Self.newChatGlassTint,
-                    fallbackFill: Self.newChatBrandColor,
-                    fallbackShadowOpacity: 0.2
+                    fallbackFill: Self.newChatBrandColor
                 ) {
                     Image(systemName: {
                         if #available(iOS 17.0, *) { return "bubble.left.and.text.bubble.right" }
                         return "plus.message.fill"
                     }())
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(Self.newChatIconColor)
+                        // [Phase 3 milk-pink] 22pt semibold → displaySmall
+                        // (20pt, nearest Theme role; glyph precedent:
+                        // ChatSendButton maps glyphs to display roles).
+                        // Ink glyph (not accent): 6.14:1 light / 8.83:1 dark
+                        // on the milk-pink fill. 8.74:1 / 15.11:1 is ink on
+                        // the solid background, NOT a tinted-glass
+                        // measurement — the tinted-glass composite over a
+                        // real list backdrop is unverified until a
+                        // device/screenshot check (see the tint note above).
+                        .font(Theme.Font.displaySmall())
+                        .foregroundStyle(Theme.Color.ink)
                 }
                     .contextMenu {
                         let groups = Array(ProviderConfigStore.shared.config.modelGroups.prefix(10))
@@ -280,18 +259,22 @@ extension ContentView {
                     // Inline search bar — fills space between edges, leaving room for New Chat
                     GeometryReader { geo in
                         let fabSize: CGFloat = 56
-                        let edgePad: CGFloat = 16
-                        let gap: CGFloat = 10
+                        let edgePad: CGFloat = Theme.Spacing.lg
+                        let gap: CGFloat = Theme.Spacing.sm
                         let barX: CGFloat = fabOnLeft
                             ? edgePad + fabSize + gap
                             : edgePad
                         let barWidth: CGFloat = geo.size.width - edgePad * 2 - fabSize - gap
 
-                        HStack(spacing: 8) {
+                        HStack(spacing: Theme.Spacing.sm) {
                             Image(systemName: "magnifyingglass")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(.secondary)
+                                // [Phase 3 milk-pink] 15pt medium → bodyEmphasized
+                                // (13pt semibold, nearest Theme role). Ink-2
+                                // glyph: 4.09:1 light passes the 3:1 non-text bar.
+                                .font(Theme.Font.bodyEmphasized())
+                                .foregroundStyle(Theme.Color.ink2)
                             TextField("Search chats...", text: $searchText)
+                                .font(Theme.Font.body())
                                 .textFieldStyle(.plain)
                                 .autocorrectionDisabled()
                                 .focused($searchFocused)
@@ -299,13 +282,13 @@ extension ContentView {
                             searchClearButton
                         }
                         // [T-ios-search-bar-glass-hit-hole] Trailing padding is
-                        // trimmed to 8 so the X button's 32pt-wide target sits
+                        // trimmed to 8 so the X button's 44pt-wide target sits
                         // closer to the capsule edge instead of behind 18pt of
                         // dead space (the button keeps its own internal
                         // padding, so the glyph barely moves). Leading stays 18
                         // — that side holds the magnifier and needs the inset.
                         .padding(.leading, 18)
-                        .padding(.trailing, 8)
+                        .padding(.trailing, Theme.Spacing.sm)
                         .frame(width: barWidth, height: fabSize)
                         .modifier(SearchBarSurface())
                         // [T-ios-search-bar-glass-hit-hole] `glassEffect(in:)`
@@ -348,12 +331,15 @@ extension ContentView {
                     } label: {
                         Self.fabCircleSurface(
                             tint: nil,
-                            fallbackFill: Color(UIColor.secondarySystemBackground),
-                            fallbackShadowOpacity: 0.15
+                            fallbackFill: Theme.Color.surface
                         ) {
                             Image(systemName: "magnifyingglass")
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
+                                // [Phase 3 milk-pink] 22pt semibold → displaySmall
+                                // (20pt, nearest Theme role). Ink on surface:
+                                // 8.83:1 light / 13.10:1 dark. (8.74:1 / 15.11:1
+                                // is ink on background, not on surface.)
+                                .font(Theme.Font.displaySmall())
+                                .foregroundStyle(Theme.Color.ink)
                         }
                             .modifier(FABGlassMorphID(namespace: fabGlassNamespace))
                     }
@@ -365,6 +351,16 @@ extension ContentView {
             }
         }
         .frame(height: 56)
-        .padding(.bottom, 20)
+        .padding(.bottom, Theme.Spacing.xl)
+        // [Phase 3 milk-pink] Selection feedback when the search bar OPENS
+        // (search FAB tap or Cmd-F). Fires on open only — dismiss sets
+        // showSearchBar false and the condition suppresses it, so opening
+        // and closing do not double-fire. The new-chat FAB has no equivalent
+        // trigger in this file: its tap goes through DraggableFAB's
+        // onTapGesture (not a Button) and creates a draft via the channel,
+        // so press feedback for it belongs inside DraggableFAB.swift —
+        // recorded as an open item, not faked here with a navigation trigger
+        // that would also fire on session-row taps.
+        .sensoryFeedback(.selection, trigger: showSearchBar) { _, new in new }
     }
 }
