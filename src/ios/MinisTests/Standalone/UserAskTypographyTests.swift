@@ -1,7 +1,8 @@
 #!/usr/bin/env swift
 // [T-user-ask-font-scale] The user_ask card's text follows the chat font
-// setting (Settings › Appearance, FontSettings.messageBaseScale) instead of
-// fixed points, keeps its hierarchy at every step, and keeps ≥44pt targets.
+// setting (Settings › Appearance, the one global font dial,
+// FontSettings.bodySize) instead of fixed points, keeps its hierarchy at
+// every step, and keeps ≥44pt targets.
 //
 //   [1] UserAskTypography (shipping code, compiled standalone) at all six
 //       FontScaleLevel multipliers (read from FontSettings.swift)
