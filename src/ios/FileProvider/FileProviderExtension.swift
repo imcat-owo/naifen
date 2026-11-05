@@ -11,12 +11,13 @@ final class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
 
     private static let log = OSLog(subsystem: "com.openminis.app.FileProvider", category: "Extension")
 
-    /// Root directory for all FileProvider-visible files in the App Group container.
+    /// Root directory for all FileProvider-visible files.
+    /// Nil-safe: SharedContainerStore.containerURL returns the App Group
+    /// container when granted, else this process's own Application Support
+    /// directory — never force-unwrapped, so a missing App Group cannot
+    /// trap at launch.
     static var providerRoot: URL {
-        let container = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.com.openminis.app.naifen"
-        )!
-        let url = container.appendingPathComponent("MinisFileProvider", isDirectory: true)
+        let url = SharedContainerStore.containerURL.appendingPathComponent("MinisFileProvider", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

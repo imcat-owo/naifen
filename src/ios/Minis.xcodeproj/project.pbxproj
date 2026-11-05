@@ -297,6 +297,8 @@
 		E5FP00001 /* FileProviderExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FP00011 /* FileProviderExtension.swift */; };
 		E5FP00002 /* FileProviderEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FP00012 /* FileProviderEnumerator.swift */; };
 		E5FP00003 /* FileProviderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FP00013 /* FileProviderItem.swift */; };
+		E5FP00004 /* PendingShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E000016 /* PendingShare.swift */; };
+		E5FP00005 /* SharedContainerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E000017 /* SharedContainerStore.swift */; };
 		E5FP00009 /* MinisFileProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E5FP00010 /* MinisFileProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E5FP00100 /* AppGroupChangeWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FP00101 /* AppGroupChangeWatcher.swift */; };
 		E5FP00200 /* FPSyncTraceLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FP00201 /* FPSyncTraceLog.swift */; };
@@ -3708,6 +3710,8 @@
 				E5FP00200 /* FPSyncTraceLog.swift in Sources */,
 				E5FPBH01 /* FileProviderBootHealth.swift in Sources */,
 				E5SHV0002 /* SharedFolderVisibility.swift in Sources */,
+				E5FP00004 /* PendingShare.swift in Sources */,
+				E5FP00005 /* SharedContainerStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

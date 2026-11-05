@@ -1,7 +1,8 @@
 import Foundation
 
 /// Reads and writes PendingShare data to the App Group shared container.
-/// Compiled into both the main app target and the Share Extension target.
+/// Compiled into the main app target, the Share Extension target, and the
+/// FileProvider extension target.
 enum SharedContainerStore {
     static let appGroupID = "group.com.openminis.app.naifen"
 
