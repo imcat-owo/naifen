@@ -77,9 +77,9 @@ jobs:
           test -d "$app"
           mkdir -p build/Payload
           cp -R "$app" build/Payload/Minis.app
-          cd build/Payload
-          /usr/bin/zip -qry "../Naifen-unsigned-${{ github.run_number }}.ipa" Minis.app
-          cd ../..
+          cd build
+          /usr/bin/zip -qry "Naifen-unsigned-${{ github.run_number }}.ipa" Payload
+          cd ..
           /usr/bin/file "build/Naifen-unsigned-${{ github.run_number }}.ipa"
           /usr/bin/du -h "build/Naifen-unsigned-${{ github.run_number }}.ipa"
 
