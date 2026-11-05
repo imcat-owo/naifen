@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- RoseClusterSmall — original line art. Three small roses with stems,
+       leaves and buds. Hero/profile surfaces only, never on chat rows. -->
+  <g fill="none" stroke="#ECC7D6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+    <defs>
+      <g id="rose">
+        <path d="M-6,1 A6,6 0 1,1 6,-1 A4.5,4.5 0 1,1 -3,2 A3,3 0 1,0 3,-1"/>
+        <path d="M-9,-6 C-13,-11 -6,-15 -1,-12"/>
+        <path d="M9,-6 C13,-11 6,-15 1,-12"/>
+        <path d="M-10,5 C-13,10 -6,14 -1,11"/>
+        <path d="M10,5 C13,10 6,14 1,11"/>
+      </g>
+      <g id="leaf">
+        <path d="M0,0 C6,-5 13,-4 17,1 C11,5 4,4 0,0 Z"/>
+        <path d="M1,0 C6,-1 11,0 16,1"/>
+      </g>
+    </defs>
+    <path d="M60,64 C60,84 58,98 60,112"/>
+    <path d="M32,90 C38,100 48,106 58,110"/>
+    <path d="M88,92 C82,100 72,106 62,110"/>
+    <use href="#rose" transform="translate(60,52) scale(1.3)"/>
+    <use href="#rose" transform="translate(30,82) scale(0.9)"/>
+    <use href="#rose" transform="translate(90,84) scale(0.9)"/>
+    <use href="#leaf" transform="translate(60,88) rotate(10)"/>
+    <use href="#leaf" transform="translate(58,96) rotate(160)"/>
+    <circle cx="16" cy="48" r="3.5"/>
+    <path d="M16,52 C16,60 20,66 26,70"/>
+    <circle cx="104" cy="46" r="3.5"/>
+    <path d="M104,50 C104,58 100,64 94,68"/>
+  </g>
+</svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360">
+  <!-- BubbleTexture — original line art. Very faint scattered four-petal
+       sprigs and dots on transparency, for use as a subtle bubble/card
+       texture only. Never under body text, never on chat rows. -->
+  <g fill="none" stroke="#ECC7D6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.18">
+    <defs>
+      <g id="sprig">
+        <path d="M0,-6 C2,-2 2,2 0,6 C-2,2 -2,-2 0,-6 Z"/>
+        <path d="M-6,0 C-2,-2 2,-2 6,0 C2,2 -2,2 -6,0 Z"/>
+        <circle cx="0" cy="0" r="1.2"/>
+      </g>
+    </defs>
+    <use href="#sprig" transform="translate(45,45)"/>
+    <use href="#sprig" transform="translate(135,45) rotate(30)"/>
+    <use href="#sprig" transform="translate(225,45) rotate(60)"/>
+    <use href="#sprig" transform="translate(315,45) rotate(15)"/>
+    <use href="#sprig" transform="translate(90,115) rotate(45)"/>
+    <use href="#sprig" transform="translate(180,115) rotate(75)"/>
+    <use href="#sprig" transform="translate(270,115) rotate(20)"/>
+    <use href="#sprig" transform="translate(45,185) rotate(60)"/>
+    <use href="#sprig" transform="translate(135,185) rotate(10)"/>
+    <use href="#sprig" transform="translate(225,185) rotate(40)"/>
+    <use href="#sprig" transform="translate(315,185) rotate(80)"/>
+    <use href="#sprig" transform="translate(90,255) rotate(25)"/>
+    <use href="#sprig" transform="translate(180,255) rotate(55)"/>
+    <use href="#sprig" transform="translate(270,255) rotate(5)"/>
+    <use href="#sprig" transform="translate(45,325) rotate(50)"/>
+    <use href="#sprig" transform="translate(135,325) rotate(70)"/>
+    <use href="#sprig" transform="translate(225,325) rotate(35)"/>
+    <use href="#sprig" transform="translate(315,325) rotate(65)"/>
+    <g>
+      <circle cx="90" cy="45" r="1.5"/><circle cx="180" cy="45" r="1.5"/><circle cx="270" cy="45" r="1.5"/>
+      <circle cx="45" cy="115" r="1.5"/><circle cx="135" cy="115" r="1.5"/><circle cx="225" cy="115" r="1.5"/><circle cx="315" cy="115" r="1.5"/>
+      <circle cx="90" cy="185" r="1.5"/><circle cx="180" cy="185" r="1.5"/><circle cx="270" cy="185" r="1.5"/>
+      <circle cx="45" cy="255" r="1.5"/><circle cx="135" cy="255" r="1.5"/><circle cx="225" cy="255" r="1.5"/><circle cx="315" cy="255" r="1.5"/>
+      <circle cx="90" cy="325" r="1.5"/><circle cx="180" cy="325" r="1.5"/><circle cx="270" cy="325" r="1.5"/>
+    </g>
+  </g>
+</svg>

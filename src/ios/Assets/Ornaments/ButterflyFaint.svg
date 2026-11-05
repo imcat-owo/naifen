@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- ButterflyFaint — original line art. One faint butterfly with a dotted
+       flight trail. Decorative only, never animated, never on chat rows. -->
+  <g fill="none" stroke="#ECC7D6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.3">
+    <path d="M60,52 C48,36 30,38 34,52 C37,62 52,61 60,52 Z"/>
+    <path d="M60,52 C72,36 90,38 86,52 C83,62 68,61 60,52 Z"/>
+    <path d="M59,56 C49,62 41,70 47,75 C53,77 58,66 59,56 Z"/>
+    <path d="M61,56 C71,62 79,70 73,75 C67,77 62,66 61,56 Z"/>
+    <path d="M60,48 L60,72"/>
+    <path d="M60,48 C57,42 54,40 51,39"/>
+    <path d="M60,48 C63,42 66,40 69,39"/>
+    <path d="M20,102 Q38,82 52,68" stroke-width="0.75" stroke-dasharray="0.5 7"/>
+    <circle cx="20" cy="102" r="1.5"/>
+    <circle cx="30" cy="92" r="1.5"/>
+    <circle cx="42" cy="80" r="1.5"/>
+  </g>
+</svg>
