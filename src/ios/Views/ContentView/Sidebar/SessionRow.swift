@@ -55,7 +55,9 @@ func sessionCategoryIcon(for category: String?) -> (systemName: String, color: C
 
 /// Folder icon composed from the folder's top member glyphs: a rounded-rect
 /// "group" container tinted with the first member's category color, holding up
-/// to 3 distinct category symbols. Empty folder → plain gray folder glyph.
+/// to 3 distinct category symbols. Empty folder → ink glyph on an ink-2
+/// tint disc (0.28): `tint` falls back to `Theme.Color.ink2` when the
+/// folder has no member glyphs.
 /// Pure rendering — the glyph selection/dedup happens in groupedSessionIDs.
 /// The "grouped list" glyph from the user-provided asset: two rounded
 /// square outlines on the left, four list lines on the right. Traced from
@@ -251,11 +253,13 @@ struct SessionRow: View, Equatable {
                 .background(iconBackgroundColor.opacity(isHighlighted ? 0.35 : 0.18))
                 .clipShape(Circle())
                 .overlay {
+                    // Rings are ink, not accent: ink on the 0.18 tint disc
+                    // is 7.36:1 light (accent was 2.45:1, under 3:1).
                     if isSuspended {
-                        SuspendedRing(color: Theme.Color.accent)
+                        SuspendedRing(color: Theme.Color.ink)
                             .frame(width: 42, height: 42)
                     } else if isActive {
-                        SpinningRing(color: iconBackgroundColor)
+                        SpinningRing(color: Theme.Color.ink)
                             .frame(width: 42, height: 42)
                     }
                 }
@@ -282,11 +286,13 @@ struct SessionRow: View, Equatable {
                 // [T-ios-session-unread-badge] Top-trailing unread dot,
                 // independent of the bottom-trailing corner badge above so an
                 // unread session can also show ⏸ / iCloud without conflict.
-                // 8pt kept; accent, never raw red.
+                // 8pt kept; ink, never raw red. Ink on background is
+                // 8.74:1 light, 7.36:1 over the 0.18 tint disc (accent was
+                // 2.91:1 / 2.45:1, both under 3:1).
                 .overlay(alignment: .topTrailing) {
                     if showsUnreadDot {
                         Circle()
-                            .fill(Theme.Color.accent)
+                            .fill(Theme.Color.ink)
                             .frame(width: 8, height: 8)
                             .offset(x: -1, y: 1)
                     }
