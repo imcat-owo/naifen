@@ -8,7 +8,9 @@
 // top swaps to that item on the try-on spring (interruptible; a new tap
 // retargets mid-flight). Nothing is applied by tapping. Confirm with
 // the Apply button under the preview (success feedback); Cancel clears
-// the try-on. Every row is live: no dead buttons, no placeholders.
+// the try-on. Inspiration items have no Apply button — ornament only,
+// nothing to apply — and show a caption instead. Every row is live: no
+// dead buttons, no placeholders.
 // All tap targets are at least the 44pt HIG minimum.
 //
 // SHEETS: the wallpaper full-screen preview uses the native sheet
@@ -147,17 +149,27 @@ struct DressUpShopView: View {
                     .stroke(Theme.Color.line, lineWidth: 1)
             )
             if let tried = triedItem {
+                if tried.category == .inspiration {
+                    // Ornament only: nothing to apply, so no Apply
+                    // button — a caption instead, ink text at the 11pt
+                    // caption floor.
+                    Text("Ornament shown in the shop only — nothing to apply.")
+                        .font(Theme.Font.caption())
+                        .foregroundStyle(Theme.Color.ink)
+                }
                 HStack(spacing: Theme.Spacing.md) {
-                    Button {
-                        applyItem(tried)
-                    } label: {
-                        Text("Apply \(tried.title)")
-                            .font(Theme.Font.bodyEmphasized())
-                            .foregroundStyle(Theme.Color.ink)
-                            .frame(maxWidth: .infinity, minHeight: Self.minTapTarget)
-                            .background(Theme.Color.surface2, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+                    if tried.category != .inspiration {
+                        Button {
+                            applyItem(tried)
+                        } label: {
+                            Text("Apply \(tried.title)")
+                                .font(Theme.Font.bodyEmphasized())
+                                .foregroundStyle(Theme.Color.ink)
+                                .frame(maxWidth: .infinity, minHeight: Self.minTapTarget)
+                                .background(Theme.Color.surface2, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+                        }
+                        .dressUpPress(feedback: .success)
                     }
-                    .dressUpPress(feedback: .success)
                     Button {
                         triedItem = nil
                     } label: {
