@@ -48,17 +48,23 @@ let minisInlineCodeBackgroundColor = UIColor(Theme.Color.surface2)
 
 /// Mirrors the `.minisChat` MarkdownUI theme using UIKit types.
 /// Every color and radius comes from Theme.* — no system color literals,
-/// no hex, no magic numbers. Text colors are ink only: ink-2 is 4.09:1
+/// no hex, no magic numbers — except inlineCodeCornerRadius, which is
+/// layout-owned (see its comment) and must stay 5 until the paint sites
+/// are wired to the theme. Text colors are ink only: ink-2 is 4.09:1
 /// for body in light mode (fails 4.5:1) and accent is 2.91:1 as text, so
 /// blockquote secondary text, links and inline code all collapse to ink;
 /// links keep their existing single underline and inline code keeps its
 /// Surface2 pill, which carry the distinction instead of a hue.
 struct SelectableMarkdownTheme {
     let baseFontSize: CGFloat
-    // Code block is a card surface; inline code is a pill. Both radii are
-    // Theme.Radius tokens (8/5 re-derived, not kept as literals).
+    // Code block is a card surface; inline code is a pill. The code-block
+    // radius is the Theme.Radius.card token.
     let codeBlockCornerRadius: CGFloat = Theme.Radius.card
-    let inlineCodeCornerRadius: CGFloat = Theme.Radius.pillTag
+    // Layout owns this value: the paint sites hardcode 5
+    // (MinisLayoutManager.swift:39, used at :346; TableCellViews.swift:398)
+    // and nothing reads this slot, so it must stay 5 here. Do not change
+    // it without wiring those sites to read the theme (open follow-up).
+    let inlineCodeCornerRadius: CGFloat = 5
 
     init(baseFontSize: CGFloat? = nil) {
         self.baseFontSize = baseFontSize ?? 16.5
@@ -70,9 +76,6 @@ struct SelectableMarkdownTheme {
     // base size, where ink-2 fails 4.5:1 in light mode. The accent bar +
     // indent carry the quote distinction, not a lighter ink.
     var secondaryLabelColor: UIColor { UIColor(Theme.Color.ink) }
-    // Small-accent slot only, never text (accent is 2.91:1 on background).
-    // Currently unreferenced by the renderer — kept so the slot exists.
-    var accentColor: UIColor { UIColor(Theme.Color.accent) }
     // Ink, not blue: accent fails 4.5:1 as text. The existing single
     // underline marks links.
     var linkColor: UIColor { UIColor(Theme.Color.ink) }
@@ -101,23 +104,10 @@ struct SelectableMarkdownTheme {
         case 6: size = baseFontSize * 0.85; weight = .semibold
         default: size = baseFontSize; weight = .semibold // H4 and fallback
         }
-        return displayFont(size: size, weight: weight)
-    }
-
-    /// Fraunces display face. Theme.Font returns SwiftUI.Font, which this
-    /// UIKit theme cannot consume, so the resolution mirrors
-    /// Theme.Font.serif() exactly: Fraunces-SemiBold when bundled, declared
-    /// system-serif fallback otherwise. The family decision lives in
-    /// Theme.Font — this is a mirror, not a second serif path.
-    private func displayFont(size: CGFloat, weight: UIFont.Weight) -> UIFont {
-        if let fraunces = UIFont(name: "Fraunces-SemiBold", size: size) {
-            return fraunces
-        }
-        let fallback = UIFont.systemFont(ofSize: size, weight: weight)
-        if let serifDescriptor = fallback.fontDescriptor.withDesign(.serif) {
-            return UIFont(descriptor: serifDescriptor, size: size)
-        }
-        return fallback
+        // Serif resolution lives in Theme.Font (uiSerif) — the single
+        // serif path. This UIKit theme cannot consume SwiftUI.Font, so
+        // headings call the UIKit mirror there, not a local copy.
+        return Theme.Font.uiSerif(size: size, weight: weight)
     }
 
     var inlineCodeFont: UIFont { inlineCodeFont(matching: nil) }
