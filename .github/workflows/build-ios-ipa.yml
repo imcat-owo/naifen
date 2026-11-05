@@ -1,4 +1,4 @@
-name: Build 奶粉 iOS IPA
+name: Build Naifen iOS IPA
 
 on:
   workflow_dispatch:
