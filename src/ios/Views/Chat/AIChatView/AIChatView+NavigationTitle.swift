@@ -239,6 +239,15 @@ extension AIChatView {
         // 4 → 1 and group vertical padding 3 → 2 on legacy), so the stack's
         // total height — the thing the May-18/19/20 clip saga fought — is
         // unchanged and the top-clip fix does not regress.
+        // [Phase 2 milk-pink] Hit-area exception (documented): the
+        // three tappable rows in this stack (title, model picker,
+        // thinking badge) share one ~46pt nav-bar band, so no row can
+        // hold a 44pt hit area — 3 x 44pt cannot fit, and any vertical
+        // expansion would steal taps from the adjacent row. Hit areas
+        // stay text-sized, as before. This exception stands on the
+        // geometry above alone — not on the plan's header-row exception
+        // (block #9), which covers the assistant header row, not these
+        // nav-title rows.
         return VStack(spacing: legacyLayout ? -3 : -2) {
             Button {
                 if let s = titlePillSession { titlePillEditSession = s }
@@ -275,7 +284,17 @@ extension AIChatView {
                     //                 naturally has breathing room above
                     //                 and below.
                     // iOS 26 path unchanged (16pt works inside liquid-glass).
-                    .font(.system(size: legacyLayout ? 13 : 16, weight: .semibold))
+                    // [Phase 2 milk-pink] Fraunces display title via
+                    // Theme.Font.displaySmall() on iOS 26 (20pt serif,
+                    // dark ink — already ink below); legacy keeps the
+                    // 13pt semibold role — the 44pt legacy band cannot
+                    // hold a 20pt display title. Height-neutral trade
+                    // for the +4pt title growth (see the padding /
+                    // spacing notes below): title top padding 2 -> 1,
+                    // container vertical padding 3 -> 1, inner
+                    // spacing 1 -> 0. Provider bottom clearance stays
+                    // 4pt — descenders.
+                    .font(legacyLayout ? Theme.Font.bodyEmphasized() : Theme.Font.displaySmall())
                     .minimumScaleFactor(legacyLayout ? 0.85 : 1.0)
                     .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
@@ -288,7 +307,10 @@ extension AIChatView {
                     // positions the stack correctly, and 2pt keeps a little
                     // breathing room above the semibold cap height without
                     // re-introducing the top crop.
-                    .padding(.top, legacyLayout ? 0 : 2)
+                    // [Phase 2 milk-pink] 2 -> 1: part of the
+                    // height-neutral trade funding the 20pt Fraunces
+                    // title (see the font note above).
+                    .padding(.top, legacyLayout ? 0 : 1)
                     .onReceive(NotificationCenter.default.publisher(for: .soulMdChanged)) { _ in
                         let n = SoulStore.cachedMetadata.name
                         soulName = n.isEmpty ? "Minis" : n
@@ -304,10 +326,12 @@ extension AIChatView {
             // Tightening ONLY the group↔provider gap moves row 2 up inside
             // the band, giving the last line breathing room from the bottom.
             // -1 still leaves ~2pt visual space (caption2's descender zone +
-            // the 9pt row's cap headroom); the calibrated title↔group overlap
+            // the provider row's cap headroom); the calibrated title↔group overlap
             // (outer -3) and the group pill's vertical padding are untouched.
-            // iOS 26 keeps spacing 1 — the liquid-glass band has no crowding.
-            VStack(spacing: legacyLayout ? -1 : 1) {
+            // [Phase 2 milk-pink] iOS 26 spacing 1 -> 0: part of the
+            // height-neutral trade funding the 20pt Fraunces title and
+            // the 11pt provider line; the rows touch but do not overlap.
+            VStack(spacing: legacyLayout ? -1 : 0) {
                 HStack(spacing: 4) {
                     Button {
                         showModelPicker = true
@@ -319,8 +343,12 @@ extension AIChatView {
                                                 modelId: currentEntry?.baseModel.id)
                             if isGroupBound {
                                 Image(systemName: "square.stack.3d.up")
-                                    .font(.system(size: 8))
-                                    .foregroundStyle(Theme.Color.ink2)
+                                    // [Phase 2 milk-pink] Theme.Font.meta()
+                                    // (11pt, the dial floor) and ink: ink-2
+                                    // at 11pt fails the light-mode rule
+                                    // (4.09:1), so small glyphs use ink.
+                                    .font(Theme.Font.meta())
+                                    .foregroundStyle(Theme.Color.ink)
                             }
                             Text(modelName)
                                 .font(.caption2)
@@ -328,8 +356,8 @@ extension AIChatView {
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 8, weight: .semibold))
-                                .foregroundStyle(Theme.Color.ink2)
+                                .font(Theme.Font.meta())
+                                .foregroundStyle(Theme.Color.ink)
                         }
                         .layoutPriority(-1)
                     }
@@ -377,12 +405,16 @@ extension AIChatView {
                         // height instead of set as a 9pt glyph: a bolt at a 9pt
                         // font stands well above the letters beside it and reads
                         // as a stray, oversized mark in this small row.
+                        // [Phase 2 milk-pink] The model name is .caption2,
+                        // so the badge reads that style's cap height
+                        // directly — no size literal. Orange -> milk-pink
+                        // accent (small accent glyph, never text).
                         if let symbol = displayedSpeedTier.badgeSymbol {
                             Image(systemName: symbol)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: ceil(UIFont.systemFont(ofSize: 9).capHeight))
-                                .foregroundStyle(Color.orange)
+                                .frame(height: ceil(UIFont.preferredFont(forTextStyle: .caption2).capHeight))
+                                .foregroundStyle(Theme.Color.accent)
                                 // Match the row text's descender clearance so
                                 // the badge centers on the same visual band.
                                 .padding(.bottom, legacyLayout ? 1 : 4)
@@ -392,7 +424,9 @@ extension AIChatView {
                             showModelPicker = true
                         } label: {
                             Text("\(detail.providerLabel) · \(detail.modelName)")
-                                .font(.system(size: 9))
+                                // [Phase 2 milk-pink] 9pt -> Theme.Font
+                                // .caption() (11pt, the dial floor).
+                                .font(Theme.Font.caption())
                                 .foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
@@ -444,10 +478,15 @@ extension AIChatView {
             .padding(.horizontal, 8)
             // [T-navbar-title-model-gap] 3 → 2 on legacy: part of the
             // height-neutral trade that funds the wider title→model gap.
-            .padding(.vertical, legacyLayout ? 2 : 3)
+            // [Phase 2 milk-pink] iOS 26: 3 -> 1, part of the
+            // height-neutral trade funding the 20pt Fraunces title and
+            // the 11pt provider line. The provider bottom clearance
+            // stays 4pt — descenders.
+            .padding(.vertical, legacyLayout ? 2 : 1)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.red.opacity(0.35 * fallbackPulseOpacity))
+                    // [Phase 2 milk-pink] Rose pulse, not red.
+                    .fill(Theme.Color.accent.opacity(0.35 * fallbackPulseOpacity))
             )
             .onChange(of: vm.fallbackTrigger) { _ in
                 // 3× pulse: fade in then out, repeated 3 times
@@ -504,9 +543,10 @@ extension AIChatView {
     @ViewBuilder
     private var thinkingLevelBadge: some View {
         let level = vm.currentThinkingLevel
-        // Sits on nav-bar row 2 (the 9pt "provider · model" line). Kept a
-        // touch smaller than that text (8pt / 6px icon) so it stays the most
-        // compact label in the title and never larger than the "is thinking…"
+        // Sits on nav-bar row 2 (the "provider · model" line, now
+        // Theme.Font.caption()). The 6px icon stays the most compact
+        // mark in the title; the text is Theme.Font.meta() (11pt, the
+        // dial floor) — never larger than the "is thinking…"
         // intensity pill in the message list.
         //
         // Also rendered when the level is Off (reasoning-capable model with
@@ -519,12 +559,14 @@ extension AIChatView {
                 .frame(width: 6, height: 6)
                 .opacity(level.isEnabled ? 1.0 : 0.4)
             Text(level.displayName)
-                .font(.system(size: 8, weight: .medium))
+                .font(Theme.Font.meta())
         }
         .foregroundStyle(Theme.Color.ink)
         .padding(.horizontal, 4)
         .padding(.vertical, 1)
-        .background(Capsule().fill(Color.secondary.opacity(0.10)))
+        // [Phase 2 milk-pink] Pill-tag language: pale-pink fill,
+        // ink text — not a grey secondary fill.
+        .background(Capsule().fill(Theme.Color.surface2))
         .onTapGesture {
             showThinkingLevelSheet = true
         }
