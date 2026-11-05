@@ -71,6 +71,13 @@
 //  list, the per-file logger copies, the dropped `private` / `fileprivate` and
 //  the `extension AIChatView { }` wrappers.
 //
+//  Motion (Phase 2 milk-pink): this screen's one signature motion is
+//  streaming — the TextFadeAnimator word fade in SelectableMarkdownView
+//  (gated to instant under Reduce Motion). DressUpMotion.Signature has no
+//  streaming case, so the signature is declared by this comment rather
+//  than .dressUpSignature(_:). The other loops on this screen (e.g. the
+//  assistant shimmer) are pre-existing upstream motion debt, recorded as
+//  a follow-up — do not remove them here.
 
 import AVFoundation
 import AVKit
