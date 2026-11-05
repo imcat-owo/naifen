@@ -52,10 +52,12 @@ extension AIChatView {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.circle.fill")
                         .font(.title2)
-                        .foregroundStyle(.red)
+                        // [Phase 2 milk-pink] Rose icon, ink message —
+                        // no pure .red.
+                        .foregroundStyle(Theme.Color.accent)
                     Text(msg)
                         .font(.subheadline)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Theme.Color.ink)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
@@ -94,7 +96,10 @@ extension AIChatView {
             // elision). Auto-dismisses after ~4s.
             if let notice = vm.transientNotice {
                 Text(notice)
-                    .font(.system(size: 12))
+                    // [Phase 2 milk-pink] The near-black chip stays: the
+                    // notice floats over any wallpaper, and white on
+                    // near-black passes everywhere. Only the font migrates.
+                    .font(Theme.Font.body())
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -124,10 +129,11 @@ extension AIChatView {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.caption)
-                .foregroundStyle(.red)
+                // [Phase 2 milk-pink] Rose icon, ink text — no pure .red.
+                .foregroundStyle(Theme.Color.accent)
             Text(error)
                 .font(.caption)
-                .foregroundStyle(.red)
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(8)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
@@ -135,7 +141,9 @@ extension AIChatView {
             Button { vm.errorMessage = nil } label: {
                 Image(systemName: "xmark")
                     .font(.caption)
-                    .foregroundStyle(Theme.Color.ink2)
+                    // [Phase 2 milk-pink] Ink, not ink-2: the 12pt glyph
+                    // must stay clearly visible as the dismiss target.
+                    .foregroundStyle(Theme.Color.ink)
                     // [T-error-card] A ~14 pt glyph was the whole target. The
                     // hit shape grows 16 pt on every side (≈ 46 x 45 pt, past
                     // the 44 pt minimum) while layout and look stay the same.
@@ -152,20 +160,20 @@ extension AIChatView {
         }
         // [T-error-card] Same card as the scheduled-task banner it stacks
         // with (ScheduledTaskBanner): 12 pt side margins, 14 pt continuous
-        // corners, material, hairline, soft shadow — in red instead of amber.
-        // The material also keeps list text from showing through on iOS 26,
+        // corners, hairline, soft shadow — rose instead of amber.
+        // [Phase 2 milk-pink] Flat porcelain surface, no material: the
+        // opaque fill keeps list text from showing through on iOS 26,
         // where the list scrolls under the top banners.
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.regularMaterial)
-            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.red.opacity(0.08))
+            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.Color.surface)
         }
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.red.opacity(0.28), lineWidth: 0.75)
+                .strokeBorder(Theme.Color.accent.opacity(0.28), lineWidth: 0.75)
         )
-        .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 3)
+        .themeShadow(Theme.Shadow.card)
         .padding(.horizontal, 12)
         .padding(.top, 6)
         .padding(.bottom, 4)
@@ -233,10 +241,10 @@ extension AIChatView {
             Divider()
             HStack {
                 Image(systemName: "eye")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.Color.ink)
                 Text("Read-only session from another device")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.Color.ink)
                 Spacer()
                 Button {
                     guard let sid = sessionId, let devId = remoteDeviceId else { return }
@@ -256,12 +264,20 @@ extension AIChatView {
                     Label("Fork to Continue", systemImage: "arrow.branch")
                         .font(.subheadline.weight(.medium))
                 }
-                .buttonStyle(.borderedProminent)
+                // [Phase 2 milk-pink] Bordered, not prominent: the
+                // prominent style fills with the system-blue accent
+                // (plan: DO-NOT-USE). Rose border + ink label; 44pt
+                // hit area via contentShape, visual stays small.
+                .buttonStyle(.bordered)
+                .tint(Theme.Color.accent)
+                .foregroundStyle(Theme.Color.ink)
                 .controlSize(.small)
+                .contentShape(Rectangle().inset(by: -8))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(.ultraThinMaterial)
+            // [Phase 2 milk-pink] Flat porcelain surface, no glass.
+            .background(Theme.Color.surface)
         }
     }
     #endif
