@@ -53,10 +53,14 @@ extension AIChatView {
             } label: {
                 icon
             }
+            // [Phase 2 composer] Press spring + feedback on the "+" itself.
+            .dressUpPress()
         } else {
             Button { showAttachmentMenu = true } label: {
                 icon
             }
+            // [Phase 2 composer] Press spring + feedback on the "+" itself.
+            .dressUpPress()
             .confirmationDialog("Add Attachment", isPresented: $showAttachmentMenu) {
                 Button { showCamera = true } label: { Label("Take Photo", systemImage: "camera") }
                 Button { showPhotoPicker = true } label: { Label("Choose Photos & Videos", systemImage: "photo.on.rectangle") }
@@ -206,7 +210,10 @@ extension AIChatView {
             .frame(minWidth: 44, minHeight: 44)
             .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
+        // [Phase 2 composer] Press spring + feedback. Replaces
+        // `.buttonStyle(.plain)`: DressUpPressButtonStyle adds no
+        // background of its own, so the capsule label renders the same.
+        .dressUpPress()
         // [T-ios-de-voice-toolbar] Name the control explicitly. It used to be
         // named implicitly by the visible Text, which is exactly what the
         // icon-only fallback removes — and the glyph beside it is
@@ -226,6 +233,24 @@ extension AIChatView {
                : AppLocalized("Off", comment: "VoiceOver value for the read-replies toggle when disabled")
         ))
         .accessibilityHint(Text("Toggles reading replies aloud", comment: "VoiceOver hint for the read-replies toggle"))
+    }
+
+    // MARK: - Composer press style (Phase 2 composer)
+
+    /// Press spring WITHOUT sensory feedback, for the slash button only:
+    /// its open-only trigger-based `.sensoryFeedback` below is the single
+    /// feedback source, so one tap never fires twice — the same split as
+    /// ComposerPressButtonStyle in ChatSendButton.swift. Scale only, on the
+    /// Theme.Motion.press spring; Reduce Motion holds scale at 1.
+    private struct SlashPressButtonStyle: ButtonStyle {
+        @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .scaleEffect(configuration.isPressed && !reduceMotion ? DressUpMotion.pressedScale : 1)
+                .animation(DressUpMotion.animation(for: .press, reduceMotion: reduceMotion),
+                           value: configuration.isPressed)
+        }
     }
 
     /// `/` button that opens the slash command menu.
@@ -254,6 +279,9 @@ extension AIChatView {
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Circle())
         }
+        // [Phase 2 composer] Press spring only — no feedback here: the
+        // open-only trigger below stays the single feedback source.
+        .buttonStyle(SlashPressButtonStyle())
         // [Phase 2 composer] Feedback on open only: the plain trigger fires
         // on dismiss too, including programmatic dismiss.
         .sensoryFeedback(.selection, trigger: vm.showSlashMenu) { _, isOpen in isOpen }
@@ -298,6 +326,8 @@ extension AIChatView {
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Circle())
         }
+        // [Phase 2 composer] Press spring + feedback.
+        .dressUpPress()
     }
 
     /// Mic button plus the attached language-picker sheet.
