@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="0 0 360 240">
+  <!-- PorcelainCard — the one white card. Plain white surface, 16pt radius,
+       hairline border + faint inner hairline. The only strong surface
+       contrast; no second competing card style. Shadow is added by the app
+       (Theme.Shadow), not baked into this asset. -->
+  <rect x="8" y="8" width="344" height="224" rx="16" fill="#FFFFFF" stroke="#ECC7D6" stroke-width="1"/>
+  <rect x="16" y="16" width="328" height="208" rx="12" fill="none" stroke="#ECC7D6" stroke-width="0.5" opacity="0.6"/>
+</svg>

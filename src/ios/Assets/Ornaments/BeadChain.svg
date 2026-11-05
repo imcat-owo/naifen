@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="24" viewBox="0 0 360 24">
+  <!-- BeadChain — original line art. Horizontal chain of beads with small
+       diamond links and one larger centre bead. Divider / trim only. -->
+  <g fill="none" stroke="#ECC7D6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+    <path d="M6,12 H354" stroke-width="0.75"/>
+    <g>
+      <circle cx="18" cy="12" r="3"/><circle cx="45" cy="12" r="3"/><circle cx="72" cy="12" r="3"/>
+      <circle cx="99" cy="12" r="3"/><circle cx="126" cy="12" r="3"/><circle cx="153" cy="12" r="3"/>
+      <circle cx="207" cy="12" r="3"/><circle cx="234" cy="12" r="3"/><circle cx="261" cy="12" r="3"/>
+      <circle cx="288" cy="12" r="3"/><circle cx="315" cy="12" r="3"/><circle cx="342" cy="12" r="3"/>
+    </g>
+    <g>
+      <path d="M31,8 l4,4 -4,4 -4,-4 Z"/><path d="M58,8 l4,4 -4,4 -4,-4 Z"/>
+      <path d="M85,8 l4,4 -4,4 -4,-4 Z"/><path d="M112,8 l4,4 -4,4 -4,-4 Z"/>
+      <path d="M139,8 l4,4 -4,4 -4,-4 Z"/><path d="M193,8 l4,4 -4,4 -4,-4 Z"/>
+      <path d="M220,8 l4,4 -4,4 -4,-4 Z"/><path d="M247,8 l4,4 -4,4 -4,-4 Z"/>
+      <path d="M274,8 l4,4 -4,4 -4,-4 Z"/><path d="M301,8 l4,4 -4,4 -4,-4 Z"/>
+      <path d="M328,8 l4,4 -4,4 -4,-4 Z"/>
+    </g>
+    <circle cx="180" cy="12" r="4.5"/>
+    <circle cx="180" cy="12" r="1.5"/>
+  </g>
+</svg>
