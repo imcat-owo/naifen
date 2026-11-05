@@ -970,15 +970,7 @@ struct ContentView: View {
                         ProgressView()
                             .controlSize(.large)
                             .tint(Theme.Color.ink)
-                        if let p = exportProgress, p.total > 0 {
-                            Text(AppLocalized("Exporting… \(p.done) / \(p.total)"))
-                                .font(Theme.Font.body())
-                                .foregroundStyle(Theme.Color.ink)
-                        } else {
-                            Text(AppLocalized("Exporting…"))
-                                .font(Theme.Font.body())
-                                .foregroundStyle(Theme.Color.ink)
-                        }
+                        exportProgressLabel
                     }
                     .padding(Theme.Spacing.xxl)
                     .background(Theme.Color.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
@@ -1492,4 +1484,18 @@ struct ContentView: View {
     /// Namespace tying the search FAB and the expanded search bar together as one
     /// glass fragment, so the two morph instead of cross-fading (iOS 26+).
     @Namespace var fabGlassNamespace
+
+    // Export HUD label, extracted so the overlay's nested expression stays
+    // under the type checker's limit (CI run 4, Archive exit 65).
+    private var exportProgressLabel: some View {
+        if let p = exportProgress, p.total > 0 {
+            Text(AppLocalized("Exporting… \(p.done) / \(p.total)"))
+                .font(Theme.Font.body())
+                .foregroundStyle(Theme.Color.ink)
+        } else {
+            Text(AppLocalized("Exporting…"))
+                .font(Theme.Font.body())
+                .foregroundStyle(Theme.Color.ink)
+        }
+    }
 }
