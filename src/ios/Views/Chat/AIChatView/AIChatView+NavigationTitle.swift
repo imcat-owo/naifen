@@ -196,7 +196,7 @@ extension AIChatView {
         // when one exists (auto-generated or user-renamed). Tap opens the
         // same SessionEditSheet used from the home screen so users can
         // rename / re-categorize without leaving the chat. Falls back to
-        // the SOUL.md `name` (or "Minis") for draft sessions or before a
+        // the SOUL.md `name` (or "奶粉") for draft sessions or before a
         // title has been generated.
         let sessionTitle: String? = (titlePillSession?.title?.trimmingCharacters(in: .whitespacesAndNewlines))
             .flatMap { $0.isEmpty ? nil : $0 }
@@ -313,7 +313,7 @@ extension AIChatView {
                     .padding(.top, legacyLayout ? 0 : 1)
                     .onReceive(NotificationCenter.default.publisher(for: .soulMdChanged)) { _ in
                         let n = SoulStore.cachedMetadata.name
-                        soulName = n.isEmpty ? "Minis" : n
+                        soulName = n.isEmpty ? "奶粉" : n
                     }
             }
             .buttonStyle(.plain)

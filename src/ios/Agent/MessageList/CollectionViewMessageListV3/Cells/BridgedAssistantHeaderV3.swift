@@ -41,8 +41,8 @@ struct BridgedAssistantHeaderV3: View {
         HStack(spacing: 6) {
             // [T-soul-custom-icon] 36pt chat avatar (plan §B.4): solid
             // circle with milk-pink ring; serif initial when no photo is
-            // set. `initial` is the soul name's first letter ("M" for the
-            // "Minis" fallback). The icon is square by construction
+            // set. `initial` is the soul name's first letter ("奶" for the
+            // "奶粉" fallback). The icon is square by construction
             // (SoulIconImage.encode crops), so an image cannot make this
             // row taller than the disc does. The avatar's layout footprint
             // is 44pt (36 disc + 2pt gap + 2pt ring each side), so it —
@@ -50,9 +50,9 @@ struct BridgedAssistantHeaderV3: View {
             SoulIconView(
                 icon: soulMeta.icon,
                 size: 36,
-                initial: soulMeta.name.isEmpty ? "M" : String(soulMeta.name.prefix(1)).uppercased()
+                initial: soulMeta.name.isEmpty ? "奶" : String(soulMeta.name.prefix(1)).uppercased()
             )
-            Text(soulMeta.name.isEmpty ? "Minis" : soulMeta.name)
+            Text(soulMeta.name.isEmpty ? "奶粉" : soulMeta.name)
                 .font(Theme.Font.bodyEmphasized())
                 .foregroundStyle(Theme.Color.ink)
         }

@@ -271,10 +271,10 @@ struct ContentView: View {
     /// (the render pass before its `.onChange` rebuild) without a per-row scan.
     @State var sessionRowLookupMemo = SessionRowLookupMemo()
     /// Soul name shown as the sidebar title. Sourced from SOUL.md, falls
-    /// back to "Minis". Refreshed whenever SoulStore posts .soulMdChanged.
+    /// back to "奶粉". Refreshed whenever SoulStore posts .soulMdChanged.
     @State var soulName: String = SoulStore.cachedMetadata.name.isEmpty
-        ? "Minis" : SoulStore.cachedMetadata.name
-    /// Subtitle state shown under the "Minis" sidebar title. nil hides the
+        ? "奶粉" : SoulStore.cachedMetadata.name
+    /// Subtitle state shown under the "奶粉" sidebar title. nil hides the
     /// row; otherwise it renders as small capsules per type or a single
     /// status string. Refreshed by a 5s timer.
     @State var migrationSubtitle: SyncSubtitleState?

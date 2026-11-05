@@ -451,8 +451,8 @@ enum SoulIconSource {
 /// scaled to the disc). No emoji default, no face illustration: any `icon`
 /// value that is not a decodable image — empty, the legacy sparkle, a
 /// user emoji — renders this disc. The initial is the persona's first
-/// letter (`initial`, default "M" for Minis); a non-alphanumeric first
-/// character falls back to "M" so an emoji name can never put an emoji
+/// letter (`initial`, default "奶" for 奶粉); a non-alphanumeric first
+/// character falls back to "奶" so an emoji name can never put an emoji
 /// on the disc.
 /// Contrast: ink disc + background initial is 8.74:1 light / 15.11:1 dark
 /// (same pair as ink on background, Tokens.swift header) — passes 4.5:1
@@ -468,7 +468,7 @@ struct SoulIconView: View {
     let icon: String
     let size: CGFloat
     /// First letter of the persona name, rendered on the default disc.
-    /// Default "M" (Minis); the chat header passes the soul name's
+    /// Default "奶" (奶粉); the chat header passes the soul name's
     /// first letter. Callers that do not know the name keep the default.
     let initial: String
 
@@ -487,10 +487,10 @@ struct SoulIconView: View {
     private var footprint: CGFloat { size + 2 * (Self.ringGap + Self.ringWidth) }
 
     /// The mark on the default disc: first alphanumeric character of
-    /// `initial`, uppercased; "M" otherwise.
+    /// `initial`, uppercased; "奶" otherwise.
     private var mark: String {
         guard let first = initial.unicodeScalars.first,
-              CharacterSet.alphanumerics.contains(first) else { return "M" }
+              CharacterSet.alphanumerics.contains(first) else { return "奶" }
         return String(initial.prefix(1)).uppercased()
     }
 
@@ -500,7 +500,7 @@ struct SoulIconView: View {
         image.size.width * 2 < size
     }
 
-    init(icon: String, size: CGFloat, initial: String = "M") {
+    init(icon: String, size: CGFloat, initial: String = "奶") {
         self.icon = icon
         self.size = size
         self.initial = initial
@@ -514,7 +514,7 @@ struct SoulIconView: View {
     /// remove this init when those three call sites drop the arguments.
     /// The generic style parameter is deliberate: it accepts any style
     /// value without naming a gradient type in this file.
-    init<S: ShapeStyle>(icon: String, size: CGFloat, sparkleGradient _: S, cornerRadius _: CGFloat? = nil, initial: String = "M") {
+    init<S: ShapeStyle>(icon: String, size: CGFloat, sparkleGradient _: S, cornerRadius _: CGFloat? = nil, initial: String = "奶") {
         self.icon = icon
         self.size = size
         self.initial = initial
@@ -620,7 +620,7 @@ struct SoulMetadata: Equatable {
     var displayEmoji: String { "✨" }
 
     static let `default` = SoulMetadata(
-        name: "Minis",
+        name: "奶粉",
         // Default emoji is intentionally empty — the UI uses the fixed
         // `displayEmoji` sparkle and serialize() no longer writes the
         // `emoji:` line. Kept on the struct only so the parser can
@@ -954,7 +954,7 @@ enum SoulStore {
     /// style / lang) is seeded.
     static let defaultContent: String = """
     ---
-    name: "Minis"
+    name: "奶粉"
     style: ""
     lang: "auto"
     ---
@@ -1151,7 +1151,7 @@ enum SystemPromptBuilder {
         let name: String = {
             let n = (file?.metadata.name ?? SoulMetadata.default.name)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-            return n.isEmpty ? "Minis" : n
+            return n.isEmpty ? "奶粉" : n
         }()
         let style: String = (file?.metadata.style ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1249,18 +1249,18 @@ enum SystemPromptBuilder {
 
 // MARK: - Reusable SwiftUI text view
 
-/// Renders the current SOUL.md `name` (falling back to "Minis") and
+/// Renders the current SOUL.md `name` (falling back to "奶粉") and
 /// auto-refreshes whenever SoulStore posts `.soulMdChanged`. Use this in
 /// any place that previously hard-coded "Minis" as a label.
 @MainActor
 struct AssistantSoulName: View {
     @State private var name: String = SoulStore.cachedMetadata.name.isEmpty
-        ? "Minis" : SoulStore.cachedMetadata.name
+        ? "奶粉" : SoulStore.cachedMetadata.name
     var body: some View {
         Text(name)
             .onReceive(NotificationCenter.default.publisher(for: .soulMdChanged)) { _ in
                 let n = SoulStore.cachedMetadata.name
-                name = n.isEmpty ? "Minis" : n
+                name = n.isEmpty ? "奶粉" : n
             }
     }
 }

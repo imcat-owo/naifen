@@ -2850,9 +2850,9 @@ struct ToolLiveSheet: View {
         case .memoryTool: return "Minis is using Memory"
         case .delegateTool: return "Minis is using an Agent"
         case .userAskTool: return "Minis is asking you"
-        case .info: return "Minis"
-        case .text: return "Minis"
-        case .thinking: return "Minis"
+        case .info: return "奶粉"
+        case .text: return "奶粉"
+        case .thinking: return "奶粉"
         }
     }
 
