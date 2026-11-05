@@ -29,13 +29,13 @@ struct SwipeToSendHint: View {
             let capsuleStart = max(0, armFraction - 0.4)
             let capsuleSpan = max(0.0001, armFraction - capsuleStart)
             let capsuleAlpha = max(0, min(1, (progress - capsuleStart) / capsuleSpan))
-            // `ChatColors.sendButton == UIColor.label` (auto-inverts:
-            // black in light, white in dark). For this floating hint we
+            // `Theme.Color.ink` (was the `UIColor.label` send-button fill;
+            // auto-inverts: black in light, white in dark). For this floating hint we
             // need a clearly-contrasting *glyph on top of the circle* and
             // *text on top of the capsule* — both must use the inverse
             // (`UIColor.systemBackground`), otherwise dark mode renders
             // white-on-white and the indicator vanishes (bug 2026-05-18).
-            let chipBg = ChatColors.sendButton
+            let chipBg = Theme.Color.ink
             let chipFg = Color(UIColor.systemBackground)
             HStack(spacing: 8) {
                 Image(systemName: "arrow.up.circle.fill")
@@ -251,10 +251,10 @@ private struct VideoLoadingChip: View {
 
             Text("Loading…")
                 .font(.caption2)
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink)
         }
         .frame(width: 64, height: 64)
-        .background(ChatColors.secondaryBg)
+        .background(Theme.Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
     }
@@ -305,7 +305,7 @@ private struct AttachmentChip: View {
         ProgressView()
             .controlSize(.small)
             .frame(width: 64, height: 64)
-            .background(ChatColors.secondaryBg)
+            .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
     }
@@ -320,10 +320,10 @@ private struct AttachmentChip: View {
                     .foregroundStyle(.orange)
                 Text("Failed")
                     .font(.caption2)
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
             }
             .frame(width: 64, height: 64)
-            .background(ChatColors.secondaryBg)
+            .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.orange.opacity(0.5), lineWidth: 0.5))
 
@@ -444,12 +444,12 @@ private struct AttachmentChip: View {
             VStack(spacing: 2) {
                 Image(systemName: fileIconName)
                     .font(.system(size: 20))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink2)
                     .frame(maxHeight: .infinity, alignment: .bottom)
 
                 Text(attachment.fileName)
                     .font(.system(size: 9))
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
                     .truncationMode(.middle)
@@ -458,7 +458,7 @@ private struct AttachmentChip: View {
             .padding(.horizontal, 4)
             .padding(.vertical, 6)
             .frame(width: 64, height: 64)
-            .background(ChatColors.secondaryBg)
+            .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
 
@@ -514,15 +514,15 @@ struct PastedTextChipRow: View {
                         VStack(spacing: 2) {
                             Image(systemName: "doc.text")
                                 .font(.system(size: 20))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink2)
                                 .frame(maxHeight: .infinity, alignment: .bottom)
 
                             Text("#\(entry.id)")
                                 .font(.system(size: 10, weight: .semibold).monospacedDigit())
-                                .foregroundStyle(ChatColors.primaryText)
+                                .foregroundStyle(Theme.Color.ink)
                             Text(String(format: AppLocalized("%d chars"), entry.charCount))
                                 .font(.system(size: 8))
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
                                 .frame(maxHeight: .infinity, alignment: .top)
@@ -530,7 +530,7 @@ struct PastedTextChipRow: View {
                         .padding(.horizontal, 4)
                         .padding(.vertical, 6)
                         .frame(width: 64, height: 64)
-                        .background(ChatColors.secondaryBg)
+                        .background(Theme.Color.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
                         .contentShape(RoundedRectangle(cornerRadius: 8))
@@ -875,15 +875,15 @@ struct UserAttachmentList: View {
             VStack(spacing: 2) {
                 Image(systemName: "doc.text")
                     .font(.system(size: 20))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink2)
                     .frame(maxHeight: .infinity, alignment: .bottom)
 
                 Text("#\(meta.pastedId ?? 0)")
                     .font(.system(size: 10, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                 Text(String(format: AppLocalized("%d chars"), meta.pastedCharCount ?? meta.size))
                     .font(.system(size: 8))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .frame(maxHeight: .infinity, alignment: .top)
@@ -891,7 +891,7 @@ struct UserAttachmentList: View {
             .padding(.horizontal, 4)
             .padding(.vertical, 6)
             .frame(width: tileSize, height: tileSize)
-            .background(ChatColors.secondaryBg)
+            .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
         }
@@ -905,12 +905,12 @@ struct UserAttachmentList: View {
             VStack(spacing: 2) {
                 Image(systemName: fileIconName(for: meta.fileName))
                     .font(.system(size: 20))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink2)
                     .frame(maxHeight: .infinity, alignment: .bottom)
 
                 SearchHighlightText(meta.fileName, key: searchKey)
                     .font(.system(size: 9))
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
                     .truncationMode(.middle)
@@ -919,7 +919,7 @@ struct UserAttachmentList: View {
             .padding(.horizontal, 4)
             .padding(.vertical, 6)
             .frame(width: tileSize, height: tileSize)
-            .background(ChatColors.secondaryBg)
+            .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
