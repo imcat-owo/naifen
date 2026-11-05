@@ -281,6 +281,35 @@ struct AppearanceSettingsView: View {
                 }
             }
 
+            // Front door to the dress-up shop (Phase 1): the one milk-pink
+            // set — theme, bubbles, avatar pendants, fonts, namecards,
+            // inspiration, and wallpaper. The 3-way appearance override
+            // above keeps working; the shop never touches it.
+            Section {
+                NavigationLink {
+                    DressUpShopView()
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "paintpalette")
+                            .foregroundStyle(Theme.Color.ink)
+                            .font(.title3)
+                            .frame(width: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Dress-Up Shop")
+                                .foregroundStyle(.primary)
+                            Text("Milk Pink theme, bubbles, wallpaper, and more.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            } header: {
+                Text("Dress-Up Shop")
+            } footer: {
+                Text("Try on the milk-pink set and save it. Changing the theme never clears a saved set.")
+            }
+
             Section {
                 Picker("Launch Session", selection: $launchScreen) {
                     Text("Auto").tag(0)
