@@ -94,8 +94,8 @@ struct GroupGlyphShape: Shape {
 /// the session rows use, at the same 44pt slot — so a group icon and a
 /// session icon are the same species at the same size. The tint borrows the
 /// newest member's category color (ink-2 when empty); the glyph itself is
-/// always ink — accent-on-its-own-tint is 2.45:1 in light mode, ink-on-tint
-/// is 7.36:1.
+/// always ink — accent-on-its-own-tint is 2.23:1 in light mode, ink-on-tint
+/// is 6.68:1 (0.28 tint).
 struct FolderComposedIcon: View {
     let glyphs: [FolderGlyph]
     var diameter: CGFloat = 44
@@ -236,7 +236,7 @@ struct SessionRow: View, Equatable {
         return badge
     }
 
-    /// [T-ios-session-unread-badge] Whether to draw the top-trailing red unread
+    /// [T-ios-session-unread-badge] Whether to draw the top-trailing ink unread
     /// dot — a background task finished and posted its notification, and the user
     /// hasn't opened the session yet. Independent of `visibleBadge` (the
     /// bottom-trailing corner badge), so an unread session can also show ⏸.
@@ -399,7 +399,7 @@ struct SessionRow: View, Equatable {
             sessionCornerBadge(icon: "icloud.fill")
         case .unread:
             // [T-ios-session-unread-badge] `.unread` renders as a separate
-            // top-trailing accent dot (see the .topTrailing overlay), never through
+            // top-trailing ink dot (see the .topTrailing overlay), never through
             // this bottom-trailing corner path. `topCornerBadge` filters it out
             // upstream, so this case is unreachable — render nothing defensively.
             EmptyView()

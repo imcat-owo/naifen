@@ -63,8 +63,8 @@ struct SessionEditSheet: View {
                                 VStack(spacing: Theme.Spacing.xs) {
                                     // displaySmall() is the 20pt size carrier
                                     // for this SF Symbol only (see SessionRow).
-                                    // Glyph ink on the accent tint (7.36:1
-                                    // light); selected adds a surface-2 fill
+                                    // Glyph ink on the accent tint (7.80:1
+                                    // light, 0.12 tint); selected adds a surface-2 fill
                                     // + accent ring + semibold label — never
                                     // white-on-accent (1.47:1 dark).
                                     Image(systemName: icon.systemName)
