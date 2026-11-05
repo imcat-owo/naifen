@@ -78,7 +78,14 @@ struct FloatingCircleButtonSurface: ViewModifier {
 
 /// Background + shadow for the composer's outer rounded container.
 ///
-/// **[T-popup-white-patch 7a0e3d62] — the invariant both branches must keep.**
+/// [Phase 2 composer] Milk-pink porcelain surface: Theme.Color.inputBackground
+/// fill + Theme.Color.inputBorder hairline + the one Theme.Shadow.card, at
+/// Theme.Radius.card (16pt, re-derived — the old 20 was not a token).
+/// The iOS 26 Liquid Glass path is gone: the plan re-derives glass surfaces
+/// as milk-pink flat/retro surfaces, and the porcelain card is this set's
+/// surface language. Both iOS branches now render the same porcelain.
+///
+/// **[T-popup-white-patch 7a0e3d62] — the invariant the fill must keep.**
 /// The fill is painted INSIDE a rounded shape, never as a rectangular
 /// `.background(color)` + `.clipShape(...)` pair. With that older pairing the
 /// host CALayer carried a rectangular backing colour which the system
@@ -87,39 +94,29 @@ struct FloatingCircleButtonSurface: ViewModifier {
 /// Filling the shape directly leaves the host layer's `backgroundColor` at
 /// `.clear`, so the snapshot is already rounded. `clipShape` is still applied so
 /// child views (text view, attachment grid) are clipped to the same rect.
+/// The border is `strokeBorder`, drawn inside the shape, for the same reason:
+/// it sets no rectangular layer background. Verified on device by
+/// long-pressing composer text to raise the edit menu — see the task notes.
 ///
-/// `glassEffect(in:)` composites the material into the shape it is given, for
-/// the same reason: it does not set a rectangular layer background, so it
-/// preserves the invariant rather than reintroducing the bug. Verified on device
-/// by long-pressing composer text to raise the edit menu — see the task notes.
-///
-/// The two hand-rolled shadows are dropped on the glass path (Liquid Glass
-/// renders its own edge and shadow; stacking the old ones reads as a dark halo —
-/// the same finding as the FAB conversion). The sub-26 branch keeps the original
-/// fill and BOTH shadows byte-for-byte, including the dark-mode-only top shadow
-/// that lifts the bar off the message list.
+/// The hand-rolled shadows are replaced by the one Theme.Shadow.card (the
+/// Liquid Glass path used to render its own edge and shadow; stacking the old
+/// ones read as a dark halo — the same finding as the FAB conversion).
 struct ComposerSurface: ViewModifier {
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
+        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
     }
 
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content
-                .glassEffect(.regular, in: shape)
-                .clipShape(shape)
-        } else {
-            content
-                .background(shape.fill(Theme.Color.inputBackground))
-                .clipShape(shape)
-                .shadow(color: Color.black.opacity(0.12), radius: 8, x: 0, y: 2)
-                .shadow(color: Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0, alpha: 0.5) : UIColor(white: 0, alpha: 0) }), radius: 8, x: 0, y: -4)
-        }
+        content
+            .background(shape.fill(Theme.Color.inputBackground))
+            .overlay(shape.strokeBorder(Theme.Color.inputBorder, lineWidth: 1))
+            .clipShape(shape)
+            .themeShadow(Theme.Shadow.card)
     }
 }
 
 /// [T-ios-context-usage-hint] Inner glow along the composer's own wall when the
-/// context window is filling up: amber from 70%, red from 80%.
+/// context window is filling up: accent rose from 70%, deep ink from 80%.
 ///
 /// One layer, clipped by the composer's shape so nothing escapes the outline
 /// (the acceptance criterion from the on-device review): a 13 pt stroke
@@ -134,9 +131,9 @@ struct ComposerSurface: ViewModifier {
 /// 87188e3b build was invisible in light mode, within ~2 RGB steps of the
 /// background. So light mode now uses `.normal` (real tint on the pale
 /// wall) at a visibly higher opacity; dark mode keeps `.plusLighter`, which
-/// adds light and never darkens the material. Warning is amber
-/// (systemOrange) rather than systemYellow, which washes out on light
-/// surfaces.
+/// adds light and never darkens the material. Warning is the Theme accent
+/// rose rather than a yellow, which washes out on light surfaces;
+/// critical is the deep ink.
 ///
 /// Only opacity ever animates (critical-tier breathing, compositor-side; off
 /// under Reduce Motion). No `drawingGroup`, no per-frame re-blur.
@@ -153,10 +150,14 @@ struct ComposerContextGlow: View {
     /// Must match ComposerSurface's shape exactly: it is the stroke path and
     /// the clip that keeps the glow inside the wall.
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
+        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
     }
+    /// [Phase 2 composer] No system red / amber: warning is the Theme accent
+    /// rose, critical is the deep ink. The glow is a status tint on the
+    /// porcelain wall, not text, so the accent's never-text rule does not
+    /// apply; ink is the strongest tone the set has.
     private var color: Color {
-        tier == .critical ? Color(UIColor.systemRed) : Color(UIColor.systemOrange)
+        tier == .critical ? Theme.Color.ink : Theme.Color.accent
     }
     /// Overall visibility of the glow. Light mode needs more: a normal-blend
     /// tint on a pale wall reads weaker than additive light on a dark one.
@@ -191,7 +192,9 @@ struct ComposerContextGlow: View {
             }
         }
         .allowsHitTesting(false)
-        .animation(.easeInOut(duration: 0.35), value: tier)
+        // [Phase 2 composer] Opacity-only tier change on the quiet fade
+        // (Theme.Motion.base via DressUpMotion.quietFade()).
+        .animation(DressUpMotion.quietFade(), value: tier)
         .onAppear { updateBreathing() }
         .onChange(of: tier) { _ in updateBreathing() }
         .onChange(of: reduceMotion) { _ in updateBreathing() }
@@ -199,11 +202,14 @@ struct ComposerContextGlow: View {
 
     private func updateBreathing() {
         if tier == .critical && !reduceMotion {
-            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+            // [Phase 2 composer] Breathing on Theme.Motion.sheet (0.40s each
+            // way): the old 1.4s slow pulse had no token. The faster pulse
+            // reads as more urgent, which suits the critical tier.
+            withAnimation(.easeInOut(duration: Theme.Motion.sheet).repeatForever(autoreverses: true)) {
                 breathing = true
             }
         } else {
-            withAnimation(.easeInOut(duration: 0.3)) { breathing = false }
+            withAnimation(DressUpMotion.quietFade()) { breathing = false }
         }
     }
 }
