@@ -303,7 +303,7 @@ final class DressUpStore: ObservableObject {
         case ShopCatalog.milkPinkTheme.id:
             return appliedThemeId == item.id
         case ShopCatalog.milkPinkWallpaper.id:
-            return appliedWallpaperId == "bundled:WallpaperMilkPink"
+            return appliedWallpaperId == WallpaperStore.bundledWallpaperId
         case ShopCatalog.userBubble.id:
             return appliedUserBubbleId == item.id
         case ShopCatalog.assistantSurface.id:
@@ -328,7 +328,7 @@ final class DressUpStore: ObservableObject {
         case ShopCatalog.milkPinkTheme.id:
             set(item.id, key: Keys.appliedThemeId, to: &appliedThemeId)
         case ShopCatalog.milkPinkWallpaper.id:
-            set("bundled:WallpaperMilkPink", key: Keys.appliedWallpaperId, to: &appliedWallpaperId)
+            set(WallpaperStore.bundledWallpaperId, key: Keys.appliedWallpaperId, to: &appliedWallpaperId)
         case ShopCatalog.userBubble.id:
             set(item.id, key: Keys.appliedUserBubbleId, to: &appliedUserBubbleId)
         case ShopCatalog.assistantSurface.id:

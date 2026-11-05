@@ -34,25 +34,28 @@ extension ContentView {
         let hasProviders = !providerStore.instances.isEmpty
         let hasGroups = !providerStore.modelGroups.isEmpty
 
-        return VStack(spacing: 32) {
+        return VStack(spacing: Theme.Spacing.xxxl) {
             Spacer()
-            // App icon / hero
+            // App icon / hero — ink, never the system tint: the tint is
+            // the blue accent, which has no place in the milk-pink set.
+            // 56pt had no Theme role; nearest is displayExtraLarge (32pt).
             Image(systemName: "sparkles")
-                .font(.system(size: 56))
-                .foregroundStyle(.tint)
-                .padding(.bottom, 4)
+                .font(Theme.Font.displayExtraLarge())
+                .foregroundStyle(Theme.Color.ink)
+                .padding(.bottom, Theme.Spacing.xs)
 
-            VStack(spacing: 8) {
+            VStack(spacing: Theme.Spacing.sm) {
                 Text("Welcome to Minis")
-                    .font(.title2.bold())
+                    .font(Theme.Font.displaySmall())
+                    .foregroundStyle(Theme.Color.ink)
                 Text("Your first On-Device Agent is almost ready.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(Theme.Font.body())
+                    .foregroundStyle(Theme.Color.ink)
                     .multilineTextAlignment(.center)
             }
 
             // Setup steps
-            VStack(spacing: 16) {
+            VStack(spacing: Theme.Spacing.lg) {
                 // Step 1 – Add Provider
                 setupStep(
                     number: 1,
@@ -90,7 +93,9 @@ extension ContentView {
                     }
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, Theme.Spacing.sm)
+            // Reading-width cap for wide windows; no Theme token exists
+            // for it, so the value stays a named layout constant.
             .frame(maxWidth: 400)
 
             Spacer()
@@ -113,16 +118,20 @@ extension ContentView {
                     showRestoreBackup = true
                 } label: {
                     Label("Have a backup? Restore from it", systemImage: "clock.arrow.circlepath")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .font(Theme.Font.caption())
+                        .foregroundStyle(Theme.Color.ink)
+                        // The label alone is ~20pt tall: widen the hit
+                        // area to the 44pt minimum (visual stays small).
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .padding(.bottom, 12)
+                .padding(.bottom, Theme.Spacing.md)
                 .accessibilityIdentifier("onboarding.restoreBackup")
             }
         }
         .frame(maxHeight: .infinity)
-        .padding(.horizontal, 32)
+        .padding(.horizontal, Theme.Spacing.xxxl)
         .sheet(isPresented: $showAddProvider) {
             NavigationStack {
                 AddProviderView()
@@ -164,44 +173,55 @@ extension ContentView {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                // Step indicator
+            HStack(spacing: Theme.Spacing.md) {
+                // Step indicator — done is a solid ink disc, undone a
+                // pale surface-2 disc. The glyph is the locked ink /
+                // surface-2 pairing either way (8.00:1 light, 11.16:1
+                // dark), so white-on-accent never appears here: white on
+                // the milk-pink accent is 3.14:1 light / 1.47:1 dark.
+                // Disc diameter reuses the 32pt grid step
+                // (Theme.Spacing.xxxl); no Theme size token exists for it.
                 ZStack {
                     Circle()
-                        .fill(isDone ? Color.green : Color.accentColor)
-                        .frame(width: 32, height: 32)
+                        .fill(isDone ? Theme.Color.ink : Theme.Color.surface2)
+                        .frame(width: Theme.Spacing.xxxl, height: Theme.Spacing.xxxl)
                     if isDone {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundColor(Theme.Color.surface2)
                     } else {
                         Text("\(number)")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(Theme.Font.bodyEmphasized())
+                            .foregroundColor(Theme.Color.ink)
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text(title)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(isDone ? .secondary : .primary)
+                        .font(Theme.Font.bodyEmphasized())
+                        .foregroundStyle(Theme.Color.ink)
                     Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(Theme.Font.caption())
+                        .foregroundStyle(Theme.Color.ink)
                 }
 
                 Spacer()
 
                 if !isDone {
                     Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tertiary)
+                        .font(Theme.Font.caption())
+                        .foregroundStyle(Theme.Color.ink)
                 }
             }
-            .padding(14)
+            .padding(Theme.Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                    .fill(Theme.Color.surface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                            .stroke(Theme.Color.line, lineWidth: 1)
+                    )
+                    .themeShadow(Theme.Shadow.card)
             )
         }
         .buttonStyle(.plain)
