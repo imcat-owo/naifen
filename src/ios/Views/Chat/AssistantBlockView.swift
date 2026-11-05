@@ -42,31 +42,31 @@ struct AssistantBlockView: View {
             )
             .padding(.vertical, 2)
         case .shellTool:
-            ToolCapsuleView(block: block, icon: "terminal", accentColor: .green,
+            ToolCapsuleView(block: block, icon: "terminal", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop, browserPool: browserPool,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .fileReadTool:
-            ToolCapsuleView(block: block, icon: "doc.text", accentColor: .cyan,
+            ToolCapsuleView(block: block, icon: "doc.text", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .fileWriteTool:
-            ToolCapsuleView(block: block, icon: "doc.text.fill", accentColor: .blue,
+            ToolCapsuleView(block: block, icon: "doc.text.fill", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .fileEditTool:
-            ToolCapsuleView(block: block, icon: "square.and.pencil", accentColor: .orange,
+            ToolCapsuleView(block: block, icon: "square.and.pencil", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .browserTool:
-            ToolCapsuleView(block: block, icon: "globe", accentColor: .blue,
+            ToolCapsuleView(block: block, icon: "globe", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop, browserPool: browserPool,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .readImageTool:
-            ToolCapsuleView(block: block, icon: "photo", accentColor: .purple,
+            ToolCapsuleView(block: block, icon: "photo", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .memoryTool:
-            ToolCapsuleView(block: block, icon: "brain.head.profile", accentColor: .pink,
+            ToolCapsuleView(block: block, icon: "brain.head.profile", accentColor: Theme.Color.accent,
                             commandStartTime: commandStartTime, onStop: onStop,
                             toolSnapshots: toolSnapshots, detailBlock: $detailBlock)
         case .userAskTool:
@@ -105,17 +105,19 @@ struct AssistantBlockView: View {
             VStack(alignment: .leading, spacing: 3) {
                 ForEach(Array(displayReasons.enumerated()), id: \.offset) { i, line in
                     SearchHighlightText(line, blockId: block.id, field: .line(i), messageId: message.id)
-                        .font(.system(size: 10))
-                        .foregroundStyle(Theme.Color.ink.opacity(0.45))
+                        .font(Theme.Font.meta())
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(2)
                 }
                 if let switchedLine {
                     HStack(spacing: 5) {
                         Image(systemName: "arrow.triangle.2.circlepath")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(.orange.opacity(0.8))
+                            .font(Theme.Font.meta())
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Theme.Color.accent)
                         SearchHighlightText(switchedLine, blockId: block.id, field: .title, messageId: message.id)
-                            .font(.system(size: 11, weight: .medium))
+                            .font(Theme.Font.caption())
+                            .fontWeight(.medium)
                             .foregroundStyle(Theme.Color.ink)
                             .lineLimit(2)
                     }
@@ -124,9 +126,9 @@ struct AssistantBlockView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
-            .background(Color.orange.opacity(0.08))
+            .background(Theme.Color.surface2)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.orange.opacity(0.14), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
             .contextMenu {
                 Button {
                     UIPasteboard.general.string = block.content
@@ -238,7 +240,7 @@ struct ToolCapsuleView: View {
     @State private var showRevokeMemoryResultAlert = false
     @ObservedObject private var keepAlive = BackgroundKeepAliveManager.shared
 
-    /// Show the yellow ⓘ hint only when this tool was flagged as background-
+    /// Show the accent ⓘ hint only when this tool was flagged as background-
     /// suspended AND enhanced background isn't already effective (nothing to
     /// suggest if it's on). Mirrors the BackgroundInterruptionTracker gate.
     private var showBgSuspendedHint: Bool {
@@ -388,25 +390,20 @@ struct ToolCapsuleView: View {
                 // Description text with bouncing dots during streaming
                 HStack(spacing: 0) {
                     SearchHighlightText(displayText, blockId: block.id, field: .body, messageId: searchMessageId)
-                        .font(.system(size: 13, weight: .medium))
-                        // [T-subagent-control-capsule] Sub agent control calls
-                        // title in the accent, every other tool in the normal
-                        // text colour.
-                        //
-                        // Elsewhere the accent lives only on the icon, which is
-                        // enough when the title names a file or a command — the
-                        // text itself is the content. A control call's title IS
-                        // the operation ("Sent a course correction"), and it
-                        // belongs to the sub agent world the purple identifies;
-                        // leaving it in the default colour made these read as
-                        // ordinary tool calls that happened to have a purple
-                        // glyph, which is what the report is about.
-                        .foregroundStyle(isSubAgentControl ? accentColor : Theme.Color.ink)
+                        .font(Theme.Font.body())
+                        .fontWeight(.medium)
+                        // [T-subagent-control-capsule] A control call's title
+                        // used to render in its accent; the milk-pink accent
+                        // is locked never-text (2.91:1 light), so every tool
+                        // title now reads in ink. The accent icon still says
+                        // "this was the model operating on its sub agents".
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                     if isStreaming {
                         ForEach(0..<3, id: \.self) { i in
                             Text(".")
-                                .font(.system(size: 13, weight: .medium))
+                                .font(Theme.Font.body())
+                                .fontWeight(.medium)
                                 .foregroundStyle(Theme.Color.ink)
                                 .offset(y: dotsActive ? -2 : 1)
                                 .animation(
@@ -426,7 +423,7 @@ struct ToolCapsuleView: View {
                 // pill list stays clean.
                 if let dur = durationText {
                     Text(dur)
-                        .font(.system(size: 11, weight: .regular, design: .monospaced))
+                        .font(Theme.Font.mono())
                         .foregroundStyle(Theme.Color.ink)
                 }
 
@@ -435,23 +432,30 @@ struct ToolCapsuleView: View {
                     Button {
                         onStop?()
                     } label: {
-                        // Visual: 10×10 red square unchanged. Hit area enlarged to
-                        // 24×24 via an expanded contentShape, while the negative
-                        // padding pins the *layout* footprint back to 18×18 so the
-                        // capsule width/height is identical to before.
+                        // Visual: 10×10 ink square unchanged in shape. The
+                        // milk-pink accent is never text and reads poorly as
+                        // a small mark on the pale capsule (2.67:1 light), so
+                        // the square is ink on the surface-2 capsule — the
+                        // locked 8.00:1 light / 11.16:1 dark pairing. Hit area
+                        // is 44×44 (HIG minimum) via an expanded contentShape,
+                        // while the negative padding pins the *layout* footprint
+                        // back to 18×18 so the capsule width/height is
+                        // identical to before.
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(.red)
+                            .fill(Theme.Color.ink)
                             .frame(width: 10, height: 10)
-                            .frame(width: 24, height: 24)
+                            .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
-                            .padding(-3)
+                            .padding(-13)
                     }
                     .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 12)
-            .frame(height: 36)
-            .background(Color(UIColor.systemGray6))
+            // 44pt tall: the whole capsule is the tap target (opens the
+            // detail sheet), so it meets the HIG 44pt minimum itself.
+            .frame(height: 44)
+            .background(Theme.Color.surface2)
             .clipShape(Capsule())
             .overlay(
                 Group {
@@ -540,17 +544,20 @@ struct ToolCapsuleView: View {
                 }
                 .equatable()
             }
-            // [T-tool-bg-suspended-hint] Yellow ⓘ just outside the capsule's
+            // [T-tool-bg-suspended-hint] Accent ⓘ just outside the capsule's
             // trailing edge when this tool was likely suspended by the OS in the
             // background. Tapping shows an alert offering to enable enhanced
             // background (deep-links to Settings → Permissions → Background).
+            // 44×44 hit area (HIG minimum); the glyph itself stays small.
             if showBgSuspendedHint {
                 Button {
                     showBgHintAlert = true
                 } label: {
                     Image(systemName: "info.circle.fill")
-                        .font(.system(size: 15))
-                        .foregroundStyle(.yellow)
+                        .font(Theme.Font.body())
+                        .foregroundStyle(Theme.Color.accent)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .padding(.leading, 6)
@@ -623,27 +630,32 @@ struct ToolCapsuleView: View {
     @ViewBuilder
     private var statusOrIcon: some View {
         Image(systemName: icon)
-            .font(.system(size: 13))
+            .font(Theme.Font.body())
             .foregroundStyle(iconColor)
     }
 
     private var iconColor: Color {
         switch block.toolStatus {
         // [T-subagent-control-capsule] A sub agent control call keeps its
-        // accent when it succeeds, instead of turning the universal green.
+        // accent when it succeeds, instead of turning the universal accent
+        // every other capsule uses for "done".
         //
-        // Green answers "did this tool work", which every other capsule needs
-        // because they are all the same colour once finished. These are the
-        // exception: their accent is what says "this was the model operating
-        // on its sub agents", and that identity is exactly what the reader is
-        // scanning for in a transcript full of tool calls — a succeeded
-        // control call rendered green was indistinguishable from a shell
-        // command. Failure and cancellation still override, since those must
-        // read as problems before they read as anything else.
+        // The accent is what says "this was the model operating on its sub
+        // agents", and that identity is exactly what the reader is scanning
+        // for in a transcript full of tool calls — a succeeded control call
+        // rendered like a shell command was indistinguishable from one.
+        // Failure and cancellation still override, since those must read as
+        // problems before they read as anything else.
+        //
+        // Milk-pink mapping (one accent family, no rainbow): success and
+        // running read in the accent; a failure reads in ink (the dark mark
+        // is the "problem" signal in this system — there is no red); a
+        // cancellation reads in ink-2 (muted, not an error; an icon, so the
+        // ~3.7:1 non-text ratio on the capsule is enough).
         case .success where isSubAgentControl: return accentColor
-        case .success: return .green
-        case .failed: return .red
-        case .cancelled: return .yellow
+        case .success: return Theme.Color.accent
+        case .failed: return Theme.Color.ink
+        case .cancelled: return Theme.Color.ink2
         default: return accentColor
         }
     }
@@ -671,7 +683,7 @@ struct ToolCapsuleView: View {
 // MARK: - Tool Group Row (folded run of tool calls)
 
 /// [T-fold-consecutive-tools] The one line that stands in for a folded run of
-/// tool calls: "› Ran 5 tools", then a red "1 failed" / grey "1 cancelled"
+/// tool calls: "› Ran 5 tools", then an ink "1 failed" / "1 cancelled"
 /// when any member ended that way. Deliberately light — no fill, border or
 /// icons — so it reads as a quiet summary between two replies rather than
 /// another capsule. Type breakdown and durations live on the member capsules,
@@ -691,7 +703,10 @@ struct ToolGroupRowView: View {
 
     /// Fixed so the list can estimate the row exactly (see
     /// `estimateItemHeight`), with no first-measure correction.
-    static let rowHeight: CGFloat = 28
+    /// 44pt: the row is a tap target (expands/collapses the folded group),
+    /// so it meets the HIG 44pt minimum itself; the estimator reads this
+    /// constant, so it stays exact.
+    static let rowHeight: CGFloat = 44
 
     private var title: String { AppLocalized("Ran \(toolCount) tools") }
     private var failedText: String { AppLocalized("\(failedCount) failed") }
@@ -720,7 +735,8 @@ struct ToolGroupRowView: View {
         HStack(spacing: 0) {
             HStack(spacing: 5) {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(Theme.Font.meta())
+                    .fontWeight(.semibold)
                     .rotationEffect(.degrees(isExpanded ? 90 : 0))
                 Text(title)
                 if let durationText {
@@ -729,14 +745,17 @@ struct ToolGroupRowView: View {
                 }
                 if failedCount > 0 {
                     Text(verbatim: "·")
-                    Text(failedText).foregroundStyle(.red)
+                    // Failed in ink: there is no red in milk-pink, and the
+                    // word itself ("1 failed") carries the meaning. Ink on
+                    // the chat background is 8.74:1 light / 15.11:1 dark.
+                    Text(failedText).foregroundStyle(Theme.Color.ink)
                 }
                 if cancelledCount > 0 {
                     Text(verbatim: "·")
                     Text(cancelledText)
                 }
             }
-            .font(.system(size: 13))
+            .font(Theme.Font.body())
             .foregroundStyle(Theme.Color.ink)
             .lineLimit(1)
             .padding(.horizontal, 4)
@@ -964,14 +983,12 @@ struct ThinkingBlockView: View {
                 Image("ThinkingIcon")
                     .resizable()
                     .frame(width: 14, height: 14)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Theme.Color.accent)
                 Text(AppLocalized("Deep Thinking"))
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.blue)
+                    .font(Theme.Font.displaySmall())
+                    .foregroundStyle(Theme.Color.ink)
                 if isStreaming {
-                    ProgressView()
-                        .controlSize(.mini)
-                        .tint(.blue)
+                    ThinkingDotsView()
                 }
                 Spacer()
                 // [T-thinking-count-beside-chevron] The character count sits at
@@ -987,16 +1004,23 @@ struct ThinkingBlockView: View {
                     if block.content.count > 0 || block.thinkingContentBuffer.count > 0 {
                         let charCount = max(block.content.count, block.thinkingContentBuffer.count)
                         Text(charCount > 1000 ? "\(charCount / 1000)K" : "\(charCount)")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .foregroundStyle(.blue.opacity(0.6))
+                            .font(Theme.Font.mono())
+                            .fontWeight(.medium)
+                            .foregroundStyle(Theme.Color.ink)
                     }
                     Image(systemName: isExpanded.wrappedValue ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(.blue.opacity(0.5))
+                        .font(Theme.Font.caption())
+                        .fontWeight(.medium)
+                        .foregroundStyle(Theme.Color.ink)
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
+            // The header is the expand/collapse tap target: 44pt tall
+            // (HIG minimum) so the tap area is never the old ~40pt strip.
+            // The frame sits AFTER the padding, so 44pt is the total height,
+            // not 44pt plus padding.
+            .frame(minHeight: 44)
             .contentShape(Rectangle())
             .onTapGesture {
                 // Mark before flipping so any concurrent stream-end collapse
@@ -1047,8 +1071,8 @@ struct ThinkingBlockView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             if isTruncated {
                                 Text("Showing last \(displayContent.count / 1000)K of \(total / 1000)K characters", comment: "Thinking window truncation hint")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(.secondary)
+                                    .font(Theme.Font.caption())
+                                    .foregroundStyle(Theme.Color.ink)
                                     .padding(.horizontal, 12)
                                     .padding(.bottom, 4)
                             }
@@ -1058,7 +1082,7 @@ struct ThinkingBlockView: View {
                             // moving is useless anyway — enable it only once
                             // streaming finished.
                             let thinkingText = Text(displayContent)
-                                .font(.system(size: 13))
+                                .font(Theme.Font.body())
                                 .foregroundStyle(Theme.Color.ink)
                                 .lineSpacing(3)
                             Group {
@@ -1164,12 +1188,17 @@ struct ThinkingBlockView: View {
         .onDisappear {
             ThinkingHitchMonitor.shared.stop(owner: block.id)
         }
-        .background(Color.blue.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        // Milk-pink card surface: its own thinkingBackground group (never a
+        // generic color), hairline border, soft shadow. One card per thinking
+        // segment — ThinkingBlockView is instantiated once per .thinking block,
+        // never one long card per turn.
+        .background(Theme.Color.thinkingBackground)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.thinking))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.blue.opacity(0.15), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: Theme.Radius.thinking)
+                .stroke(Theme.Color.line, lineWidth: 0.5)
         )
+        .themeShadow(Theme.Shadow.card)
         .task(id: block.id) {
             // One-shot per-block auto-expand. Runs when this cell first hosts
             // a given thinking block (block.id is stable across content
@@ -1292,7 +1321,6 @@ private struct ThinkingBodyHeightKey: PreferenceKey {
 // MARK: - Typing Indicator
 
 struct TypingIndicator: View {
-    @State private var dotOffsets: [Bool] = [false, false, false]
     /// Live Soul name so the indicator reads "<custom name> is thinking…" when
     /// the user has renamed the assistant in Soul settings. Updates via
     /// `.soulMdChanged` Notification — same wiring used by `AssistantSoulName`.
@@ -1307,31 +1335,22 @@ struct TypingIndicator: View {
         // the single place that shows and changes the thinking level, so a
         // duplicate here was redundant. ThinkingLevelSheetView is unchanged;
         // it's still presented from the nav-bar badge.
-        HStack(spacing: 0) {
+        //
+        // The dots are the shared ThinkingDotsView (0.4s PhaseAnimator
+        // rhythm, static dots under Reduce Motion) — the same dots the
+        // thinking card uses — not a second hand-rolled animation.
+        HStack(spacing: Theme.Spacing.xs) {
             Text("\(soulName) is thinking")
-            ForEach(0..<3, id: \.self) { i in
-                Text(".")
-                    .offset(y: dotOffsets[i] ? -3 : 1)
-            }
+            ThinkingDotsView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .soulMdChanged)) { _ in
             let n = SoulStore.cachedMetadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
             soulName = n.isEmpty ? "Minis" : n
         }
-        .font(.system(size: 15, weight: .medium))
+        .font(Theme.Font.body())
+        .fontWeight(.medium)
         .foregroundStyle(Theme.Color.ink)
         .padding(.top, 0)
-        .onAppear {
-            for i in 0..<3 {
-                withAnimation(
-                    .easeInOut(duration: 0.4)
-                        .repeatForever(autoreverses: true)
-                        .delay(Double(i) * 0.15)
-                ) {
-                    dotOffsets[i] = true
-                }
-            }
-        }
     }
 }
 
@@ -1367,11 +1386,11 @@ struct ThinkingLevelSheetView: View {
                     .frame(width: 16, height: 16)
                     .opacity(level == .off ? 0.4 : 1.0)
                 Text(level.displayName)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Theme.Color.ink)
                 Spacer()
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Theme.Color.accent)
                         .fontWeight(.semibold)
                 }
             }
@@ -1382,7 +1401,7 @@ struct ThinkingLevelSheetView: View {
 // MARK: - Tool Copy Button
 
 private struct ToolCopyButton: View {
-    var accentColor: Color = .green
+    var accentColor: Color = Theme.Color.accent
     let content: () -> String
     @State private var copied = false
 
@@ -1395,8 +1414,10 @@ private struct ToolCopyButton: View {
             }
         } label: {
             Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                .font(.system(size: 11))
+                .font(Theme.Font.caption())
                 .frame(width: 16, height: 16)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
                 .foregroundStyle(copied ? accentColor : accentColor.opacity(0.4))
         }
         .animation(.easeInOut(duration: 0.15), value: copied)

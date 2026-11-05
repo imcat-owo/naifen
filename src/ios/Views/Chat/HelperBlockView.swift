@@ -300,31 +300,35 @@ struct HelperBlockInfo {
         }
     }
 
+    /// Milk-pink status: status is carried by the WORD ("Failed" vs "Done")
+    /// and the GLYPH (checkmark vs exclamation mark vs pause), never by hue.
+    /// The old green/yellow/red mapping is gone with the rainbow. The accent
+    /// is locked never-text (2.91:1 light) and ink-2 is locked out at 11pt in
+    /// light mode (4.09:1), so ink is the only text color that passes 4.5:1
+    /// for an 11pt status word in both modes (8.74:1 light / 15.11:1 dark).
+    /// Every status reads in ink; the word and the glyph do the work.
     static func statusColor(_ status: String) -> Color {
         switch status {
-        case "completed": return .green
+        case "completed": return Theme.Color.ink
         // [T-subagent-no-deliverable-status] Warning, not error: the run is
         // recoverable by re-delegating with a narrower task or a bigger
         // budget — the same "needs attention, nothing is broken" reading as
         // timeout/interrupted, which is the closest existing neighbour.
-        case "no_deliverable": return .yellow
-        case "cancelled", "timeout", "interrupted": return .yellow
-        // Waiting its turn, not a problem — the accent, not a warning colour.
-        case "queued": return HelperAccent.color
-        // Never ran and never will — the same "needs attention, not broken"
-        // yellow that interrupted uses.
-        case "queue_lost": return .yellow
-        // [T-subagent-error-surface] A run that genuinely failed IS red. It
-        // used to fall through to the neutral default below, so a real error
-        // looked the same as "the app cannot tell how this ended" — and with
-        // an empty result it was reclassified to the yellow "No result", which
-        // reads as "nothing to hand back" rather than "something broke".
-        case "failed": return .red
+        // The word "No result" says it; the glyph is the exclamation mark.
+        case "no_deliverable": return Theme.Color.ink
+        case "cancelled", "timeout", "interrupted": return Theme.Color.ink
+        // Waiting its turn, not a problem — the word "Queued" and the pause
+        // glyph say it, not a hue.
+        case "queued": return Theme.Color.ink
+        // Never ran and never will — the word "Never started" says it.
+        case "queue_lost": return Theme.Color.ink
+        // [T-subagent-error-surface] A run that genuinely failed IS a
+        // problem — the word "Failed" (or the attributed kind, e.g. "Rate
+        // limited") and the exclamation-mark glyph say so, in ink.
+        case "failed": return Theme.Color.ink
         // [T-subagent-unknown-status-label] Neutral, not red. Red asserts the
         // run failed; an unrecognised or missing status only says the app does
-        // not know how it ended, and the transcript may well be intact. Use
-        // the same secondary grey the rest of the card's chrome uses so it
-        // reads as "no information" rather than "error".
+        // not know how it ended, and the transcript may well be intact.
         default: return Theme.Color.ink
         }
     }
@@ -336,16 +340,14 @@ struct HelperBlockInfo {
 
 /// Shared accent for every helper surface (capsule, sheet header, block).
 enum HelperAccent {
-    /// [T-agent-accent-color] Electric violet — reads as "AI / tech" without
-    /// colliding with the app's semantic hues (red = stop/error, green =
-    /// done, yellow = warning/timeout, system blue = thinking). Slightly
-    /// deeper in light mode for contrast on the light card, lifted in dark
-    /// mode so it stays luminous on near-black.
-    static let color = Color(UIColor { tc in
-        tc.userInterfaceStyle == .dark
-            ? UIColor(red: 0.64, green: 0.52, blue: 1.00, alpha: 1)   // #A385FF
-            : UIColor(red: 0.45, green: 0.30, blue: 0.93, alpha: 1)   // #734DED
-    })
+    /// Milk-pink accent family: Theme.Color.accent, the single accent of the
+    /// one set. Small accents only — icons, discs, spinner strokes, chip
+    /// fills — never text (2.91:1 on background in light mode). The old
+    /// electric violet is FORBIDDEN and gone: no #734DED / #A385FF anywhere.
+    /// API unchanged (color / symbol / displayName), so the existing call
+    /// sites in this file, ToolLiveSheet, SubAgentRunDetail and
+    /// AgentCallbackCellView keep working — they now resolve milk-pink.
+    static let color = Theme.Color.accent
     /// Glyph with its own circular background — for places that draw the
     /// icon bare (detail header, tool sheet nav bar). [T-agent-icon]
     static let icon = "person.2.circle.fill"
@@ -470,14 +472,19 @@ struct HelperBlockView: View {
                     // the child is confirmed running. Named too early the
                     // badge would appear and then change, which reads as a
                     // glitch — HelperRunner sets the name at `markRunning`.
+                    // Ink text on the accent chip fill: the accent is locked
+                    // never-text, so the chip's fill carries the accent and
+                    // the word reads in ink (8.74:1 light / 15.11:1 dark).
                     Text(badgeLabel(info))
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(HelperAccent.color)
+                        .font(Theme.Font.meta())
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Theme.Color.ink)
                         .padding(.horizontal, 5).padding(.vertical, 1)
                         .background(HelperAccent.color.opacity(0.15))
                         .clipShape(Capsule())
                     SearchHighlightText(info.title, blockId: block.id, field: .title, messageId: searchMessageId)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(Theme.Font.body())
+                        .fontWeight(.medium)
                         .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                 }
@@ -485,8 +492,12 @@ struct HelperBlockView: View {
             }
             Spacer(minLength: 4)
             if info.isRunning, let childId = block.helperChildSessionId {
-                // [T-helper-block-stop-button] Classic stop-recording look:
-                // red disc with a white rounded square cut out of it.
+                // [T-helper-block-stop-button] Classic stop look: a square in
+                // a disc. No red disc in milk-pink — the disc is the surface-2
+                // capsule fill and the square is ink, the locked 8.00:1 light /
+                // 11.16:1 dark pairing, so it reads in both modes. (An accent
+                // disc fails in dark mode: white on light-pink accent is
+                // 1.47:1, ink on it 1.38:1.) 44×44 hit area, glyph stays 24pt.
                 Button {
                     // [T-sub-agents-stop-silent] Go through the registry, not
                     // straight to the child's `cancel()`. Stopping the child
@@ -513,9 +524,10 @@ struct HelperBlockView: View {
                     if stopped == 0 { ViewModelCache.shared.get(for: childId)?.cancel() }
                 } label: {
                     ZStack {
-                        Circle().fill(Color.red).frame(width: 24, height: 24)
-                        RoundedRectangle(cornerRadius: 2).fill(Color.white).frame(width: 9, height: 9)
+                        Circle().fill(Theme.Color.surface2).frame(width: 24, height: 24)
+                        RoundedRectangle(cornerRadius: 2).fill(Theme.Color.ink).frame(width: 9, height: 9)
                     }
+                    .frame(width: 44, height: 44)
                     .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -524,15 +536,18 @@ struct HelperBlockView: View {
                 // [T-sub-agents-resume] Same slot as Stop, and its counterpart:
                 // this is the block's primary control, so what it offers tracks
                 // what the run needs. Once resumed the block turns .running and
-                // Stop takes the slot back on its own.
+                // Stop takes the slot back on its own. Same surface-2 disc +
+                // ink glyph as Stop, same 44×44 hit area.
                 Button { resume() } label: {
                     ZStack {
-                        Circle().fill(HelperAccent.color.opacity(resuming ? 0.25 : 1))
+                        Circle().fill(Theme.Color.surface2.opacity(resuming ? 0.25 : 1))
                             .frame(width: 24, height: 24)
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(.white)
+                            .font(Theme.Font.caption())
+                            .fontWeight(.bold)
+                            .foregroundStyle(Theme.Color.ink)
                     }
+                    .frame(width: 44, height: 44)
                     .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -540,18 +555,21 @@ struct HelperBlockView: View {
                 .accessibilityLabel(AppLocalized("Resume sub agent"))
             }
             Image(systemName: "chevron.right")
-                .font(.system(size: 11, weight: .semibold))
+                .font(Theme.Font.caption())
+                .fontWeight(.semibold)
+                // Chevron glyph, not text: ink-2 as a non-text mark is ~4.1:1
+                // on the card, past the 3:1 non-text bar.
                 .foregroundStyle(Theme.Color.ink2)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .background(HelperAccent.color.opacity(0.07))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.thinking, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Radius.thinking, style: .continuous)
                 .stroke(HelperAccent.color.opacity(0.35), lineWidth: 0.8)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .contentShape(RoundedRectangle(cornerRadius: Theme.Radius.thinking))
         .onTapGesture { detailBlock = block }
         .onAppear { pulse = true }
         .accessibilityIdentifier("assistantDelegateBlock")
@@ -565,13 +583,15 @@ struct HelperBlockView: View {
                 ReattachingSpinner(size: 15, lineWidth: 2, color: HelperAccent.color)
             } else if case .finished(let status, _, _, _, _, _, _, _) = info.phase {
                 // Queued is not a failure — it is waiting its turn, and an
-                // exclamation mark read as something having gone wrong. Pause
-                // matches the accent colour `statusColor` already gives it.
+                // exclamation mark read as something having gone wrong. The
+                // pause glyph says "waiting"; the ink status colour says
+                // nothing about it, by design (see statusColor).
                 Image(systemName: Self.finishedGlyph(status))
-                    .font(.system(size: 13, weight: .bold))
+                    .font(Theme.Font.body())
+                    .fontWeight(.bold)
                     .foregroundStyle(HelperBlockInfo.statusColor(status))
             } else {
-                Image(systemName: HelperAccent.glyph).font(.system(size: 13)).foregroundStyle(HelperAccent.color)
+                Image(systemName: HelperAccent.glyph).font(Theme.Font.body()).foregroundStyle(HelperAccent.color)
             }
         }
     }
@@ -595,15 +615,23 @@ struct HelperBlockView: View {
     private func secondLine(_ info: HelperBlockInfo) -> some View {
         switch info.phase {
         case .starting:
-            Text(AppLocalized("starting")).font(.system(size: 11)).foregroundStyle(Theme.Color.ink)
+            Text(AppLocalized("starting")).font(Theme.Font.caption()).foregroundStyle(Theme.Color.ink)
         case .running(let tool, let activity, let clock):
             HStack(spacing: 6) {
                 if let tool {
                     HStack(spacing: 3) {
-                        Image(systemName: HelperAccent.symbol(forTool: tool)).font(.system(size: 10, weight: .semibold))
-                        Text(HelperAccent.displayName(forTool: tool)).font(.system(size: 11, weight: .semibold))
+                        Image(systemName: HelperAccent.symbol(forTool: tool))
+                            .font(Theme.Font.meta())
+                            .fontWeight(.semibold)
+                            .foregroundStyle(HelperAccent.color)
+                        // Tool name in ink: the accent is locked never-text
+                        // on a light card (2.91:1). The accent icon beside
+                        // it carries the agent identity.
+                        Text(HelperAccent.displayName(forTool: tool))
+                            .font(Theme.Font.caption())
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Theme.Color.ink)
                     }
-                    .foregroundStyle(HelperAccent.color)
                     .lineLimit(1)
                     .fixedSize()
                 }
@@ -621,9 +649,9 @@ struct HelperBlockView: View {
                         SearchHighlightText(activity, blockId: block.id, field: .activity, messageId: searchMessageId)
                     }
                 }
-                .font(.system(size: 11)).foregroundStyle(Theme.Color.ink).lineLimit(1)
+                .font(Theme.Font.caption()).foregroundStyle(Theme.Color.ink).lineLimit(1)
                 if !clock.isEmpty {
-                    Text(clock).font(.system(size: 11, design: .monospaced)).foregroundStyle(Theme.Color.ink)
+                    Text(clock).font(Theme.Font.mono()).foregroundStyle(Theme.Color.ink)
                         .fixedSize()
                 }
             }
@@ -636,7 +664,8 @@ struct HelperBlockView: View {
             // the middle, so "Done · primary · … · 8s" always fits one line.
             HStack(spacing: 6) {
                 SearchHighlightText(info.statusText, blockId: block.id, field: .activity, messageId: searchMessageId)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(Theme.Font.caption())
+                    .fontWeight(.semibold)
                     .foregroundStyle(HelperBlockInfo.statusColor(status))
                     .fixedSize()
                 // [T-sub-agents-badge] No agent chip here: the badge above
@@ -645,7 +674,9 @@ struct HelperBlockView: View {
                 // one thing this line exists to show.
                 if let tier = HelperBlockInfo.tierLabel(info.model, fallback: tier) {
                     Text(tier)
-                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .font(Theme.Font.mono())
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Theme.Color.ink)
                         .padding(.horizontal, 4).padding(.vertical, 1)
                         .background(Theme.Color.surface)
                         .clipShape(Capsule())
@@ -653,7 +684,7 @@ struct HelperBlockView: View {
                 }
                 if let model = info.model, let line = model.compactLine() {
                     Text(line)
-                        .font(.system(size: 11))
+                        .font(Theme.Font.caption())
                         .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.middle)
@@ -661,14 +692,14 @@ struct HelperBlockView: View {
                 }
                 if let elapsed {
                     Text(HelperBlockInfo.elapsedLabel(elapsed))
-                        .font(.system(size: 11, design: .monospaced)).foregroundStyle(Theme.Color.ink)
+                        .font(Theme.Font.mono()).foregroundStyle(Theme.Color.ink)
                         .fixedSize()
                 }
                 if escalation {
-                    Image(systemName: "arrow.up.circle").font(.system(size: 11)).foregroundStyle(.orange)
+                    Image(systemName: "arrow.up.circle").font(Theme.Font.caption()).foregroundStyle(Theme.Color.accent)
                 }
                 if background {
-                    Image(systemName: "arrow.turn.down.left").font(.system(size: 10)).foregroundStyle(Theme.Color.ink2)
+                    Image(systemName: "arrow.turn.down.left").font(Theme.Font.meta()).foregroundStyle(Theme.Color.ink2)
                 }
             }
         }
@@ -682,9 +713,12 @@ struct HelperThumbnailView: View {
 
     var body: some View {
         let info = HelperBlockInfo.parse(block)
-        // [T-agent-model-identity] One extra 6 pt line — "tier · model" —
-        // in every phase; the title gives up its second line to make room,
-        // so the 100×65 frame never clips.
+        // [T-agent-model-identity] One extra line — "tier · model" — in
+        // every phase. The tile is a fixed 100×65 (the floating bar's tile
+        // size, shared with the image snapshots), and Theme.Font floors sans
+        // at 11pt, so four 11pt lines no longer fit: the header is folded
+        // into the title row (the person icon stays, the word "Agent" goes —
+        // the tile already sits in the agent's slot). Three lines, each 11pt.
         let modelLine: String? = {
             var parts: [String] = []
             if let t = HelperBlockInfo.tierLabel(info.model, fallback: { if case .finished(_, let tier, _, _, _, _, _, _) = info.phase { return tier }; return nil }()) {
@@ -698,46 +732,61 @@ struct HelperThumbnailView: View {
         }()
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 3) {
-                Image(systemName: HelperAccent.glyph).font(.system(size: 7, weight: .bold))
-                Text(AppLocalized("Agent")).font(.system(size: 6, weight: .bold))
+                Image(systemName: HelperAccent.glyph)
+                    .font(Theme.Font.meta())
+                    .fontWeight(.bold)
+                    .foregroundStyle(HelperAccent.color)
+                Text(info.title)
+                    .font(Theme.Font.caption())
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
             }
-            .foregroundStyle(HelperAccent.color)
-            Text(info.title).font(.system(size: 7, weight: .semibold)).foregroundStyle(.white)
-                .lineLimit(modelLine == nil ? 2 : 1)
             Spacer(minLength: 0)
             switch info.phase {
             case .starting:
-                Text(AppLocalized("starting")).font(.system(size: 6)).foregroundStyle(.white.opacity(0.7))
+                Text(AppLocalized("starting")).font(Theme.Font.caption()).foregroundStyle(.white.opacity(0.7))
             case .running(let tool, let activity, let clock):
                 if let tool {
                     HStack(spacing: 2) {
-                        Image(systemName: HelperAccent.symbol(forTool: tool)).font(.system(size: 6, weight: .bold))
-                        Text(HelperAccent.displayName(forTool: tool)).font(.system(size: 6, weight: .semibold))
+                        Image(systemName: HelperAccent.symbol(forTool: tool))
+                            .font(Theme.Font.meta())
+                            .fontWeight(.bold)
+                        Text(HelperAccent.displayName(forTool: tool))
+                            .font(Theme.Font.caption())
+                            .fontWeight(.semibold)
                     }
+                    // Accent on this near-black tile is 5.28:1, past 4.5:1 —
+                    // the one place accent text is allowed, because the tile
+                    // is dark, not the pale background.
                     .foregroundStyle(HelperAccent.color)
                     .lineLimit(1)
                 }
                 Text([activity, clock].filter { !$0.isEmpty }.joined(separator: " · "))
-                    .font(.system(size: 6)).foregroundStyle(.white.opacity(0.7)).lineLimit(1)
-            case .finished(let status, _, _, let elapsed, _, _, _, _):
+                    .font(Theme.Font.caption()).foregroundStyle(.white.opacity(0.7)).lineLimit(1)
+            case .finished(_, _, _, let elapsed, _, _, _, _):
                 Text([info.statusText, elapsed.map(HelperBlockInfo.elapsedLabel) ?? ""]
                         .filter { !$0.isEmpty }.joined(separator: " · "))
-                    .font(.system(size: 6, weight: .semibold)).foregroundStyle(HelperBlockInfo.statusColor(status))
+                    // Status in white, not statusColor: statusColor is ink
+                    // (8.74:1 on light cards) and ink on this dark tile is
+                    // invisible. The word itself carries the state.
+                    .font(Theme.Font.caption()).fontWeight(.semibold).foregroundStyle(.white)
                     .lineLimit(1)
             }
             if let modelLine {
                 // [T-subagent-ui-honesty] A pinned group that could not be
-                // routed gets a glyph here: at 6 pt there is no room for words,
+                // routed gets a glyph here: at 11 pt there is no room for words,
                 // and the model name alone made an ignored pin look like a
                 // working one. The detail sheet carries the sentence.
                 HStack(spacing: 2) {
                     if info.model?.modelGroupUnavailable == true {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 6, weight: .bold))
-                            .foregroundStyle(.yellow.opacity(0.9))
+                            .font(Theme.Font.meta())
+                            .fontWeight(.bold)
+                            .foregroundStyle(HelperAccent.color)
                     }
                     Text(modelLine)
-                        .font(.system(size: 6, design: .monospaced))
+                        .font(Theme.Font.mono())
                         .foregroundStyle(info.model?.hasEffective == true ? .white.opacity(0.85) : .white.opacity(0.6))
                         .lineLimit(1)
                         .truncationMode(.middle)
@@ -752,6 +801,10 @@ struct HelperThumbnailView: View {
         }
         .padding(5)
         .frame(width: 100, height: 65, alignment: .topLeading)
+        // Kept: the tile is mode-independent dark (the floating bar's dark
+        // chip). No Theme token is dark in both modes — ink and accent both
+        // flip light in dark mode — so a token fill here would turn the tile
+        // pale in dark mode and the white text invisible.
         .background(Color(white: 0.12))
     }
 }
@@ -824,13 +877,19 @@ struct HelperDetailCard: View {
                         VStack(alignment: .leading, spacing: 6) {
                             if let tool {
                                 HStack(spacing: 6) {
-                                    Image(systemName: HelperAccent.symbol(forTool: tool)).font(.system(size: 13, weight: .semibold))
-                                    Text(HelperAccent.displayName(forTool: tool)).font(.system(size: 14, weight: .semibold))
+                                    Image(systemName: HelperAccent.symbol(forTool: tool))
+                                        .font(Theme.Font.body())
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(HelperAccent.color)
+                                    // Tool name in ink: the accent is locked
+                                    // never-text on a light card (2.91:1).
+                                    Text(HelperAccent.displayName(forTool: tool))
+                                        .font(Theme.Font.bodyEmphasized())
+                                        .foregroundStyle(Theme.Color.ink)
                                 }
-                                .foregroundStyle(HelperAccent.color)
                             }
                             if !activity.isEmpty {
-                                Text(activity).font(.system(size: 13)).foregroundStyle(Color(UIColor.label))
+                                Text(activity).font(Theme.Font.body()).foregroundStyle(Theme.Color.ink)
                                     .textSelection(.enabled)
                             }
                         }
@@ -847,7 +906,7 @@ struct HelperDetailCard: View {
                             .resizable()
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 6))
-                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 0.5))
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.Color.line, lineWidth: 0.5))
                     }
                 }
 
@@ -859,8 +918,8 @@ struct HelperDetailCard: View {
                     AgentDetailCard(title: AppLocalized("Error"),
                                     icon: "exclamationmark.octagon") {
                         Text(detail)
-                            .font(.system(size: 13, design: .monospaced))
-                            .foregroundStyle(Color(UIColor.label))
+                            .font(Theme.Font.mono())
+                            .foregroundStyle(Theme.Color.ink)
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -901,8 +960,8 @@ struct HelperDetailCard: View {
                             SelectableMarkdownView(markdown: result)
                         } else {
                             Text(AppLocalized("No deliverable was returned"))
-                                .font(.system(size: 13))
-                                .foregroundStyle(Color(UIColor.secondaryLabel))
+                                .font(Theme.Font.body())
+                                .foregroundStyle(Theme.Color.ink)
                         }
                     }
                 }
@@ -971,11 +1030,11 @@ struct HelperDetailCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(Array(rows.enumerated()), id: \.offset) { _, r in
                         HStack(alignment: .top, spacing: 8) {
-                            Text(r.0).font(.system(size: 12)).foregroundStyle(Color(UIColor.secondaryLabel))
+                            Text(r.0).font(Theme.Font.body()).foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1).minimumScaleFactor(0.8)
                                 .frame(width: 84, alignment: .leading)
-                            Text(r.1).font(.system(size: 12, design: r.mono ? .monospaced : .default))
-                                .foregroundStyle(Color(UIColor.label))
+                            Text(r.1).font(r.mono ? Theme.Font.mono() : Theme.Font.body())
+                                .foregroundStyle(Theme.Color.ink)
                                 .textSelection(.enabled)
                             // [T-subagent-thinking-badge] Same pill the main
                             // conversation's nav bar puts beside its model, so
@@ -990,12 +1049,13 @@ struct HelperDetailCard: View {
                                         .frame(width: 6, height: 6)
                                         .opacity(level.isEnabled ? 1.0 : 0.4)
                                     Text(level.displayName)
-                                        .font(.system(size: 8, weight: .medium))
+                                        .font(Theme.Font.meta())
+                                        .fontWeight(.medium)
                                 }
                                 .foregroundStyle(Theme.Color.ink)
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 1)
-                                .background(Capsule().fill(Color.secondary.opacity(0.10)))
+                                .background(Capsule().fill(Theme.Color.surface2))
                             }
                         }
                     }
@@ -1010,28 +1070,32 @@ struct HelperDetailCard: View {
         HStack(spacing: 6) {
             switch info.phase {
             case .starting:
-                Text(AppLocalized("starting")).font(.system(size: 11, weight: .semibold)).foregroundStyle(HelperAccent.color)
+                // Ink, not the accent: the accent is locked never-text
+                // (2.91:1 light). The spinner beside it carries the accent.
+                Text(AppLocalized("starting")).font(Theme.Font.caption()).fontWeight(.semibold).foregroundStyle(Theme.Color.ink)
             case .running(_, _, let clock):
                 ReattachingSpinner(size: 11, lineWidth: 1.6, color: HelperAccent.color)
-                Text(AppLocalized("running")).font(.system(size: 11, weight: .semibold)).foregroundStyle(HelperAccent.color)
+                Text(AppLocalized("running")).font(Theme.Font.caption()).fontWeight(.semibold).foregroundStyle(Theme.Color.ink)
                 if !clock.isEmpty {
-                    Text(clock).font(.system(size: 11, design: .monospaced)).foregroundStyle(Color(UIColor.tertiaryLabel))
+                    Text(clock).font(Theme.Font.mono()).foregroundStyle(Theme.Color.ink)
                 }
             case .finished(let status, let tier, _, let elapsed, _, _, _, _):
                 Text(info.statusText)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(Theme.Font.caption())
+                    .fontWeight(.semibold)
                     .foregroundStyle(HelperBlockInfo.statusColor(status))
                 if let tier = HelperBlockInfo.tierLabel(info.model, fallback: tier) {
                     Text(tier)
-                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .font(Theme.Font.mono())
+                        .fontWeight(.semibold)
                         .padding(.horizontal, 5).padding(.vertical, 1)
                         .background(HelperAccent.color.opacity(0.15))
-                        .foregroundStyle(HelperAccent.color)
+                        .foregroundStyle(Theme.Color.ink)
                         .clipShape(Capsule())
                 }
                 if let elapsed {
                     Text(HelperBlockInfo.elapsedLabel(elapsed))
-                        .font(.system(size: 11, design: .monospaced)).foregroundStyle(Color(UIColor.tertiaryLabel))
+                        .font(Theme.Font.mono()).foregroundStyle(Theme.Color.ink)
                 }
             }
         }
@@ -1242,12 +1306,12 @@ struct HelperDetailCard: View {
 struct AgentDetailCard<Trailing: View, Content: View>: View {
     let title: String
     let icon: String
-    var iconTint: Color = Color(UIColor.secondaryLabel)
+    var iconTint: Color = Theme.Color.ink2
     var trailing: () -> Trailing
     var bodyPadding: CGFloat = 12
     @ViewBuilder var content: () -> Content
 
-    init(title: String, icon: String, iconTint: Color = Color(UIColor.secondaryLabel),
+    init(title: String, icon: String, iconTint: Color = Theme.Color.ink2,
          @ViewBuilder trailing: @escaping () -> Trailing,
          bodyPadding: CGFloat = 12,
          @ViewBuilder content: @escaping () -> Content) {
@@ -1255,19 +1319,23 @@ struct AgentDetailCard<Trailing: View, Content: View>: View {
         self.trailing = trailing; self.bodyPadding = bodyPadding; self.content = content
     }
 
-    private static var barBg: Color { Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.13, alpha: 1) : UIColor(white: 0.92, alpha: 1) }) }
-    private static var cardBg: Color { Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.10, alpha: 1) : UIColor(white: 0.94, alpha: 1) }) }
-    private static var stroke: Color { Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.25, alpha: 1) : UIColor(white: 0.82, alpha: 1) }) }
+    // Milk-pink surfaces: title bar in surface-2 (pill/capsule fill), body
+    // in surface (card surface), hairline in line. The old white-0.92/0.94
+    // greys are gone.
+    private static var barBg: Color { Theme.Color.surface2 }
+    private static var cardBg: Color { Theme.Color.surface }
+    private static var stroke: Color { Theme.Color.line }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.system(size: 12))
+                    .font(Theme.Font.caption())
                     .foregroundStyle(iconTint)
                 Text(title)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color(UIColor.label))
+                    .font(Theme.Font.body())
+                    .fontWeight(.medium)
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                 Spacer(minLength: 6)
                 trailing()
@@ -1284,13 +1352,13 @@ struct AgentDetailCard<Trailing: View, Content: View>: View {
             }
         }
         .background(Self.cardBg)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Self.stroke, lineWidth: 0.5))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).stroke(Self.stroke, lineWidth: 0.5))
     }
 }
 
 extension AgentDetailCard where Trailing == EmptyView {
-    init(title: String, icon: String, iconTint: Color = Color(UIColor.secondaryLabel),
+    init(title: String, icon: String, iconTint: Color = Theme.Color.ink2,
          bodyPadding: CGFloat = 12,
          @ViewBuilder content: @escaping () -> Content) {
         self.init(title: title, icon: icon, iconTint: iconTint, trailing: { EmptyView() },
@@ -1301,7 +1369,7 @@ extension AgentDetailCard where Trailing == EmptyView {
 struct ReattachingSpinner: View {
     var size: CGFloat = 14
     var lineWidth: CGFloat = 2
-    var color: Color = .accentColor
+    var color: Color = Theme.Color.accent
 
     var body: some View {
         TimelineView(.animation) { ctx in

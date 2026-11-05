@@ -389,7 +389,7 @@ struct SubAgentCollapsibleText: View {
                 } label: {
                     Text(expanded ? AppLocalized("Show less") : AppLocalized("Show more"))
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(HelperAccent.color)
+                        .foregroundStyle(Color(UIColor.label))
                 }
                 .buttonStyle(.plain)
             }
@@ -475,11 +475,12 @@ struct SubAgentToolTimelineCard: View {
                 HStack(spacing: 4) {
                     Image(systemName: HelperAccent.symbol(forTool: call.tool))
                         .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(call.state == .running ? HelperAccent.color : Color(UIColor.label))
                     Text(HelperAccent.displayName(forTool: call.tool))
                         .font(.system(size: 12, weight: .semibold))
                         .lineLimit(1)
+                        .foregroundStyle(Color(UIColor.label))
                 }
-                .foregroundStyle(call.state == .running ? HelperAccent.color : Color(UIColor.label))
                 if !call.title.isEmpty {
                     Text(call.title)
                         .font(.system(size: 12))
@@ -546,7 +547,7 @@ struct SubAgentActionsCard: View {
                         } label: {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 26))
-                                .foregroundStyle(isBlank ? Color(UIColor.tertiaryLabel) : HelperAccent.color)
+                                .foregroundStyle(isBlank ? Color(UIColor.tertiaryLabel) : Color(UIColor.label))
                         }
                         .buttonStyle(.plain)
                         .disabled(isBlank)
