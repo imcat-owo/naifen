@@ -220,6 +220,17 @@ struct AIChatView: View {
     @ObservedObject var configStore = ProviderConfigStore.shared
     @ObservedObject private var fontSettings = FontSettings.shared
     @ObservedObject private var deepLink = DeepLinkCoordinator.shared
+    /// [Phase 2 milk-pink] The dress-up slot that owns the wallpaper choice.
+    /// Observed so a shop apply re-renders this screen with the new
+    /// wallpaper; the slot defaults to the bundled milk-pink image
+    /// (see `chatWallpaperBackdrop`), so shop choice and live chat agree.
+    @ObservedObject private var dressUpStore = DressUpStore.shared
+    /// [Phase 2 milk-pink] The user's custom wallpaper image, loaded once
+    /// from disk (see `refreshChatWallpaper`) instead of on every body
+    /// pass — body re-evaluates on every streaming tick, and a JPEG
+    /// decode per tick would drop frames. Nil unless the custom slot
+    /// is applied and the file loads.
+    @State private var chatCustomWallpaper: UIImage?
     @Environment(\.dismiss) private var dismiss
     @State var inputFocused: Bool = false
     /// [T-in-chat-search] The search bar is open (mirrors vm.chatSearch.isActive):
@@ -529,6 +540,52 @@ struct AIChatView: View {
     /// (file was deleted, the session was pruned, or iCloud hasn't synced yet).
     @State var missingMinisFileName: String?
 
+    // MARK: - Wallpaper (Phase 2 milk-pink)
+    //
+    // The chat screen's wallpaper is the shared `WallpaperBackdrop`,
+    // placed as the bottom layer of body's ZStack (see the placement
+    // contract in WallpaperStore.swift's header — never `.background()`
+    // of a small view). It is full-bleed incl. the bottom safe area and
+    // under the translucent tab bar; its own base is the scheme
+    // background, so there are never white margins, and the blur-stretch
+    // fallback + scrim come from `WallpaperBackdrop` itself.
+    //
+    // The list host is transparent — cells, collection view and host
+    // view are all `.clear` (MessageListInfrastructure / V3 coordinator)
+    // — so the wallpaper shows through the scrolling list. The
+    // `.background(Theme.Color.background)` on the page stays as the
+    // fallback base behind the backdrop.
+    //
+    // The choice reads the `DressUpStore` wallpaper slot, the same slot
+    // the shop preview reads: bundled `WallpaperMilkPink` by default
+    // (nil id = never chose), `custom` for the user's upload. Preview
+    // == real chat by construction — same component, same slot.
+
+    /// Bottom ZStack layer of the chat screen: the applied wallpaper.
+    @ViewBuilder
+    private var chatWallpaperBackdrop: some View {
+        if dressUpStore.appliedWallpaperId == WallpaperStore.customWallpaperId,
+           let image = chatCustomWallpaper {
+            WallpaperBackdrop(image: image, undersized: WallpaperStore.isUndersized(image))
+        } else {
+            // Default (never chose) and bundled id both show the bundled
+            // milk-pink wallpaper. A custom id with a missing/unreadable
+            // file also falls back here — never a blank screen.
+            WallpaperBackdrop(assetName: "WallpaperMilkPink")
+        }
+    }
+
+    /// (Re)load the custom wallpaper image from disk into
+    /// `chatCustomWallpaper`, once per apply — not per body pass.
+    /// Called on appear and whenever the dress-up slot changes.
+    private func refreshChatWallpaper() {
+        if dressUpStore.appliedWallpaperId == WallpaperStore.customWallpaperId {
+            chatCustomWallpaper = WallpaperStore.shared.loadCustomWallpaper()
+        } else {
+            chatCustomWallpaper = nil
+        }
+    }
+
     var body: some View {
         // [T-ios-chat-body-stack-erase] Type-erase the page's content before
         // the ~80-modifier chain below. Most of those modifiers (.sheet,
@@ -545,6 +602,10 @@ struct AIChatView: View {
         // never changes, so AnyView keeps a stable identity and the subtree's
         // state is preserved.
         AnyView(ZStack {
+            // Wallpaper — bottom layer, full-bleed (see
+            // `chatWallpaperBackdrop`). Declared first so every other
+            // layer stacks above it.
+            chatWallpaperBackdrop
             // Messages — floating tool preview overlaid at bottom
             // [T-error-banner-under-navbar] The error banner and transient
             // notice used to sit in a top inset HERE, inside the content that
@@ -753,6 +814,11 @@ struct AIChatView: View {
             kernelBootOverlay
         })
         .background(Theme.Color.background)
+        // [Phase 2 milk-pink] Load the applied wallpaper once per
+        // appear / slot change — never per body pass (see
+        // `refreshChatWallpaper`).
+        .onAppear { refreshChatWallpaper() }
+        .onChange(of: dressUpStore.appliedWallpaperId) { _ in refreshChatWallpaper() }
         .onDrop(of: [.image, .movie, .fileURL, .data], isTargeted: $isDropTargeted) { providers in
             handleDropProviders(providers)
             return true
@@ -760,8 +826,8 @@ struct AIChatView: View {
         .overlay {
             if isDropTargeted {
                 RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(Color.accentColor, style: StrokeStyle(lineWidth: 2, dash: [8]))
-                    .background(Color.accentColor.opacity(0.08).clipShape(RoundedRectangle(cornerRadius: 16)))
+                    .strokeBorder(Theme.Color.accent, style: StrokeStyle(lineWidth: 2, dash: [8]))
+                    .background(Theme.Color.accent.opacity(0.08).clipShape(RoundedRectangle(cornerRadius: 16)))
                     .padding(8)
                     .allowsHitTesting(false)
             }
@@ -843,10 +909,15 @@ struct AIChatView: View {
             if let msg = forcePullToast {
                 Text(msg)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white)
+                    // [Phase 2 milk-pink] Milk-pink dark chip, not the
+                    // system-blue AccentColor (plan: DO-NOT-USE). Ink
+                    // chip + surface text passes at ~8.7:1 in both modes;
+                    // white on the milk-pink accent would fail (3.14:1
+                    // light), so the accent never carries text.
+                    .foregroundStyle(Theme.Color.surface)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.accentColor, in: Capsule())
+                    .background(Theme.Color.ink, in: Capsule())
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
