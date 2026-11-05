@@ -27,30 +27,36 @@ extension ContentView {
                     Label("Plain Text", systemImage: "text.alignleft")
                 }
             } label: {
-                VStack(spacing: 4) {
+                VStack(spacing: Theme.Spacing.xs) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20))
+                        // 20pt glyph: Theme.Font.displaySmall is the nearest
+                        // role (same precedent as the composer controls).
+                        .font(Theme.Font.displaySmall())
                     Text("Export")
-                        .font(.caption2)
+                        .font(Theme.Font.caption())
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
             }
             .disabled(selectedIds.isEmpty)
+            .dressUpPress()
 
             Button {
                 let anyFiled = sessions.contains { selectedIds.contains($0.id) && $0.isFiled }
                 folderPickerRequest = FolderPickerRequest(
                     sessionIds: selectedIds, fromMultiSelect: true, anyFiled: anyFiled)
             } label: {
-                VStack(spacing: 4) {
+                VStack(spacing: Theme.Spacing.xs) {
                     Image(systemName: "folder")
-                        .font(.system(size: 20))
+                        .font(Theme.Font.displaySmall())
                     Text("Move")
-                        .font(.caption2)
+                        .font(Theme.Font.caption())
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
             }
             .disabled(selectedIds.isEmpty)
+            .dressUpPress()
 
             // Force Sync is gated to iOS 17+ — CloudKit features (queryable
             // record fields, fetchRecordZoneChanges async APIs) used by the
@@ -62,15 +68,17 @@ extension ContentView {
                 Button {
                     runForceSyncOnSelection()
                 } label: {
-                    VStack(spacing: 4) {
+                    VStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: forceSyncInFlight ? "arrow.triangle.2.circlepath" : "icloud.and.arrow.up")
-                            .font(.system(size: 20))
+                            .font(Theme.Font.displaySmall())
                         Text("Force Sync")
-                            .font(.caption2)
+                            .font(Theme.Font.caption())
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
                 }
                 .disabled(selectedIds.isEmpty || forceSyncInFlight)
+                .dressUpPress()
             }
 
             Button(role: .destructive) {
@@ -84,19 +92,27 @@ extension ContentView {
                     isComputingDelete = false
                 }
             } label: {
-                VStack(spacing: 4) {
+                VStack(spacing: Theme.Spacing.xs) {
                     Image(systemName: "trash")
-                        .font(.system(size: 20))
+                        .font(Theme.Font.displaySmall())
                     Text("Delete")
-                        .font(.caption2)
+                        .font(Theme.Font.caption())
                 }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(selectedIds.isEmpty ? Color.gray : Color.red)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+                // Destructive stays milk-pink dark ink (no pure .red):
+                // the .disabled below dims it when nothing is selected.
+                .foregroundStyle(Theme.Color.ink)
             }
             .disabled(selectedIds.isEmpty)
+            .dressUpPress()
         }
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
+        .foregroundStyle(Theme.Color.ink)
+        .padding(.vertical, Theme.Spacing.md)
+        .background(Theme.Color.tabBar)
+        .overlay(alignment: .top) {
+            Theme.Color.line.frame(height: 1)
+        }
     }
 
     /// Force-sync the given sessions: bumps each session, its messages,

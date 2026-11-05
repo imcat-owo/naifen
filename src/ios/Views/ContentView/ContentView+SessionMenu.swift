@@ -75,7 +75,7 @@ extension ContentView {
                 switchToSession(Self.makeNewSessionId(groupId: groupId))
             case .openSearch:
                 if !searchDidDrag {
-                    withAnimation(.easeInOut(duration: 0.2)) { showSearchBar = true }
+                    withAnimation(.easeInOut(duration: Theme.Motion.base)) { showSearchBar = true }
                 }
             }
         }
