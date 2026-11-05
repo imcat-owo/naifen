@@ -727,7 +727,7 @@ extension CollectionViewMessageListV3.Coordinator {
                                     // the RENDERER's size, not the list's own
                                     // `scale` (16), or a Dynamic Type change
                                     // would collide instead of missing.
-                                    fontSize: FontSettings.shared.scaledMessage(16.5)
+                                    fontSize: FontSettings.shared.scaled(16.5)
                                 )
                                 // Never cache a string that carries attachments. An
                                 // image's height is decided at LAYOUT time by
