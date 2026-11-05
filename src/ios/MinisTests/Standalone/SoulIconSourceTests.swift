@@ -199,25 +199,25 @@ check("SoulSettingsView no longer branches on .opaque",
         .appendingPathComponent("Views/Settings/SoulSettingsView.swift").path,
         encoding: .utf8)) ?? "").contains("reason == .opaque") == false)
 
-print("\nRounded-corner rendering — the shared component decides the shape")
-check("SoulIconView clips images to a continuous rounded rect",
-      soulSource.contains("RoundedRectangle(cornerRadius: resolvedCornerRadius")
-      && soulSource.contains("style: .continuous"))
-check("the image branch is NOT clipped to a circle any more",
-      !soulSource.contains(".clipShape(Circle())"))
-check("the proportional default still exists for call sites that don't pin one",
-      soulSource.contains("static func cornerRadius(for size: CGFloat)"))
-check("an explicit radius falls back to the proportional default when nil",
-      soulSource.contains("cornerRadius ?? Self.cornerRadius(for: size)"))
-// Proportion check, so a future tweak that makes the header look boxy fails here.
-// The chat header now PINS its radius (see CollectionViewMessageListV3); the
-// settings card still derives it from size.
-let rHeader = 5.0, headerSize = 22.0, r32 = 32.0 * 0.22
-check("22pt header radius is visibly rounded (\(String(format: "%.1f", rHeader))pt)", rHeader >= 3.5)
-check("32pt card radius stays proportional (\(String(format: "%.1f", r32))pt)", r32 >= 6.5)
-// A radius of size/2 would BE a circle; assert both shapes stay under it.
-check("header radius never reaches a full circle", rHeader < headerSize / 2)
-check("card radius never reaches a full circle (would be size/2)", r32 < 32.0 / 2)
+print("\nCircle rendering — the shared component decides the shape")
+check("SoulIconView clips images to a circle",
+      soulSource.contains(".clipShape(Circle())"))
+check("no rounded-rect clip remains",
+      !soulSource.contains("RoundedRectangle"))
+check("no resolved corner radius remains",
+      !soulSource.contains("resolvedCornerRadius"))
+check("the proportional cornerRadius helper is gone",
+      !soulSource.contains("static func cornerRadius(for size: CGFloat)"))
+check("no cornerRadius fallback remains",
+      !soulSource.contains("cornerRadius ?? Self.cornerRadius(for: size)"))
+// NOTE: the bare word `cornerRadius` still appears in SoulStore.swift — the
+// compat init still accepts (and ignores) a cornerRadius argument so old
+// call sites keep compiling. A blanket `!contains("cornerRadius")` would
+// fail on that init, so the checks above target the rendering-path
+// constructs that are actually gone.
+// A circle's radius IS size/2 by construction, so the old guards that the
+// radius "never reaches a full circle" are inverted by design and deleted,
+// not updated: the avatar is a full circle on every surface now.
 
 print("\nData URI parsing")
 func parseDataURI(_ s: String) -> Data? {

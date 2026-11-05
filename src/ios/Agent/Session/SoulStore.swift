@@ -432,61 +432,143 @@ enum SoulIconSource {
 /// everywhere it appears.
 ///
 /// Shared so every surface (Soul Settings preview at 32pt, the settings
-/// picker sheet, chat turn header at 18pt) cannot drift apart: they differ
-/// only in `size`. The image branch is drawn 1:1 — `encode` already
-/// guaranteed a square, so this cannot distort.
+/// picker sheet, chat turn header at 36pt) cannot drift apart: they differ
+/// only in `size` and `initial`. The image branch is drawn 1:1 — `encode`
+/// already guaranteed a square, so this cannot distort.
 ///
-/// [T-soul-icon-opaque-rounded] The image clip is a CONTINUOUS ROUNDED
-/// RECTANGLE, and that is the single place the shape is decided. Since
-/// opaque images are now accepted, the renderer is what stops a JPEG from
-/// reading as a hard-edged tile — so the corner treatment has to live in the
-/// shared component, not at each call site, or one surface would inevitably
-/// miss it.
+/// [T-soul-icon-circle] The shape is a SOLID CIRCLE, decided here and
+/// nowhere else (plan §B.4; Part A block #9). The old squircle (corner
+/// radius 22% of size) is gone: at 36pt a squircle reads as a rounded
+/// tile, and the milk-pink language is circles, not app-icon squircles.
+/// The ring is `Theme.Color.avatarRing`, 2pt with a 2pt clear gap
+/// (plan §B.1), on every branch — photo and default disc alike — so it
+/// follows the active scheme automatically (asset-catalog Any + Dark
+/// variants). There is no gradient anywhere in this component: the
+/// beige-grey default gradient is deleted, not recoloured.
 ///
-/// Rounded rather than a circle: at 18pt a circular mask eats the corners of
-/// a small avatar (logos and faces lose noticeably more), and the request was
-/// explicitly for a soft edge, not a crop to round. The radius scales with
-/// `size` so the 18pt header and the 32pt card look like the same shape
-/// rather than one looking markedly boxier than the other.
+/// The default mark is a solid disc in the scheme deep colour
+/// (`Theme.Color.ink`) with a serif initial (`Theme.Font` displaySmall,
+/// scaled to the disc). No emoji default, no face illustration: any `icon`
+/// value that is not a decodable image — empty, the legacy sparkle, a
+/// user emoji — renders this disc. The initial is the persona's first
+/// letter (`initial`, default "M" for Minis); a non-alphanumeric first
+/// character falls back to "M" so an emoji name can never put an emoji
+/// on the disc.
+/// Contrast: ink disc + background initial is 8.74:1 light / 15.11:1 dark
+/// (same pair as ink on background, Tokens.swift header) — passes 4.5:1
+/// in both modes. In dark mode the pair inverts with the tokens (light
+/// disc, dark initial): it is the scheme's paper colour on the scheme's
+/// ink, not a literal white, in either mode.
+///
+/// Undersized images use the blur-stretch fallback (plan §B.4, same
+/// pattern as wallpaper): a blurred stretched copy fills the circle and
+/// the sharp original sits centred on top at native size, so a tiny
+/// source never upscales into a blurry tile.
 struct SoulIconView: View {
     let icon: String
     let size: CGFloat
-    /// Gradient used for the default sparkle in the chat header. Nil renders
-    /// the plain emoji glyph, which is what the settings card wants.
-    var sparkleGradient: LinearGradient? = nil
-    /// Explicit corner radius, overriding the proportional default. The chat
-    /// header pins its own value so the shape stays where it was tuned by eye
-    /// rather than drifting whenever `size` is adjusted.
-    var cornerRadius: CGFloat? = nil
+    /// First letter of the persona name, rendered on the default disc.
+    /// Default "M" (Minis); the chat header passes the soul name's
+    /// first letter. Callers that do not know the name keep the default.
+    let initial: String
 
-    /// ~22% of the edge: iOS's own app-icon "squircle" proportion, which
-    /// reads as rounded at small sizes without rounding away image content.
-    static func cornerRadius(for size: CGFloat) -> CGFloat { size * 0.22 }
+    /// 2pt ring + 2pt clear gap (plan §B.1). Per side; the layout
+    /// footprint is `size + 2 * (ringGap + ringWidth)`.
+    private static let ringWidth: CGFloat = 2
+    private static let ringGap: CGFloat = 2
 
-    private var resolvedCornerRadius: CGFloat {
-        cornerRadius ?? Self.cornerRadius(for: size)
+    /// Disc size the serif initial is designed against (plan §B.4 chat
+    /// avatar, 36pt). `Theme.Font.displaySmall()` is a 20pt serif; it is
+    /// scaled by `size / initialReferenceSize` so the mark stays
+    /// proportional on every surface instead of fixed at 20pt.
+    private static let initialReferenceSize: CGFloat = 36
+
+    /// Layout footprint: disc + gap + ring on each side.
+    private var footprint: CGFloat { size + 2 * (Self.ringGap + Self.ringWidth) }
+
+    /// The mark on the default disc: first alphanumeric character of
+    /// `initial`, uppercased; "M" otherwise.
+    private var mark: String {
+        guard let first = initial.unicodeScalars.first,
+              CharacterSet.alphanumerics.contains(first) else { return "M" }
+        return String(initial.prefix(1)).uppercased()
+    }
+
+    /// True when the decoded image is too small to fill the disc without
+    /// a visible upscale: source narrower than half the display size.
+    private func isUndersized(_ image: UIImage) -> Bool {
+        image.size.width * 2 < size
+    }
+
+    init(icon: String, size: CGFloat, initial: String = "M") {
+        self.icon = icon
+        self.size = size
+        self.initial = initial
+    }
+
+    /// Legacy call-site compatibility (Phase 2): AlwaysOnOverlay,
+    /// ChatExportRenderer and ShopSampleCards still pass a gradient and
+    /// a corner radius. Both arguments are accepted and IGNORED — the
+    /// gradient treatment is deleted and a circle has no corner radius.
+    /// They stay only so files outside this change keep compiling;
+    /// remove this init when those three call sites drop the arguments.
+    /// The generic style parameter is deliberate: it accepts any style
+    /// value without naming a gradient type in this file.
+    init<S: ShapeStyle>(icon: String, size: CGFloat, sparkleGradient _: S, cornerRadius _: CGFloat? = nil, initial: String = "M") {
+        self.icon = icon
+        self.size = size
+        self.initial = initial
     }
 
     var body: some View {
-        if let image = SoulIconImage.decode(icon) {
-            Image(uiImage: image)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: size, height: size)
-                .clipShape(RoundedRectangle(cornerRadius: resolvedCornerRadius,
-                                            style: .continuous))
-        } else if icon.isEmpty, let gradient = sparkleGradient {
-            // Default: keep the SF Symbol so the chat header's existing
-            // gradient treatment is untouched for users who never set one.
-            Image(systemName: "sparkles")
-                .font(.system(size: size, weight: .semibold))
-                .foregroundStyle(gradient)
-        } else {
-            // A user-chosen emoji, or the default sparkle where no gradient
-            // was requested.
-            Text(icon.isEmpty ? "✨" : icon)
-                .font(.system(size: size))
+        ZStack {
+            if let image = SoulIconImage.decode(icon) {
+                if isUndersized(image) {
+                    // Blur-stretch fallback: blurred copy fills the disc,
+                    // sharp original centred on top at native size.
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: size, height: size)
+                        .blur(radius: size / 6)
+                        .clipShape(Circle())
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: image.size.width, height: image.size.height)
+                        .clipShape(Circle())
+                } else {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: size, height: size)
+                        .clipShape(Circle())
+                }
+            } else {
+                // Default mark: solid disc, serif initial. No emoji.
+                Circle()
+                    .fill(Theme.Color.ink)
+                    .frame(width: size, height: size)
+                    .overlay(
+                        Text(mark)
+                            .font(Theme.Font.displaySmall())
+                            .foregroundStyle(Theme.Color.background)
+                            .frame(width: size, height: size)
+                            .scaleEffect(size / Self.initialReferenceSize)
+                    )
+            }
+            // Milk-pink ring, 2pt + 2pt clear gap, on every branch.
+            // Ring frame is size + 2 * gap + ring width (Ø42 at the 36pt
+            // chat avatar); footprint is size + 2 * (gap + ring width)
+            // (Ø44). The stroke is centred on the ring path, so the 2pt
+            // stroke spans Ø40–Ø44: inner edge exactly one gap outside
+            // the Ø36 disc, outer edge exactly on the footprint.
+            Circle()
+                .stroke(Theme.Color.avatarRing, lineWidth: Self.ringWidth)
+                .frame(width: size + 2 * Self.ringGap + Self.ringWidth,
+                       height: size + 2 * Self.ringGap + Self.ringWidth)
         }
+        .frame(width: footprint, height: footprint)
     }
 }
 

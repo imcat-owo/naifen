@@ -2,9 +2,9 @@
 //  BridgedAssistantHeaderV3.swift
 //  Minis - V3 chat message list (Agent/MessageList/CollectionViewMessageListV3)
 //
-//  Cell content for the assistant header row ("✦ <name>" from SOUL.md; tap
-//  opens Soul Settings). Hosted by AssistantHeaderCellV3 via the Coordinator's
-//  cell provider (+CellConfiguration).
+//  Cell content for the assistant header row (avatar + <name> from SOUL.md;
+//  tap opens Soul Settings). Hosted by AssistantHeaderCellV3 via the
+//  Coordinator's cell provider (+CellConfiguration).
 //
 //  File map and split rules: CollectionViewMessageListV3.swift (this folder).
 //
@@ -16,7 +16,7 @@ import UniformTypeIdentifiers
 
 // MARK: - V3 Bridged Cell Views (no GeometryReader)
 
-/// Header: "✦ Minis" label at the top of each assistant turn.
+/// Header: avatar + name label at the top of each assistant turn.
 /// Name comes from SOUL.md (user-editable in Soul Settings).
 ///
 /// [T-ios-assistant-header-open-soul] Tapping the row opens Soul Settings.
@@ -39,29 +39,24 @@ struct BridgedAssistantHeaderV3: View {
     var onOpenSoulSettings: (() -> Void)?
     var body: some View {
         HStack(spacing: 6) {
-            // [T-soul-custom-icon] Honours a user-chosen emoji or image;
-            // falls back to the gradient sparkle when unset, so headers for
-            // users who never customized are pixel-identical to before.
-            // The icon is square by construction (SoulIconImage.encode
-            // crops), so an image cannot make this row taller than a glyph
-            // does. At 22pt it now exceeds the .body cap-height beside it,
-            // so it — not the text — sets the row height; the estimated
-            // height seed below was re-measured to match.
+            // [T-soul-custom-icon] 36pt chat avatar (plan §B.4): solid
+            // circle with milk-pink ring; serif initial when no photo is
+            // set. `initial` is the soul name's first letter ("M" for the
+            // "Minis" fallback). The icon is square by construction
+            // (SoulIconImage.encode crops), so an image cannot make this
+            // row taller than the disc does. The avatar's layout footprint
+            // is 44pt (36 disc + 2pt gap + 2pt ring each side), so it —
+            // not the text — sets the row height.
             SoulIconView(
                 icon: soulMeta.icon,
-                size: 22,
-                sparkleGradient: LinearGradient(
-                    colors: [Color(red: 0.72, green: 0.69, blue: 0.59),
-                             Color(red: 0.6, green: 0.6, blue: 0.55)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
-                cornerRadius: 5
+                size: 36,
+                initial: soulMeta.name.isEmpty ? "M" : String(soulMeta.name.prefix(1)).uppercased()
             )
             Text(soulMeta.name.isEmpty ? "Minis" : soulMeta.name)
-                .font(.body.weight(.semibold))
+                .font(Theme.Font.bodyEmphasized())
                 .foregroundStyle(Theme.Color.ink)
         }
+        .frame(minHeight: 44)
         // [T-ios-assistant-header-open-soul] Hit area and tap, applied to the
         // icon+name HStack only — NOT to the full-width row below it.
         //
@@ -73,15 +68,14 @@ struct BridgedAssistantHeaderV3: View {
         // `contentShape` makes the whole icon+name box (including the 6pt gap)
         // hittable rather than only the glyph and text pixels.
         //
-        // On the 44pt HIG target: the row is deliberately NOT grown to 44pt.
-        // This header measures ~30pt (icon-driven since 22pt) and the cell
-        // height is UIKit-self-sized, so enlarging the frame would
-        // shift every assistant message in the transcript — the task explicitly
-        // asks not to disturb layout. Instead the touch target is widened
-        // horizontally (the tappable box spans icon + gap + full name, well
-        // over 44pt across) and the 28pt height is left alone. That is the
-        // trade the surrounding code forces; growing it would need the height
-        // constant re-measured, which is out of scope here.
+        // On the 44pt HIG target: the row IS 44pt. The avatar's layout
+        // footprint is 44pt (36pt disc + 2pt gap + 2pt ring each side;
+        // SoulIconView in SoulStore.swift), and `.frame(minHeight: 44)`
+        // above holds that floor even if the name shrinks. Hit area, from
+        // the layout values: 44pt tall x ~81pt wide (44 icon + 6 gap +
+        // ~31 name at 13pt semibold, by character-width estimate) —
+        // >= 44pt in both dimensions. The old ~28-30pt row and its
+        // "deliberately NOT 44pt" exception are gone with the 22pt squircle.
         .contentShape(Rectangle())
         .onTapGesture { onOpenSoulSettings?() }
         .accessibilityElement(children: .combine)
