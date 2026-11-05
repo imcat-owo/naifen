@@ -161,6 +161,7 @@ extension AIChatView {
                 // to Provider-import). Gate on real movable content so the pill
                 // doesn't linger over an empty composer. [T-ios-moveto-empty-content]
                 if hasInjectedShareContent && hasMovableShareContent {
+                    // Justified 44pt exception: a 44pt hit rect would block text-field taps under this transient overlay.
                     Button { showMoveToSheet = true } label: {
                         Label("Move to…", systemImage: "arrow.right.circle")
                             // [Phase 2 composer] 11pt medium -> caption
