@@ -13,6 +13,21 @@ private let pasteLog = AppLogger(category: "PastableTV")
 private let hintLog = AppLogger(category: "ContextUsageHint")
 
 private let minisLogger = AppLogger(category: "MinisURL")
+
+// MARK: - Phase 2 composer font migration (2026-11-05)
+//
+// Every hardcoded system-size font in this file now reads Theme.Font.
+// Theme.Font has text roles only — no icon-size roles — so glyphs take the
+// nearest role and text takes the role at (or floored to) its size:
+//   34pt glyph -> displayExtraLarge (32pt, -2) | 20pt glyph -> displaySmall (exact)
+//   18/16pt glyphs -> displaySmall (20pt; all remove glyphs unified at 20pt)
+//   13pt semibold -> bodyEmphasized (exact) | 12pt medium glyph -> mono (12pt, exact size)
+//   10pt -> meta (renders at 11pt: meta() floors via scaledSize; semibold weight drops — no 10pt semibold role)
+//   9/8pt text -> caption (11pt; the plan's sans floor)
+// The input font (16.5pt) has no Theme.Font SwiftUI role: it lives in
+// Theme.Font.inputUIFont() as a UIFont, scaled continuously by the one
+// global 10–15pt dial exactly as message text — so input and message
+// text are the same size at every dial value.
 struct SwipeToSendHint: View {
     let progress: CGFloat
     let armFraction: CGFloat
@@ -21,6 +36,8 @@ struct SwipeToSendHint: View {
     /// "Release to send" — used while the agent is mid-stream and the
     /// gesture will be routed through `performEnqueue()`.
     var isEnqueue: Bool = false
+    /// Reduce Motion: the arm pop is instant, never a spring.
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         if progress > 0 {
@@ -33,20 +50,21 @@ struct SwipeToSendHint: View {
             // ink is #5B3F41 in light, #FBF8EA in dark). For this floating hint we
             // need a clearly-contrasting *glyph on top of the circle* and
             // *text on top of the capsule* — both must use the inverse
-            // (`UIColor.systemBackground`), otherwise dark mode renders
-            // white-on-white and the indicator vanishes (bug 2026-05-18).
+            // (`Theme.Color.background`, #FFF4F5 light / #2A1E20 dark),
+            // otherwise dark mode renders white-on-white and the indicator
+            // vanishes (bug 2026-05-18).
             let chipBg = Theme.Color.ink
-            let chipFg = Color(UIColor.systemBackground)
+            let chipFg = Theme.Color.background
             HStack(spacing: 8) {
                 Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 34))
+                    .font(Theme.Font.displayExtraLarge())
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(chipFg, chipBg)
                     .shadow(color: Color.black.opacity(0.18), radius: 6, y: 2)
                 Text(isEnqueue
                      ? AppLocalized("Release to queue")
                      : AppLocalized("Release to send"))
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(Theme.Font.bodyEmphasized())
                     .foregroundStyle(chipFg)
                     .padding(.horizontal, 14)
                     .frame(height: 34)
@@ -57,12 +75,13 @@ struct SwipeToSendHint: View {
             .opacity(Double(min(1, progress * 1.4)))
             .scaleEffect(0.9 + 0.18 * progress, anchor: .leading)
             // Anchor the HStack's top-leading corner so the arrow's *center*
-            // lands at (finger.x, finger.y - 60). Arrow glyph ~34pt, half
-            // = 17pt. ~60pt above the fingertip ≈ one thumb-tip away.
-            .offset(x: location.x - 17, y: location.y - 60 - 17)
+            // lands at (finger.x, finger.y - 60). Arrow glyph ~32pt, half
+            // = 16pt. ~60pt above the fingertip ≈ one thumb-tip away.
+            .offset(x: location.x - 16, y: location.y - 60 - 16)
             .allowsHitTesting(false)
-            .animation(.interactiveSpring(response: 0.18,
-                                           dampingFraction: 0.85),
+            // [Phase 2 composer] Arm pop on the motion spring (0.32 / 0.72);
+            // instant under Reduce Motion.
+            .animation(DressUpMotion.animation(for: .motion, reduceMotion: reduceMotion),
                        value: progress >= armFraction)
         }
     }
@@ -256,7 +275,7 @@ private struct VideoLoadingChip: View {
         .frame(width: 64, height: 64)
         .background(Theme.Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
     }
 }
 
@@ -307,7 +326,7 @@ private struct AttachmentChip: View {
             .frame(width: 64, height: 64)
             .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
     }
 
     /// [T-ios-photo-pick-placeholder] Error chip for a photo that failed to load.
@@ -316,8 +335,8 @@ private struct AttachmentChip: View {
         ZStack(alignment: .topTrailing) {
             VStack(spacing: 4) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 18))
-                    .foregroundStyle(.orange)
+                    .font(Theme.Font.displaySmall())
+                    .foregroundStyle(Theme.Color.accent)
                 Text("Failed")
                     .font(.caption2)
                     .foregroundStyle(Theme.Color.ink)
@@ -325,13 +344,13 @@ private struct AttachmentChip: View {
             .frame(width: 64, height: 64)
             .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.orange.opacity(0.5), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.accent.opacity(0.5), lineWidth: 0.5))
 
             Button {
                 onRemove()
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 18))
+                    .font(Theme.Font.displaySmall())
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.5), radius: 2)
             }
@@ -351,12 +370,12 @@ private struct AttachmentChip: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 64, height: 64)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
                         .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
 
                     if isVideo {
                         Image(systemName: "play.fill")
-                            .font(.system(size: 10))
+                            .font(Theme.Font.meta())
                             .foregroundStyle(.white)
                             .padding(4)
                             .background(.black.opacity(0.5))
@@ -369,7 +388,7 @@ private struct AttachmentChip: View {
                     onRemove()
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 18))
+                        .font(Theme.Font.displaySmall())
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.5), radius: 2)
                 }
@@ -443,12 +462,12 @@ private struct AttachmentChip: View {
         ZStack(alignment: .topTrailing) {
             VStack(spacing: 2) {
                 Image(systemName: fileIconName)
-                    .font(.system(size: 20))
+                    .font(Theme.Font.displaySmall())
                     .foregroundStyle(Theme.Color.ink2)
                     .frame(maxHeight: .infinity, alignment: .bottom)
 
                 Text(attachment.fileName)
-                    .font(.system(size: 9))
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.ink)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
@@ -460,13 +479,13 @@ private struct AttachmentChip: View {
             .frame(width: 64, height: 64)
             .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
 
             Button {
                 onRemove()
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 16))
+                    .font(Theme.Font.displaySmall())
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.4), radius: 2)
             }
@@ -513,15 +532,15 @@ struct PastedTextChipRow: View {
                     ZStack(alignment: .topTrailing) {
                         VStack(spacing: 2) {
                             Image(systemName: "doc.text")
-                                .font(.system(size: 20))
+                                .font(Theme.Font.displaySmall())
                                 .foregroundStyle(Theme.Color.ink2)
                                 .frame(maxHeight: .infinity, alignment: .bottom)
 
                             Text("#\(entry.id)")
-                                .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                                .font(Theme.Font.meta().monospacedDigit())
                                 .foregroundStyle(Theme.Color.ink)
                             Text(String(format: AppLocalized("%d chars"), entry.charCount))
-                                .font(.system(size: 8))
+                                .font(Theme.Font.caption())
                                 .foregroundStyle(Theme.Color.ink)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
@@ -532,7 +551,7 @@ struct PastedTextChipRow: View {
                         .frame(width: 64, height: 64)
                         .background(Theme.Color.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
                         .contentShape(RoundedRectangle(cornerRadius: 8))
                         // The ✕ Button keeps priority for its own hit area; the
                         // rest of the card opens the read-only preview.
@@ -542,7 +561,7 @@ struct PastedTextChipRow: View {
                             onRemove(entry.id)
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 16))
+                                .font(Theme.Font.displaySmall())
                                 .foregroundStyle(.white)
                                 .shadow(color: .black.opacity(0.4), radius: 2)
                         }
@@ -744,9 +763,9 @@ private struct CodeBlockCopyButton: View {
             }
         } label: {
             Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(copied ? .green : .white.opacity(0.5))
-                .animation(.easeInOut(duration: 0.2), value: copied)
+                .font(Theme.Font.mono())
+                .foregroundStyle(copied ? Theme.Color.accent : .white.opacity(0.5))
+                .animation(DressUpMotion.quietFade(), value: copied)
         }
         .buttonStyle(.plain)
     }
@@ -874,15 +893,15 @@ struct UserAttachmentList: View {
         } label: {
             VStack(spacing: 2) {
                 Image(systemName: "doc.text")
-                    .font(.system(size: 20))
+                    .font(Theme.Font.displaySmall())
                     .foregroundStyle(Theme.Color.ink2)
                     .frame(maxHeight: .infinity, alignment: .bottom)
 
                 Text("#\(meta.pastedId ?? 0)")
-                    .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                    .font(Theme.Font.meta().monospacedDigit())
                     .foregroundStyle(Theme.Color.ink)
                 Text(String(format: AppLocalized("%d chars"), meta.pastedCharCount ?? meta.size))
-                    .font(.system(size: 8))
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -893,7 +912,7 @@ struct UserAttachmentList: View {
             .frame(width: tileSize, height: tileSize)
             .background(Theme.Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.Color.line, lineWidth: 0.5))
         }
         .buttonStyle(.plain)
     }
@@ -904,12 +923,12 @@ struct UserAttachmentList: View {
         } label: {
             VStack(spacing: 2) {
                 Image(systemName: fileIconName(for: meta.fileName))
-                    .font(.system(size: 20))
+                    .font(Theme.Font.displaySmall())
                     .foregroundStyle(Theme.Color.ink2)
                     .frame(maxHeight: .infinity, alignment: .bottom)
 
                 SearchHighlightText(meta.fileName, key: searchKey)
-                    .font(.system(size: 9))
+                    .font(Theme.Font.caption())
                     .foregroundStyle(Theme.Color.ink)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
@@ -1009,14 +1028,14 @@ struct QueuedAttachmentPreview: View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.Color.ink2)
             Text(fileName)
-                .font(.system(size: 8))
-                .foregroundStyle(.tertiary)
+                .font(Theme.Font.caption())
+                .foregroundStyle(Theme.Color.ink)
                 .lineLimit(1)
         }
         .frame(width: tileSize, height: tileSize)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.systemGray5)))
+        .background(RoundedRectangle(cornerRadius: 8).fill(Theme.Color.surface))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .opacity(0.7)
     }
@@ -1692,6 +1711,16 @@ struct PastableTextView: UIViewRepresentable {
     /// growth cap has to move with the frame.
     var maxHeightOverride: CGFloat?
 
+    /// [Phase 2 composer] The composer input font: 16.5pt through the
+    /// Theme.Font scaling path (Theme.Font.inputUIFont()), scaled
+    /// continuously by the one global 10–15pt dial exactly as message
+    /// text (FontSettings.shared.scaled(16.5)) — same size at every dial
+    /// value, so typed text does not change size on send.
+    @MainActor
+    private static func inputUIFont() -> UIFont {
+        Theme.Font.inputUIFont()
+    }
+
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -1699,7 +1728,7 @@ struct PastableTextView: UIViewRepresentable {
     func makeUIView(context: Context) -> PastableUITextView {
         let tv = PastableUITextView()
         tv.delegate = context.coordinator
-        tv.font = UIFont.systemFont(ofSize: FontSettings.shared.scaled(16.5))
+        tv.font = Self.inputUIFont()
         tv.backgroundColor = .clear
         if let maxHeightOverride { tv.maxHeight = maxHeightOverride }
         tv.isScrollEnabled = false
@@ -1768,7 +1797,7 @@ struct PastableTextView: UIViewRepresentable {
         // constraint alone still truncates at one line.
         let placeholderLabel = UILabel()
         placeholderLabel.text = placeholder
-        placeholderLabel.font = UIFont.systemFont(ofSize: FontSettings.shared.scaled(16.5))
+        placeholderLabel.font = Self.inputUIFont()
         placeholderLabel.textColor = .placeholderText
         placeholderLabel.tag = 999
         placeholderLabel.numberOfLines = 0
@@ -1942,8 +1971,8 @@ struct PastableTextView: UIViewRepresentable {
             }
         }
 
-        // Keep font in sync with FontSettings
-        let inputFont = UIFont.systemFont(ofSize: FontSettings.shared.scaled(16.5))
+        // Keep font in sync with the dial (Theme.Font scaling path).
+        let inputFont = Self.inputUIFont()
         if tv.font != inputFont {
             tv.font = inputFont
             tv.invalidateIntrinsicContentSize()
@@ -2258,7 +2287,7 @@ struct PastableTextView: UIViewRepresentable {
                 }
             }
             if animated, !UIAccessibility.isReduceMotionEnabled {
-                UIView.transition(with: label, duration: 0.25, options: .transitionCrossDissolve, animations: apply)
+                UIView.transition(with: label, duration: Theme.Motion.base, options: .transitionCrossDissolve, animations: apply)
             } else {
                 apply()
             }
@@ -2403,7 +2432,7 @@ struct PastableTextView: UIViewRepresentable {
             if UIAccessibility.isReduceMotionEnabled {
                 apply()
             } else {
-                UIView.transition(with: label, duration: 0.25,
+                UIView.transition(with: label, duration: Theme.Motion.base,
                                   options: .transitionCrossDissolve, animations: apply)
             }
             startHintCarouselIfNeeded(in: textView)
@@ -2457,7 +2486,7 @@ struct PastableTextView: UIViewRepresentable {
             if UIAccessibility.isReduceMotionEnabled {
                 apply()
             } else {
-                UIView.transition(with: label, duration: 0.25,
+                UIView.transition(with: label, duration: Theme.Motion.base,
                                   options: .transitionCrossDissolve, animations: apply)
             }
         }
@@ -2886,25 +2915,25 @@ private extension UIView {
 // MARK: - [T-ios-context-usage-hint] Tier colours for the placeholder line
 
 private extension ContextUsage.Tier {
-    /// System dynamic colours so light and dark mode both get the intended
-    /// contrast against `.placeholderText`; matches the orange the message
-    /// footer's usage capsule already uses.
+    /// [Phase 2 composer] Theme colours, not system red / orange: warning is
+    /// the accent rose, critical is the deep ink — the same pairing as the
+    /// ComposerContextGlow. Resolved from the asset catalog so light and dark
+    /// both get the intended tone against `.placeholderText`.
     ///
     /// Toned down with an alpha rather than a custom hex: the alpha is applied
     /// at draw time over the composer's own surface, so the colour tracks the
     /// light/dark appearance the way `.placeholderText` next to it does, and
-    /// it stays a recognisable system red/orange — just no longer at full
-    /// strength, which on device read as shouting inside a placeholder line.
-    /// Red keeps a slightly lower alpha than orange because it is the more
-    /// saturated hue; it still reads as the more urgent of the two.
+    /// it stays recognisable — just no longer at full strength, which on device
+    /// read as shouting inside a placeholder line. Ink keeps a slightly higher
+    /// alpha than accent because it is the more urgent of the two.
     var highlightColor: UIColor? {
         switch self {
         case .normal: return nil
-        // Orange is the lighter hue, so it needs the lower alpha to sit at the
-        // same restraint as the red — on device 0.65 still read brighter than
-        // the 0.60 red beside it.
-        case .warning: return UIColor.systemOrange.withAlphaComponent(0.50)
-        case .critical: return UIColor.systemRed.withAlphaComponent(0.60)
+        // Accent is the lighter hue, so it needs the lower alpha to sit at the
+        // same restraint as the ink — on device 0.65 still read brighter than
+        // the 0.60 ink beside it.
+        case .warning: return UIColor(named: "Accent")?.withAlphaComponent(0.50)
+        case .critical: return UIColor(named: "TextPrimary")?.withAlphaComponent(0.60)
         }
     }
 }

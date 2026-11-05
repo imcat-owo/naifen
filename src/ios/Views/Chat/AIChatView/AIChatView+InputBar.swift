@@ -81,14 +81,18 @@ extension AIChatView {
             if vm.isSuspended {
                 HStack(spacing: 8) {
                     ProgressView()
-                        .tint(.yellow)
+                        // [Phase 2 composer] No yellow: the spinner is the
+                        // Theme accent (decorative, not text).
+                        .tint(Theme.Color.accent)
                     Text("Waiting for other tasks to complete...")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
+                        .font(Theme.Font.body())
+                        // [Phase 2 composer] 13pt body text is ink: ink-2 is
+                        // 4.09:1 in light mode and locked out of body sizes.
+                        .foregroundStyle(Theme.Color.ink)
                 }
                 .padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
-                .background(Color.yellow.opacity(0.08))
+                .background(Theme.Color.surface2)
             }
 
             // [T-ios-chat-body-stack-erase] Same as body: erase the composer
@@ -136,7 +140,8 @@ extension AIChatView {
                     .padding(.horizontal, 12)
                     .padding(.bottom, 10)
             })
-            .contentShape(RoundedRectangle(cornerRadius: 20))
+            // [Phase 2 composer] Hit shape matches ComposerSurface's radius.
+            .contentShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
             .onTapGesture { inputFocused = true }
             .onReceive(speechManager.$recognizedText) { text in
                 guard speechManager.state == .recording || !text.isEmpty else { return }
@@ -156,9 +161,12 @@ extension AIChatView {
                 // to Provider-import). Gate on real movable content so the pill
                 // doesn't linger over an empty composer. [T-ios-moveto-empty-content]
                 if hasInjectedShareContent && hasMovableShareContent {
+                    // Justified 44pt exception: a 44pt hit rect would block text-field taps under this transient overlay.
                     Button { showMoveToSheet = true } label: {
                         Label("Move to…", systemImage: "arrow.right.circle")
-                            .font(.system(size: 11, weight: .medium))
+                            // [Phase 2 composer] 11pt medium -> caption
+                            // (11pt, nearest Theme.Font role).
+                            .font(Theme.Font.caption())
                             .foregroundStyle(Theme.Color.ink)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -476,7 +484,9 @@ extension AIChatView {
                                     performSend()
                                 }
                             }
-                            withAnimation(.easeOut(duration: 0.18)) {
+                            // [Phase 2 composer] Hint reset on the base
+                            // token duration (0.20s).
+                            withAnimation(.easeOut(duration: Theme.Motion.base)) {
                                 sendSwipeProgress = 0
                             }
                         } else if swipedUp && !hasText && !inputFocused {
@@ -498,13 +508,19 @@ extension AIChatView {
             )
         }
         .background(
-            // Fade from transparent (top) to solid background (bottom half)
-            // so scrolling content doesn't bleed through below the input bar,
+            // Fade from transparent (top) to a dimmed background (bottom) so
+            // scrolling content doesn't bleed through below the input bar,
             // while keeping the gap between tool status bar and input bar clear.
+            // [Phase 2 composer] The bottom stop is the plan's legibility
+            // scrim (background at 60%), not a solid fill: the wallpaper runs
+            // full-bleed under the composer with no solid white margin, and
+            // the fade still hides scrolling content progressively. Over the
+            // plain porcelain background (no wallpaper yet) the 60% stop
+            // reads the same as before.
             LinearGradient(
                 stops: [
                     .init(color: Theme.Color.background.opacity(0), location: 0),
-                    .init(color: Theme.Color.background, location: 0.8),
+                    .init(color: Theme.Color.background.opacity(0.6), location: 0.8),
                 ],
                 startPoint: .top,
                 endPoint: .bottom

@@ -194,6 +194,21 @@ enum Theme {
             return SwiftUI.Font.system(size: scaled, weight: .regular, design: .monospaced)
         }
 
+        // UIKit input font — the 16.5pt message size as a UIFont, scaled
+        // CONTINUOUSLY by the one global dial exactly as
+        // FontSettings.shared.scaled(16.5) does: 16.5 * bodySize / 13.
+        // Single source for the composer input (and its placeholder); the
+        // system font is the fallback, as in serif() above.
+        // No 11pt floor in this path: at the dial minimum (10pt) this is
+        // 12.69pt, so the floor in scaled(_:) never engages. Do NOT route
+        // through UIFontMetrics here: its stepped .body sizes (15/17/23pt)
+        // diverge from message text (+1.87pt at dial 10, +3.28pt at dial
+        // 15), so typed text visibly changed size on send.
+        @MainActor
+        static func inputUIFont() -> UIFont {
+            UIFont.systemFont(ofSize: 16.5 * FontSettings.shared.scaleFactor)
+        }
+
         // MARK: - Private helpers
 
         // Single source of the Fraunces display-face name: both serif()

@@ -85,6 +85,15 @@ struct ChatSendButton: View {
     /// closure kept from the first render would see frozen.
     @State private var stopActionBox = SendPrimaryActionBox()
 
+    /// [Phase 2 composer] Sensory-feedback triggers, one per action, so a
+    /// tap fires exactly one matching feedback: send .success, enqueue
+    /// .selection, stop .warning. The triggers live here (not in the press
+    /// style) so the iOS 26 Menu path and the iOS 16–25 Button path share
+    /// one feedback source and a tap never fires twice.
+    @State private var sendFeedbackTrigger = false
+    @State private var enqueueFeedbackTrigger = false
+    @State private var stopFeedbackTrigger = false
+
     /// True when this conversation owns a timer that will still fire.
     private var hasLiveScheduled: Bool {
         guard let sid = vm.sessionId else { return false }
@@ -111,22 +120,23 @@ struct ChatSendButton: View {
             // waits for recognition the button would otherwise still look like
             // Send (or Queue) and take taps for seconds with nothing visible
             // happening, which reads as "the tap did not register". Not a control:
-            // nothing to press, so nothing to press twice. Same 34 pt footprint as
+            // nothing to press, so nothing to press twice. Same 44 pt footprint as
             // the glyphs below, so the row does not move.
             if isWaitingToSendVoice {
                 ZStack {
                     Image(systemName: "circle.fill")
-                        .font(.system(size: 34))
+                        .font(Theme.Font.displayExtraLarge())
                         .foregroundStyle(Theme.Color.ink2)
                     ProgressView()
                         .controlSize(.small)
                 }
+                .frame(minWidth: 44, minHeight: 44)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text("Transcribing, then sending…", comment: "Voice input: status while a tapped Send waits for speech recognition to finish"))
             } else if vm.isProcessing && canEnqueue {
-                returnModeMenu(primaryAction: onEnqueue) {
+                returnModeMenu(primaryAction: { enqueueFeedbackTrigger.toggle(); onEnqueue() }) {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 34))
+                        .font(Theme.Font.displayExtraLarge())
                         .foregroundStyle(Theme.Color.ink)
                 }
                 .accessibilityLabel(Text("Add to queue", comment: "VoiceOver label for the send button while a reply is generating"))
@@ -138,6 +148,7 @@ struct ChatSendButton: View {
                 // [T-stop-mode-longpress] Tap stops; long-press picks between
                 // stopping at once and confirming first.
                 stopModeMenu(primaryAction: {
+                    stopFeedbackTrigger.toggle()
                     // [T-scheduled-stop-confirm] Stop now also cancels this
                     // conversation's scheduled tasks (see AIChatViewModel.cancel),
                     // which is a bigger, less reversible action than stopping a
@@ -160,8 +171,11 @@ struct ChatSendButton: View {
                     }
                 }) {
                     Image(systemName: "stop.circle.fill")
-                        .font(.system(size: 34))
-                        .foregroundStyle(.red)
+                        .font(Theme.Font.displayExtraLarge())
+                        // [Phase 2 composer] Stop is ink, never red: the
+                        // milk-pink set has no red stop; ink reads on the
+                        // porcelain surface at 8.74:1 light / 15.11:1 dark.
+                        .foregroundStyle(Theme.Color.ink)
                 }
                 // Hosted here rather than on the chat root: this button owns the
                 // decision, and the existing "Task Running" alert up there belongs
@@ -204,14 +218,22 @@ struct ChatSendButton: View {
                 // disabled control also ignores the long-press, and the menu must
                 // open from the grey button too (switching Return mode before
                 // typing is the common case). The tap is gated instead.
-                returnModeMenu(primaryAction: { if canSend { onSend() } }) {
+                returnModeMenu(primaryAction: { if canSend { sendFeedbackTrigger.toggle(); onSend() } }) {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 34))
+                        .font(Theme.Font.displayExtraLarge())
                         .foregroundStyle(canSend ? Theme.Color.ink : Theme.Color.ink2)
                 }
                 .accessibilityLabel(Text("Send", comment: "VoiceOver label for the send button"))
             }
         }
+        // [Phase 2 composer] One matching feedback per action, on every iOS
+        // path: send .success, enqueue .selection, stop .warning. The press
+        // spring lives in ComposerPressButtonStyle (Button paths only — the
+        // iOS 26 Menu owns its own press); feedback is trigger-based here so
+        // it fires exactly once per tap on both paths.
+        .sensoryFeedback(.success, trigger: sendFeedbackTrigger)
+        .sensoryFeedback(.selection, trigger: enqueueFeedbackTrigger)
+        .sensoryFeedback(.warning, trigger: stopFeedbackTrigger)
         // [T-stop-confirm] Close the confirmation when what it would stop
         // is gone. Observed on the publisher rather than via onChange so a
         // turn that ends and is immediately followed by a queued one
@@ -256,7 +278,11 @@ struct ChatSendButton: View {
             // a UIKit button whose tap never reached the action — Send did
             // nothing at all, even with a live action box. A Button always
             // taps; `.contextMenu` still opens from the button on long-press.
-            Button(action: primaryAction) { label() }
+            // [Phase 2 composer] 44pt hit area: the 32pt glyph keeps its
+            // visual size; the frame widens the tappable rect. Press spring
+            // is Theme.Motion.press (0.3 / 0.6) via ComposerPressButtonStyle.
+            Button(action: primaryAction) { label().frame(minWidth: 44, minHeight: 44).contentShape(Rectangle()) }
+                .buttonStyle(ComposerPressButtonStyle())
                 .keyboardShortcut(.return, modifiers: .command)
                 .contextMenu { returnModePicker }
                 .accessibilityAction(named: Text("Return key options", comment: "VoiceOver action on the send button that opens the Return-key mode menu")) {
@@ -284,7 +310,11 @@ struct ChatSendButton: View {
         return Menu {
             returnModePicker
         } label: {
-            label()
+            // [Phase 2 composer] 44pt hit area (see the Button branch above).
+            // No custom press spring here: the iOS 26 Menu owns its press
+            // (glass morph); the trigger-based .sensoryFeedback on the Group
+            // still fires the matching feedback for the action.
+            label().frame(minWidth: 44, minHeight: 44).contentShape(Rectangle())
         } primaryAction: { [primaryActionBox] in
             primaryActionBox.action()
         }
@@ -312,7 +342,10 @@ struct ChatSendButton: View {
         if #available(iOS 26, *) {
             glassStopModeMenu(primaryAction: primaryAction, label: label)
         } else {
-            Button(action: primaryAction) { label() }
+            // [Phase 2 composer] 44pt hit area + Theme.Motion.press spring,
+            // as in returnModeMenu's Button branch.
+            Button(action: primaryAction) { label().frame(minWidth: 44, minHeight: 44).contentShape(Rectangle()) }
+                .buttonStyle(ComposerPressButtonStyle())
                 .contextMenu { stopModePicker }
                 .accessibilityAction(named: Text("Stop button options", comment: "VoiceOver action on the stop button that switches between stopping at once and confirming first")) {
                     setStopMode(confirm: !confirmBeforeStopping)
@@ -327,7 +360,8 @@ struct ChatSendButton: View {
         return Menu {
             stopModePicker
         } label: {
-            label()
+            // [Phase 2 composer] 44pt hit area (see glassReturnModeMenu).
+            label().frame(minWidth: 44, minHeight: 44).contentShape(Rectangle())
         } primaryAction: { [stopActionBox] in
             stopActionBox.action()
         }
@@ -363,6 +397,28 @@ struct ChatSendButton: View {
         returnKeyBehavior = mode
         UISelectionFeedbackGenerator().selectionChanged()
         minisLogger.info("[ReturnMode] set from send-button menu: \(mode == 1 ? "send" : "newline")")
+    }
+}
+
+// MARK: - Composer press style (Phase 2 composer)
+
+/// Press feedback for the composer's send / stop Buttons on the iOS 16–25
+/// path (the iOS 26 path is a Menu, which owns its own press).
+///
+/// Scale only, on the Theme.Motion.press spring (response 0.3 / damping
+/// 0.6); Reduce Motion holds scale at 1. No sensory feedback here: the
+/// action's own trigger-based `.sensoryFeedback` on ChatSendButton's Group
+/// is the single feedback source, so one tap never fires twice.
+/// This is DressUpPressButtonStyle's scale half without its feedback half —
+/// kept separate so the two never double-fire on the same tap.
+private struct ComposerPressButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? DressUpMotion.pressedScale : 1)
+            .animation(DressUpMotion.animation(for: .press, reduceMotion: reduceMotion),
+                       value: configuration.isPressed)
     }
 }
 

@@ -31,14 +31,19 @@ extension AIChatView {
         // [T-ios-voiceover-labels] Labelled on the shared `icon` so both the
         // iOS 17 Menu branch and the iOS 16 confirmationDialog branch below
         // announce the same thing; otherwise VoiceOver reads "plus".
+        // [Phase 2 composer] The 34pt disc keeps its visual size; the outer
+        // frame widens the hit area to 44pt. Glyph 18pt -> Theme.Font
+        // displaySmall (20pt, nearest role).
         let icon = Image(systemName: "plus")
-            .font(.system(size: 18, weight: .medium))
+            .font(Theme.Font.displaySmall())
             .foregroundStyle(Theme.Color.ink2)
             .frame(width: 34, height: 34)
             .accessibilityLabel(Text("Add attachment", comment: "VoiceOver label for the attachment button"))
             .background(Theme.Color.surface2)
             .clipShape(Circle())
             .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Circle())
 
         if #available(iOS 17, *) {
             Menu {
@@ -82,11 +87,11 @@ extension AIChatView {
         return AnyView(row)
     }
 
-    /// [T-ios-de-voice-toolbar] Fixed controls in `inputBottomRow`: two 34pt
-    /// leading buttons, the 34pt mic and the 34pt send button, plus the four
+    /// [T-ios-de-voice-toolbar] Fixed controls in `inputBottomRow`: two 44pt
+    /// leading buttons, the 44pt mic and the 44pt send button, plus the four
     /// 12pt HStack gaps between them. Everything left over is what the
     /// read-aloud capsule may use.
-    private static let readAloudRowFixedWidth: CGFloat = 34 * 4 + 12 * 4
+    private static let readAloudRowFixedWidth: CGFloat = 44 * 4 + 12 * 4
 
     /// Free width below which the toggle drops its text and becomes icon-only.
     ///
@@ -102,9 +107,10 @@ extension AIChatView {
     /// drops under 130pt, where even a short label would be cramped against
     /// the mic and send buttons, does the text go entirely.
     ///
-    /// Effect per device (usable = width − 24 side padding − 184 fixed):
-    /// 320pt SE → 112pt → icon-only (the reported German case);
-    /// 375pt mini → 167pt, 393pt → 185pt, 430pt → 222pt → label kept.
+    /// Effect per device (usable = width − 24 side padding − 224 fixed):
+    /// 320pt SE → 72pt → icon-only (the reported German case);
+    /// 375pt mini → 127pt → icon-only;
+    /// 393pt → 145pt, 430pt → 182pt → label kept.
     private static let readAloudLabelMinWidth: CGFloat = 130
 
     /// Whether the read-aloud toggle shows its text label.
@@ -127,10 +133,12 @@ extension AIChatView {
     private var readAloudToolbarToggle: some View {
         // Source of truth = vm.speakEnabled (also driven by the floating speaker's
         // tap-cycle / long-press-off), so this toggle reflects those changes too.
-        // Three states, in lockstep with the global voice-output capsule:
-        //  • disabled  (!isEnabled)        → gray, slashed speaker
-        //  • muted     (isEnabled & muted) → accent, slashed speaker
-        //  • active    (isEnabled & !muted)→ accent, wave speaker
+        // Three states, in lockstep with the global voice-output capsule.
+        // Text is ink in all three (accent is locked never-text); the fill
+        // tint + glyph carry the state:
+        //  • disabled  (!isEnabled)        → ink-tint fill, slashed speaker
+        //  • muted     (isEnabled & muted) → accent-tint fill, slashed speaker
+        //  • active    (isEnabled & !muted)→ accent-tint fill, wave speaker
         let on = voiceOutput.isEnabled
         let muted = voiceOutput.isMuted
         return Button {
@@ -157,7 +165,7 @@ extension AIChatView {
                 // for VoiceOver and would otherwise be read as
                 // "speaker wave 2 fill".
                 Image(systemName: (on && !muted) ? "speaker.wave.2.fill" : "speaker.slash.fill")
-                    .font(.system(size: 12))
+                    .font(Theme.Font.mono())
                     .frame(width: 16)
                     .accessibilityHidden(true)
                 // [T-ios-de-voice-toolbar] The label is the only part of this
@@ -180,13 +188,23 @@ extension AIChatView {
                         .transition(.opacity)
                 }
             }
-            .foregroundStyle(on ? Color.accentColor : .secondary)
+            // [Phase 2 composer] On/off text is ink in both states: the
+            // accent is 2.91:1 on the porcelain surface and locked never-text.
+            // State is carried by the capsule fill tint + the glyph (wave vs
+            // slash) + the VoiceOver value below, not by text colour.
+            .foregroundStyle(Theme.Color.ink)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(
-                Capsule().fill(on ? Color.accentColor.opacity(0.15)
-                                  : Color.secondary.opacity(0.10))
+                Capsule().fill(on ? Theme.Color.accent.opacity(0.15)
+                                  : Theme.Color.ink.opacity(0.10))
             )
+            // [Phase 2 composer] 44pt hit area: the capsule keeps its visual
+            // height; the frame widens the tappable rect. minWidth covers
+            // the icon-only fallback (label dropped): without it the capsule
+            // is ~36pt wide when the glyph stands alone.
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Capsule())
         }
         .buttonStyle(.plain)
         // [T-ios-de-voice-toolbar] Name the control explicitly. It used to be
@@ -220,15 +238,25 @@ extension AIChatView {
                 inputFocused = true
             }
         } label: {
+            // [Phase 2 composer] "/" is display text: Fraunces serif via
+            // Theme.Font.displaySmall (20pt, nearest role to the old 18pt
+            // rounded) keeps the Rococo display language. The 34pt disc
+            // keeps its visual size; the outer frame widens the hit area
+            // to 44pt.
             Text("/")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(Theme.Font.displaySmall())
                 .italic()
                 .foregroundStyle(Theme.Color.ink2)
                 .frame(width: 34, height: 34)
                 .background(Theme.Color.surface2)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Circle())
         }
+        // [Phase 2 composer] Feedback on open only: the plain trigger fires
+        // on dismiss too, including programmatic dismiss.
+        .sensoryFeedback(.selection, trigger: vm.showSlashMenu) { _, isOpen in isOpen }
     }
 
     /// "Exit Edit Mode" capsule shown while editing a past message.
@@ -237,13 +265,18 @@ extension AIChatView {
             vm.cancelEdit()
         } label: {
             Text("Exit Edit Mode", comment: "Cancel message editing")
-                .font(.system(size: 13, weight: .medium))
+                // [Phase 2 composer] 13pt medium -> bodyEmphasized (13pt
+                // semibold, nearest Theme.Font role). The capsule keeps its
+                // visual height; the frame widens the hit area to 44pt.
+                .font(Theme.Font.bodyEmphasized())
                 .foregroundStyle(Theme.Color.ink)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(Theme.Color.surface2)
                 .clipShape(Capsule())
                 .overlay(Capsule().stroke(Theme.Color.line, lineWidth: 0.5))
+                .frame(minHeight: 44)
+                .contentShape(Capsule())
         }
     }
 
@@ -253,12 +286,17 @@ extension AIChatView {
             speechManager.showLanguagePicker = true
         } label: {
             Text(speechManager.languageLabel)
-                .font(.system(size: 12, weight: .semibold))
+                // [Phase 2 composer] 12pt semibold -> bodyEmphasized (13pt
+                // semibold, nearest Theme.Font role). The 34pt disc keeps
+                // its visual size; the outer frame widens the hit area to 44pt.
+                .font(Theme.Font.bodyEmphasized())
                 .foregroundStyle(Theme.Color.ink)
                 .frame(width: 34, height: 34)
                 .background(Theme.Color.surface2)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Circle())
         }
     }
 
@@ -271,7 +309,8 @@ extension AIChatView {
                 // composer mirrors it, so clearing here would empty the input
                 // box and lose the dictated text on the way back to keyboard.
                 voiceVM.reset(clearTranscript: false)
-                withAnimation(.easeInOut(duration: 0.2)) { voiceInputActive = false }
+                // [Phase 2 composer] Panel collapse on the motion spring.
+                withAnimation(Theme.Motion.springMotion) { voiceInputActive = false }
             } else {
                 // Mark the composition as voice-assisted (committed to the
                 // "voice" input-mode preference only at send time). Switch the
@@ -280,7 +319,8 @@ extension AIChatView {
                 // Switching text→voice opens the panel expanded this one time;
                 // afterwards it resumes the remembered expand/compact state.
                 VoiceModePreference.shared.enteredFromText = true
-                withAnimation(.easeInOut(duration: 0.2)) { voiceInputActive = true }
+                // [Phase 2 composer] Panel expand on the motion spring.
+                withAnimation(Theme.Motion.springMotion) { voiceInputActive = true }
             }
         }, isVoiceActive: voiceInputActive)
     }
@@ -364,7 +404,9 @@ extension AIChatView {
                         .frame(height: min(max(transcriptHeight, 22), transcriptMaxHeight))
                         .onPreferenceChange(TranscriptHeightKey.self) { transcriptHeight = $0 }
                         .onReceive(speechManager.$recognizedText) { _ in
-                            withAnimation(.linear(duration: 0.1)) {
+                            // [Phase 2 composer] Scroll nudge on the fast
+                            // token duration (0.06s linear).
+                            withAnimation(.linear(duration: Theme.Motion.fast)) {
                                 proxy.scrollTo("transcriptTail", anchor: .bottom)
                             }
                         }
@@ -511,7 +553,8 @@ extension AIChatView {
     /// dragged composer grows rather than collapsing unexpectedly.
     private func toggleComposerHeight() {
         let isExpanded = currentComposerHeight >= composerMaxHeight - 0.5
-        withAnimation(.easeOut(duration: 0.2)) {
+        // [Phase 2 composer] Height toggle on the motion spring.
+        withAnimation(Theme.Motion.springMotion) {
             persistComposerHeight(isExpanded ? Self.composerDefaultHeight : composerMaxHeight)
         }
     }
