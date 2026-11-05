@@ -1,7 +1,7 @@
 // EnvironmentKey-driven theme injection, so screens read the theme from the
 // environment instead of reaching for tokens through string literals.
-// Apply once at the app root via .withTheme(). NOT wired into the app yet —
-// wiring at the app root is a Phase 1 task, not a token task.
+// Applied once at the app root via .withTheme() (MinisApp.swift,
+// WindowGroup). Do not call it anywhere else.
 
 import SwiftUI
 
@@ -48,7 +48,12 @@ struct ThemeModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(\.theme, context)
-            .tint(context.accent)
+            // NOTE (2026-11-05, wiring review fix): NO root .tint(accent) here.
+            // Accent on background is 2.91:1 light and locked "never text"
+            // (Tokens.swift header); a root tint turns ~178 text buttons
+            // accent-colored and illegible. Tint must be applied explicitly
+            // per control in Phase 2 migration, only where the control is
+            // non-text (or its text is ink on an accent fill).
             .foregroundStyle(Theme.Color.ink)
             // Honor Dynamic Type — never lock the user out of larger sizes.
             .dynamicTypeSize(.xSmall ... .accessibility5)
