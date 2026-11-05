@@ -162,6 +162,10 @@ enum Theme {
         static func displayExtraLarge() -> SwiftUI.Font { serif(size: 32, relativeTo: .largeTitle) }
 
         // Body — SF Pro / PingFang SC, 13pt default, whole 10–15 dial scales together
+        // The 13pt base IS the one global dial's default (FontSettings.bodySize):
+        // the app root applies the dial as .dynamicTypeSize and UIFontMetrics
+        // scales each role from there, so body() needs no dial read of its own.
+        // Keep this 13 in sync with FontSettings.defaultBodySize.
         static func body() -> SwiftUI.Font { sans(size: 13, relativeTo: .body) }
         static func bodyEmphasized() -> SwiftUI.Font { sans(size: 13, relativeTo: .body, weight: .semibold) }
 
