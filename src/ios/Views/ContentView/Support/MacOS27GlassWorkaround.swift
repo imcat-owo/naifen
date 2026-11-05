@@ -84,7 +84,7 @@ enum MacOS27GlassWorkaround {
 }
 
 /// See MacOS27GlassWorkaround. The choice of `background` matters:
-/// - The detail column MUST use an opaque colour (`ChatColors.background`) —
+/// - The detail column MUST use an opaque colour (`Theme.Color.background`) —
 ///   its backdrop does not render in an active window, so any Material would
 ///   fail the same way.
 /// - The sidebar uses `Material.bar`: the sidebar column's backdrop DOES render
