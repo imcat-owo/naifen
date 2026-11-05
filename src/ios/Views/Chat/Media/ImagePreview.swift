@@ -428,7 +428,7 @@ struct ImagePreviewView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 44, height: 44)
                             .contentShape(Circle())
                             .background(.ultraThinMaterial, in: Circle())
@@ -447,7 +447,7 @@ struct ImagePreviewView: View {
                     } label: {
                         Image(systemName: copyDone ? "checkmark" : "doc.on.doc")
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(copyDone ? .green : ChatColors.primaryText)
+                            .foregroundStyle(copyDone ? .green : Theme.Color.ink)
                             .frame(width: 44, height: 44)
                             .contentShape(Circle())
                             .background(.ultraThinMaterial, in: Circle())
@@ -465,7 +465,7 @@ struct ImagePreviewView: View {
                                     .offset(y: -1)
                             case .saving:
                                 ProgressView()
-                                    .tint(ChatColors.primaryText)
+                                    .tint(Theme.Color.ink)
                             case .saved:
                                 Image(systemName: "checkmark")
                                     .foregroundStyle(.green)
@@ -474,7 +474,7 @@ struct ImagePreviewView: View {
                             }
                         }
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .frame(width: 44, height: 44)
                         .contentShape(Circle())
                         .background(.ultraThinMaterial, in: Circle())
@@ -490,7 +490,7 @@ struct ImagePreviewView: View {
                     } label: {
                         Image(systemName: "printer")
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 44, height: 44)
                             .contentShape(Circle())
                             .background(.ultraThinMaterial, in: Circle())
@@ -506,7 +506,7 @@ struct ImagePreviewView: View {
                         Image(systemName: "square.and.arrow.up")
                             .offset(y: -1)
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(ChatColors.primaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .frame(width: 44, height: 44)
                             .contentShape(Circle())
                             .background(.ultraThinMaterial, in: Circle())
@@ -562,7 +562,7 @@ struct AsyncImagePreviewView: View {
                 } label: {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .frame(width: 44, height: 44)
                         .contentShape(Circle())
                         .background(.ultraThinMaterial, in: Circle())
