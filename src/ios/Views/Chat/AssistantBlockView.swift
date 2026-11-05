@@ -32,7 +32,7 @@ struct AssistantBlockView: View {
                     .padding(.vertical, 2)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(ChatColors.accent.opacity(isHighlighted ? 0.10 : 0))
+                            .fill(Theme.Color.accent.opacity(isHighlighted ? 0.10 : 0))
                     )
             }
         case .thinking:
@@ -106,7 +106,7 @@ struct AssistantBlockView: View {
                 ForEach(Array(displayReasons.enumerated()), id: \.offset) { i, line in
                     SearchHighlightText(line, blockId: block.id, field: .line(i), messageId: message.id)
                         .font(.system(size: 10))
-                        .foregroundStyle(ChatColors.primaryText.opacity(0.45))
+                        .foregroundStyle(Theme.Color.ink.opacity(0.45))
                         .lineLimit(2)
                 }
                 if let switchedLine {
@@ -116,7 +116,7 @@ struct AssistantBlockView: View {
                             .foregroundStyle(.orange.opacity(0.8))
                         SearchHighlightText(switchedLine, blockId: block.id, field: .title, messageId: message.id)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(ChatColors.primaryText.opacity(0.75))
+                            .foregroundStyle(Theme.Color.ink)
                             .lineLimit(2)
                     }
                 }
@@ -401,13 +401,13 @@ struct ToolCapsuleView: View {
                         // leaving it in the default colour made these read as
                         // ordinary tool calls that happened to have a purple
                         // glyph, which is what the report is about.
-                        .foregroundStyle(isSubAgentControl ? accentColor : ChatColors.primaryText)
+                        .foregroundStyle(isSubAgentControl ? accentColor : Theme.Color.ink)
                         .lineLimit(1)
                     if isStreaming {
                         ForEach(0..<3, id: \.self) { i in
                             Text(".")
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(ChatColors.primaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .offset(y: dotsActive ? -2 : 1)
                                 .animation(
                                     .easeInOut(duration: 0.35)
@@ -427,7 +427,7 @@ struct ToolCapsuleView: View {
                 if let dur = durationText {
                     Text(dur)
                         .font(.system(size: 11, weight: .regular, design: .monospaced))
-                        .foregroundStyle(ChatColors.tertiaryText)
+                        .foregroundStyle(Theme.Color.ink)
                 }
 
                 // Stop button for running commands
@@ -464,7 +464,7 @@ struct ToolCapsuleView: View {
             )
             .overlay(
                 Capsule()
-                    .stroke(ChatColors.toolBorder, lineWidth: 0.5)
+                    .stroke(Theme.Color.line.opacity(0.5), lineWidth: 0.5)
             )
             .contentShape(Capsule())
             .onTapGesture {
@@ -737,7 +737,7 @@ struct ToolGroupRowView: View {
                 }
             }
             .font(.system(size: 13))
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink)
             .lineLimit(1)
             .padding(.horizontal, 4)
             .frame(height: Self.rowHeight)
@@ -1059,7 +1059,7 @@ struct ThinkingBlockView: View {
                             // streaming finished.
                             let thinkingText = Text(displayContent)
                                 .font(.system(size: 13))
-                                .foregroundStyle(ChatColors.tertiaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .lineSpacing(3)
                             Group {
                                 if isStreaming {
@@ -1319,7 +1319,7 @@ struct TypingIndicator: View {
             soulName = n.isEmpty ? "Minis" : n
         }
         .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(ChatColors.tertiaryText)
+        .foregroundStyle(Theme.Color.ink)
         .padding(.top, 0)
         .onAppear {
             for i in 0..<3 {
