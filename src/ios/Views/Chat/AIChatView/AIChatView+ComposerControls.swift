@@ -33,12 +33,12 @@ extension AIChatView {
         // announce the same thing; otherwise VoiceOver reads "plus".
         let icon = Image(systemName: "plus")
             .font(.system(size: 18, weight: .medium))
-            .foregroundStyle(ChatColors.secondaryText)
+            .foregroundStyle(Theme.Color.ink2)
             .frame(width: 34, height: 34)
             .accessibilityLabel(Text("Add attachment", comment: "VoiceOver label for the attachment button"))
-            .background(ChatColors.inputIconBg)
+            .background(Theme.Color.surface2)
             .clipShape(Circle())
-            .overlay(Circle().stroke(ChatColors.inputIconBorder, lineWidth: 0.5))
+            .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
 
         if #available(iOS 17, *) {
             Menu {
@@ -223,11 +223,11 @@ extension AIChatView {
             Text("/")
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .italic()
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink2)
                 .frame(width: 34, height: 34)
-                .background(ChatColors.inputIconBg)
+                .background(Theme.Color.surface2)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(ChatColors.inputIconBorder, lineWidth: 0.5))
+                .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
         }
     }
 
@@ -238,12 +238,12 @@ extension AIChatView {
         } label: {
             Text("Exit Edit Mode", comment: "Cancel message editing")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(ChatColors.inputIconBg)
+                .background(Theme.Color.surface2)
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(ChatColors.inputIconBorder, lineWidth: 0.5))
+                .overlay(Capsule().stroke(Theme.Color.line, lineWidth: 0.5))
         }
     }
 
@@ -254,11 +254,11 @@ extension AIChatView {
         } label: {
             Text(speechManager.languageLabel)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(ChatColors.secondaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .frame(width: 34, height: 34)
-                .background(ChatColors.inputIconBg)
+                .background(Theme.Color.surface2)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(ChatColors.inputIconBorder, lineWidth: 0.5))
+                .overlay(Circle().stroke(Theme.Color.line, lineWidth: 0.5))
         }
     }
 
@@ -353,7 +353,7 @@ extension AIChatView {
                         ScrollView(.vertical, showsIndicators: true) {
                             Text(speechManager.recognizedText)
                                 .font(.subheadline)
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .multilineTextAlignment(.center)
                                 .frame(maxWidth: .infinity)
                                 .background(GeometryReader { geo in
@@ -482,7 +482,7 @@ extension AIChatView {
     /// translation is negated. Double-tapping toggles between the two extremes.
     private var composerResizeHandle: some View {
         Capsule()
-            .fill(ChatColors.secondaryText.opacity(0.35))
+            .fill(Theme.Color.ink2.opacity(0.35))
             .frame(width: 36, height: 5)
             .padding(.top, 4)
             .contentShape(Rectangle().inset(by: -12))  // enlarge the hit area
