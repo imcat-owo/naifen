@@ -13,38 +13,51 @@ import SwiftUI
 
 // MARK: - Session Row
 
-/// category → (SF Symbol, color) for a session's list icon.
+/// category → (SF Symbol, accent) for a session's list icon.
 ///
-/// Single source of truth shared by `SessionRow`, `RemoteSessionRow`, and the
-/// folder header's composed icon (which stacks the top members' glyphs). It
-/// was previously duplicated as two identical private computed properties on
-/// the row structs; the composed icon made a third copy untenable.
+/// Single source of truth shared by `SessionRow`, `RemoteSessionRow`, the
+/// folder header's composed icon (`FolderComposedIcon`, via `FolderGlyph`),
+/// and the `SessionEditSheet` category grid — which derives its icon + color
+/// from here and keeps only key → label. It was previously duplicated as two
+/// identical private computed properties on the row structs, plus the edit
+/// sheet's own 16-entry copy; the composed icon made a third copy untenable.
 /// Pure function — safe to call from the `groupedSessions` aggregation pass.
+///
+/// One accent family only (milk pink): every category returns
+/// `Theme.Color.accent`. The glyph SHAPE is what distinguishes categories —
+/// never a rainbow hue (plan §F.8: no orange/blue/teal/pink/green/purple/
+/// cyan/red/gray category colors). The glyph itself renders in
+/// `Theme.Color.ink` on the accent tint (accent-on-its-own-tint is 2.45:1 in
+/// light mode, below the 3:1 non-text bar; ink-on-tint is 7.36:1).
 func sessionCategoryIcon(for category: String?) -> (systemName: String, color: Color) {
+    let glyph: String
     switch category {
-    case "code":         return ("terminal.fill", .orange)
-    case "writing":      return ("doc.text.fill", .blue)
-    case "research":     return ("globe.americas.fill", .teal)
-    case "analysis":     return ("chart.pie.fill", .indigo)
-    case "creative":     return ("paintbrush.pointed.fill", .pink)
-    case "chat":         return ("bubble.left.fill", .green)
-    case "math":         return ("number.circle.fill", .purple)
-    case "translation":  return ("character.bubble", .cyan)
-    case "health":       return ("heart.fill", .red)
-    case "finance":      return ("banknote.fill", .mint)
-    case "travel":       return ("map.fill", .orange)
-    case "education":    return ("book.closed.fill", .blue)
-    case "design":       return ("paintpalette.fill", .pink)
-    case "productivity": return ("calendar.badge.checkmark", .yellow)
-    case "support":      return ("gearshape.fill", .brown)
-    case "other":        return ("square.grid.2x2.fill", .gray)
-    default:             return ("bubble.left.fill", .gray)
+    case "code":         glyph = "terminal.fill"
+    case "writing":      glyph = "doc.text.fill"
+    case "research":     glyph = "globe.americas.fill"
+    case "analysis":     glyph = "chart.pie.fill"
+    case "creative":     glyph = "paintbrush.pointed.fill"
+    case "chat":         glyph = "bubble.left.fill"
+    case "math":         glyph = "number.circle.fill"
+    case "translation":  glyph = "character.bubble"
+    case "health":       glyph = "heart.fill"
+    case "finance":      glyph = "banknote.fill"
+    case "travel":       glyph = "map.fill"
+    case "education":    glyph = "book.closed.fill"
+    case "design":       glyph = "paintpalette.fill"
+    case "productivity": glyph = "calendar.badge.checkmark"
+    case "support":      glyph = "gearshape.fill"
+    case "other":        glyph = "square.grid.2x2.fill"
+    default:             glyph = "bubble.left.fill"
     }
+    return (glyph, Theme.Color.accent)
 }
 
 /// Folder icon composed from the folder's top member glyphs: a rounded-rect
 /// "group" container tinted with the first member's category color, holding up
-/// to 3 distinct category symbols. Empty folder → plain gray folder glyph.
+/// to 3 distinct category symbols. Empty folder → ink glyph on an ink-2
+/// tint disc (0.28): `tint` falls back to `Theme.Color.ink2` when the
+/// folder has no member glyphs.
 /// Pure rendering — the glyph selection/dedup happens in groupedSessionIDs.
 /// The "grouped list" glyph from the user-provided asset: two rounded
 /// square outlines on the left, four list lines on the right. Traced from
@@ -79,16 +92,16 @@ struct GroupGlyphShape: Shape {
 
 /// Group icon: the grouped-list glyph on the SAME circular translucent tint
 /// the session rows use, at the same 44pt slot — so a group icon and a
-/// session icon are the same species at the same size. The tint and glyph
-/// color borrow the newest member's category color (gray when empty), which
-/// is all that remains of the member-glyph composition: the shape is
-/// uniform, the color still says what the group holds.
+/// session icon are the same species at the same size. The tint borrows the
+/// newest member's category color (ink-2 when empty); the glyph itself is
+/// always ink — accent-on-its-own-tint is 2.23:1 in light mode, ink-on-tint
+/// is 6.68:1 (0.28 tint).
 struct FolderComposedIcon: View {
     let glyphs: [FolderGlyph]
     var diameter: CGFloat = 44
 
     var body: some View {
-        let tint = glyphs.first?.color ?? .gray
+        let tint = glyphs.first?.color ?? Theme.Color.ink2
         ZStack {
             // 0.28 vs the session icons' 0.18: a deliberately stronger tint
             // so a group circle reads as a different kind of thing at a
@@ -96,11 +109,25 @@ struct FolderComposedIcon: View {
             Circle()
                 .fill(tint.opacity(0.28))
             GroupGlyphShape()
-                .fill(tint, style: FillStyle(eoFill: true))
+                .fill(Theme.Color.ink, style: FillStyle(eoFill: true))
                 .frame(width: diameter * 0.56, height: diameter * 0.56)
         }
         .frame(width: diameter, height: diameter)
     }
+}
+
+/// Corner badge disc shared by `SessionRow` and `RemoteSessionRow`: the
+/// locked time-capsule pairing, ink on surface-2 (8.00:1 light / 11.16:1
+/// dark). A white glyph on accent fails dark mode (1.47:1), so no badge ever
+/// uses a white glyph or an accent fill.
+@ViewBuilder
+fileprivate func sessionCornerBadge(icon: String) -> some View {
+    Image(systemName: icon)
+        .font(Theme.Font.caption().weight(.bold))
+        .foregroundStyle(Theme.Color.ink)
+        .frame(width: Theme.Spacing.lg, height: Theme.Spacing.lg)
+        .background(Theme.Color.surface2)
+        .clipShape(Circle())
 }
 
 struct SessionRow: View, Equatable {
@@ -155,10 +182,9 @@ struct SessionRow: View, Equatable {
     // queue changes. The custom Equatable above gates only the parent-push
     // path; @ObservedObject still drives in-place re-eval on store changes.
     @ObservedObject private var badgeStore = SessionBadgeStore.shared
-    // Observe the one global font dial so the row re-evaluates when the user moves
-    // the slider. The row's fonts use hardcoded `.system(size:)` which ignore
-    // Dynamic Type, so we must explicitly scale them by the dial.
-    @ObservedObject private var fontSettings = FontSettings.shared
+    // Row fonts come from Theme.Font (UIFontMetrics + the app-root
+    // Dynamic Type size from the one global dial), so the row needs no
+    // FontSettings observation of its own.
 
     init(session: ChatSession,
          isHighlighted: Bool = false,
@@ -210,7 +236,7 @@ struct SessionRow: View, Equatable {
         return badge
     }
 
-    /// [T-ios-session-unread-badge] Whether to draw the top-trailing red unread
+    /// [T-ios-session-unread-badge] Whether to draw the top-trailing ink unread
     /// dot — a background task finished and posted its notification, and the user
     /// hasn't opened the session yet. Independent of `visibleBadge` (the
     /// bottom-trailing corner badge), so an unread session can also show ⏸.
@@ -220,18 +246,20 @@ struct SessionRow: View, Equatable {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.sm) {
             // Provider icon with optional spinning/suspended ring
             providerIcon
                 .frame(width: 44, height: 44)
                 .background(iconBackgroundColor.opacity(isHighlighted ? 0.35 : 0.18))
                 .clipShape(Circle())
                 .overlay {
+                    // Rings are ink, not accent: ink on the 0.18 tint disc
+                    // is 7.36:1 light (accent was 2.45:1, under 3:1).
                     if isSuspended {
-                        SuspendedRing(color: .yellow)
+                        SuspendedRing(color: Theme.Color.ink)
                             .frame(width: 42, height: 42)
                     } else if isActive {
-                        SpinningRing(color: iconBackgroundColor)
+                        SpinningRing(color: Theme.Color.ink)
                             .frame(width: 42, height: 42)
                     }
                 }
@@ -240,7 +268,7 @@ struct SessionRow: View, Equatable {
                     // badges: the locked state is the most important
                     // affordance for the user when scanning the list.
                     if isVisuallyLocked {
-                        badgeCircle(icon: "lock.fill", color: .gray)
+                        sessionCornerBadge(icon: "lock.fill")
                             .offset(x: 2, y: 2)
                     } else if let badge = visibleBadge {
                         // [T-ios-session-paused-badge] Transient queue states win
@@ -248,20 +276,23 @@ struct SessionRow: View, Equatable {
                         badgeCircle(for: badge)
                             .offset(x: 2, y: 2)
                     } else if session.source == "shortcut" {
-                        badgeCircle(icon: "bolt.fill", color: .orange)
+                        sessionCornerBadge(icon: "bolt.fill")
                             .offset(x: 2, y: 2)
                     } else if session.isRemote {
-                        badgeCircle(icon: "icloud.fill", color: .blue, iconSize: 7)
+                        sessionCornerBadge(icon: "icloud.fill")
                             .offset(x: 2, y: 2)
                     }
                 }
-                // [T-ios-session-unread-badge] Top-trailing red unread dot,
+                // [T-ios-session-unread-badge] Top-trailing unread dot,
                 // independent of the bottom-trailing corner badge above so an
                 // unread session can also show ⏸ / iCloud without conflict.
+                // 8pt kept; ink, never raw red. Ink on background is
+                // 8.74:1 light, 7.36:1 over the 0.18 tint disc (accent was
+                // 2.91:1 / 2.45:1, both under 3:1).
                 .overlay(alignment: .topTrailing) {
                     if showsUnreadDot {
                         Circle()
-                            .fill(Color.red)
+                            .fill(Theme.Color.ink)
                             .frame(width: 8, height: 8)
                             .offset(x: -1, y: 1)
                     }
@@ -271,11 +302,11 @@ struct SessionRow: View, Equatable {
             // so neither the conversation topic nor the last message reads
             // as plain text in the list. The avatar and trailing lock-icon
             // overlay sit outside this VStack so they stay crisp.
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                 highlightedText(
                     session.title ?? "New Chat",
-                    font: .system(size: fontSettings.scaled(16), weight: .semibold),
-                    color: Color(UIColor.label)
+                    font: Theme.Font.bodyEmphasized(),
+                    color: Theme.Color.ink
                 )
                 .lineLimit(1)
 
@@ -287,15 +318,15 @@ struct SessionRow: View, Equatable {
                     // keyword stands out inside the ~100-char window.
                     highlightedText(
                         snippet,
-                        font: .system(size: fontSettings.scaled(14)),
-                        color: Color(UIColor.secondaryLabel)
+                        font: Theme.Font.body(),
+                        color: Theme.Color.ink
                     )
                     .lineLimit(2)
                 } else {
                     highlightedText(
                         session.lastMessage ?? "No messages yet",
-                        font: .system(size: fontSettings.scaled(14)),
-                        color: Color(UIColor.secondaryLabel)
+                        font: Theme.Font.body(),
+                        color: Theme.Color.ink
                     )
                     .lineLimit(1)
                 }
@@ -317,24 +348,28 @@ struct SessionRow: View, Equatable {
 
             Spacer(minLength: 1)
 
-            VStack(alignment: .trailing, spacing: 4) {
-                // Date
+            VStack(alignment: .trailing, spacing: Theme.Spacing.xs) {
+                // Date — 11pt caption in ink: ink-2 is 4.09:1 in light mode,
+                // below the 4.5:1 body bar at this size.
                 Text(relativeDate(session.updatedAt))
-                    .font(.system(size: fontSettings.scaled(13)))
-                    .foregroundStyle(Color(UIColor.tertiaryLabel))
+                    .font(Theme.Font.caption())
+                    .foregroundStyle(Theme.Color.ink)
                 if isVisuallyLocked {
                     Image(systemName: "lock.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(UIColor.tertiaryLabel))
+                        .font(Theme.Font.caption())
+                        .foregroundStyle(Theme.Color.ink2)
                 } else if session.isPinned {
                     Image(systemName: "pin.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(UIColor.tertiaryLabel))
+                        .font(Theme.Font.caption())
+                        .foregroundStyle(Theme.Color.ink2)
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        // Row floor is 44pt; content grows the row past it (never a fixed
+        // .frame(height: 44)), so two-line snippets and AX sizes still fit.
+        .frame(minHeight: 44)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.md)
         .contentShape(Rectangle())
         #if DEBUG
         // TEMPORARY height probe — confirms List self-sizing jitter source.
@@ -349,29 +384,22 @@ struct SessionRow: View, Equatable {
         #endif
     }
 
-    private func badgeCircle(icon: String, color: Color, iconSize: CGFloat = 9, size: CGFloat = 16) -> some View {
-        Image(systemName: icon)
-            .font(.system(size: iconSize, weight: .bold))
-            .foregroundStyle(.white)
-            .frame(width: size, height: size)
-            .background(color)
-            .clipShape(Circle())
-    }
-
     /// [T-ios-session-paused-badge] Maps a queued badge state to its corner
-    /// badge. Reuses the same `badgeCircle` layout/size/position as the iCloud
-    /// and lock badges so all session badges sit identically on the icon corner.
+    /// badge. Reuses the same `sessionCornerBadge` layout/size/position as
+    /// the iCloud and lock badges so all session badges sit identically on
+    /// the icon corner.
     @ViewBuilder
     private func badgeCircle(for state: SessionBadgeState) -> some View {
         switch state {
         case .paused:
-            // Pause glyph (⏸), orange to distinguish from the blue iCloud badge.
-            badgeCircle(icon: "pause.fill", color: .orange, iconSize: 8)
+            // Pause glyph (⏸); the glyph — not a color — distinguishes it
+            // from the iCloud badge.
+            sessionCornerBadge(icon: "pause.fill")
         case .iCloudSyncing:
-            badgeCircle(icon: "icloud.fill", color: .blue, iconSize: 7)
+            sessionCornerBadge(icon: "icloud.fill")
         case .unread:
             // [T-ios-session-unread-badge] `.unread` renders as a separate
-            // top-trailing red dot (see the .topTrailing overlay), never through
+            // top-trailing ink dot (see the .topTrailing overlay), never through
             // this bottom-trailing corner path. `topCornerBadge` filters it out
             // upstream, so this case is unreachable — render nothing defensively.
             EmptyView()
@@ -406,7 +434,10 @@ struct SessionRow: View, Equatable {
         var attr = AttributedString(text)
         attr.foregroundColor = baseColor
         guard !query.isEmpty else { return attr }
-        let highlightBg = Color.accentColor.opacity(0.25)
+        // Accent tint behind the hit; the hit text stays ink — accent-as-text
+        // is 2.91:1 in light mode, below the 4.5:1 bar. The tint + strong
+        // emphasis still makes the keyword stand out.
+        let highlightBg = Theme.Color.accent.opacity(0.25)
         let totalChars = text.count
         for range in SearchKeywords.hitRanges(in: text, terms: SearchKeywords.terms(query)) {
             let lo = text.distance(from: text.startIndex, to: range.lowerBound)
@@ -421,7 +452,7 @@ struct SessionRow: View, Equatable {
             let attrHi = attr.index(attr.startIndex, offsetByCharacters: hi)
             let r = attrLo..<attrHi
             attr[r].backgroundColor = highlightBg
-            attr[r].foregroundColor = Color.accentColor
+            attr[r].foregroundColor = Theme.Color.ink
             attr[r].inlinePresentationIntent = .stronglyEmphasized
         }
         return attr
@@ -434,11 +465,13 @@ struct SessionRow: View, Equatable {
 
     @ViewBuilder
     private var providerIcon: some View {
-        let icon = categoryIcon
-        let size: CGFloat = (icon.systemName == "bubble.left.fill" || icon.systemName == "terminal.fill") ? 18 : 20
-        Image(systemName: icon.systemName)
-            .font(.system(size: size))
-            .foregroundStyle(icon.color)
+        // displaySmall() is used ONLY as the 20pt size carrier for this SF
+        // Symbol — no display text is rendered here (Theme.Font has no icon
+        // role yet; see open items). Glyph is ink, not the accent: accent
+        // on its own 0.18 tint is 2.45:1 in light mode, ink-on-tint 7.36:1.
+        Image(systemName: categoryIcon.systemName)
+            .font(Theme.Font.displaySmall())
+            .foregroundStyle(Theme.Color.ink)
     }
 
     private var iconBackgroundColor: Color {
@@ -528,8 +561,8 @@ private struct LockedRowEffect: ViewModifier {
     func body(content: Content) -> some View {
         if isLocked {
             content
-                .blur(radius: 4)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .blur(radius: Theme.Spacing.xs)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Spacing.sm, style: .continuous))
                 .mask {
                     LinearGradient(
                         stops: [
@@ -552,37 +585,34 @@ struct RemoteSessionRow: View {
     let session: ChatSession
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.sm) {
             // Category icon with iCloud badge
             providerIcon
                 .frame(width: 44, height: 44)
                 .background(iconColor.opacity(0.18))
                 .clipShape(Circle())
                 .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: "icloud.fill")
-                        .font(.system(size: 7, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 16, height: 16)
-                        .background(Color.blue)
-                        .clipShape(Circle())
+                    sessionCornerBadge(icon: "icloud.fill")
                         .offset(x: 2, y: 2)
                 }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                 Text(session.title ?? "Untitled")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(Color(UIColor.label))
+                    .font(Theme.Font.bodyEmphasized())
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
                 Text(session.updatedAt, style: .relative)
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(UIColor.secondaryLabel))
+                    .font(Theme.Font.body())
+                    .foregroundStyle(Theme.Color.ink)
                     .lineLimit(1)
             }
 
             Spacer(minLength: 1)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        // Same 44pt floor as SessionRow; content grows the row past it.
+        .frame(minHeight: 44)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.md)
         .contentShape(Rectangle())
     }
 
@@ -594,11 +624,13 @@ struct RemoteSessionRow: View {
 
     @ViewBuilder
     private var providerIcon: some View {
-        let icon = categoryIcon
-        let size: CGFloat = (icon.systemName == "bubble.left.fill" || icon.systemName == "terminal.fill") ? 18 : 20
-        Image(systemName: icon.systemName)
-            .font(.system(size: size))
-            .foregroundStyle(icon.color)
+        // displaySmall() is used ONLY as the 20pt size carrier for this SF
+        // Symbol — no display text is rendered here (Theme.Font has no icon
+        // role yet; see open items). Glyph is ink, not the accent: accent
+        // on its own 0.18 tint is 2.45:1 in light mode, ink-on-tint 7.36:1.
+        Image(systemName: categoryIcon.systemName)
+            .font(Theme.Font.displaySmall())
+            .foregroundStyle(Theme.Color.ink)
     }
 }
 

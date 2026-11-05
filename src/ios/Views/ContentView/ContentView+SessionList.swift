@@ -280,12 +280,17 @@ extension ContentView {
 
         }
         .listStyle(.plain)
-        // Milk-pink list chrome: Theme ground behind the rows (the system
-        // grouped/plain background is gone) and a 44pt minimum row height
-        // set on the List itself (HIG minimum) — never .frame(height: 44)
+        // Milk-pink list chrome: NO opaque ground behind the rows — the
+        // home wallpaper (HomeWallpaperBackground, applied at the end of
+        // this chain) is the ground, and the system grouped/plain
+        // background is gone. The wallpaper is always on
+        // (DressUpStore.appliedWallpaperId has no off state; nil still
+        // renders bundled WallpaperMilkPink), and WallpaperBackdrop
+        // provides its own scheme-background base + 85%→60% scrim, so
+        // the List needs no opaque ground. 44pt minimum row height set
+        // on the List itself (HIG minimum) — never .frame(height: 44)
         // on a row.
         .scrollContentBackground(.hidden)
-        .background(Theme.Color.background)
         .environment(\.defaultMinListRowHeight, 44)
         #if DEBUG
         // TEMPORARY scroll-phase markers to bracket the jitter window in the
@@ -318,6 +323,7 @@ extension ContentView {
         .ignoresSafeArea(.keyboard, edges: showSearchBar ? [] : .bottom)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { sidebarToolbarContent }
+        .homeWallpaperBackground()
         )
     }
 
@@ -388,11 +394,12 @@ extension ContentView {
 
         }
         .listStyle(.plain)
-        // Milk-pink list chrome: Theme ground behind the rows and a 44pt
-        // minimum row height set on the List itself (HIG minimum) — never
-        // .frame(height: 44) on a row.
+        // Milk-pink list chrome: NO opaque ground behind the rows — the
+        // home wallpaper (HomeWallpaperBackground, applied at the end of
+        // this chain) is the ground; see the stack list above for the
+        // always-on rationale. 44pt minimum row height set on the List
+        // itself (HIG minimum) — never .frame(height: 44) on a row.
         .scrollContentBackground(.hidden)
-        .background(Theme.Color.background)
         .environment(\.defaultMinListRowHeight, 44)
         .navigationSplitViewColumnWidth(min: 340, ideal: 380, max: 500)
         // [T-macos27-liquid-glass-navbar] See MacOS27GlassWorkaround. Applied to
@@ -420,6 +427,7 @@ extension ContentView {
         .ignoresSafeArea(.keyboard, edges: showSearchBar ? [] : .bottom)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { sidebarToolbarContent }
+        .homeWallpaperBackground()
         }
     }
 }

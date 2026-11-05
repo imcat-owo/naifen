@@ -21,23 +21,28 @@ struct SessionEditSheet: View {
     @State private var editCategory: String = ""
     @State private var isRegenerating = false
 
-    private static let categories: [(key: String, label: String, icon: String, color: Color)] = [
-        ("code",         "Code",         "terminal.fill",               .orange),
-        ("writing",      "Writing",      "doc.text.fill",               .blue),
-        ("research",     "Research",     "globe.americas.fill",         .teal),
-        ("analysis",     "Analysis",     "chart.pie.fill",              .indigo),
-        ("creative",     "Creative",     "paintbrush.pointed.fill",     .pink),
-        ("chat",         "Chat",         "bubble.left.fill",            .green),
-        ("math",         "Math",         "number.circle.fill",          .purple),
-        ("translation",  "Translation",  "character.bubble",            .cyan),
-        ("health",       "Health",       "heart.fill",                  .red),
-        ("finance",      "Finance",      "banknote.fill",               .mint),
-        ("travel",       "Travel",       "map.fill",                    .orange),
-        ("education",    "Education",    "book.closed.fill",            .blue),
-        ("design",       "Design",       "paintpalette.fill",           .pink),
-        ("productivity", "Productivity", "calendar.badge.checkmark",    .yellow),
-        ("support",      "Support",      "gearshape.fill",              .brown),
-        ("other",        "Other",        "square.grid.2x2.fill",       .gray),
+    /// key → label only. Icon + color come from the single shared map
+    /// `sessionCategoryIcon(for:)` (SessionRow.swift) — the old 16-entry
+    /// copy with its own orange/blue/teal/pink/green/purple/cyan/red/gray
+    /// literals is gone. One accent family: every category renders its glyph
+    /// in ink on an accent tint; the glyph shape distinguishes categories.
+    private static let categories: [(key: String, label: String)] = [
+        ("code",         "Code"),
+        ("writing",      "Writing"),
+        ("research",     "Research"),
+        ("analysis",     "Analysis"),
+        ("creative",     "Creative"),
+        ("chat",         "Chat"),
+        ("math",         "Math"),
+        ("translation",  "Translation"),
+        ("health",       "Health"),
+        ("finance",      "Finance"),
+        ("travel",       "Travel"),
+        ("education",    "Education"),
+        ("design",       "Design"),
+        ("productivity", "Productivity"),
+        ("support",      "Support"),
+        ("other",        "Other"),
     ]
 
     var body: some View {
@@ -48,29 +53,43 @@ struct SessionEditSheet: View {
                 }
 
                 Section("Category") {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 72), spacing: 12)], spacing: 12) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 72), spacing: Theme.Spacing.md)], spacing: Theme.Spacing.md) {
                         ForEach(Self.categories, id: \.key) { cat in
+                            let icon = sessionCategoryIcon(for: cat.key)
+                            let isSelected = editCategory == cat.key
                             Button {
                                 editCategory = cat.key
                             } label: {
-                                VStack(spacing: 6) {
-                                    Image(systemName: cat.icon)
-                                        .font(.system(size: 20))
-                                        .foregroundStyle(editCategory == cat.key ? .white : cat.color)
+                                VStack(spacing: Theme.Spacing.xs) {
+                                    // displaySmall() is the 20pt size carrier
+                                    // for this SF Symbol only (see SessionRow).
+                                    // Glyph ink on the accent tint (7.80:1
+                                    // light, 0.12 tint); selected adds a surface-2 fill
+                                    // + accent ring + semibold label — never
+                                    // white-on-accent (1.47:1 dark).
+                                    Image(systemName: icon.systemName)
+                                        .font(Theme.Font.displaySmall())
+                                        .foregroundStyle(Theme.Color.ink)
                                         .frame(width: 44, height: 44)
                                         .background(
                                             Circle()
-                                                .fill(editCategory == cat.key ? cat.color : cat.color.opacity(0.12))
+                                                .fill(isSelected ? Theme.Color.surface2 : Theme.Color.accent.opacity(0.12))
+                                        )
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Theme.Color.accent, lineWidth: 2)
+                                                .opacity(isSelected ? 1 : 0)
                                         )
                                     Text(LocalizedStringKey(cat.label))
-                                        .font(.caption2)
-                                        .foregroundStyle(editCategory == cat.key ? cat.color : .secondary)
+                                        .font(Theme.Font.caption())
+                                        .fontWeight(isSelected ? .semibold : .regular)
+                                        .foregroundStyle(Theme.Color.ink)
                                 }
                             }
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, Theme.Spacing.sm)
                 }
 
                 Section {
@@ -79,7 +98,7 @@ struct SessionEditSheet: View {
                     } label: {
                         HStack {
                             if isRegenerating {
-                                SpinningRing(color: .accentColor)
+                                SpinningRing(color: Theme.Color.accent)
                                     .frame(width: 18, height: 18)
                             } else {
                                 Image(systemName: "arrow.triangle.2.circlepath")
