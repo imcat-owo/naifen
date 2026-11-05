@@ -578,7 +578,7 @@ struct ContentView: View {
                         .padding(.top, 8)
                 }
             }
-            .animation(.easeInOut(duration: 0.25), value: forceSyncToast)
+            .animation(.easeInOut(duration: Theme.Motion.base), value: forceSyncToast)
             .onChange(of: wide) { newWide in
                 isWideLayout = newWide
             }
@@ -798,6 +798,8 @@ struct ContentView: View {
                         .toolbar {
                             ToolbarItem(placement: .topBarTrailing) {
                                 Button("Done") { activeToolSheet = nil }
+                                    .font(Theme.Font.bodyEmphasized())
+                                    .foregroundStyle(Theme.Color.ink)
                             }
                         }
                 }
@@ -813,6 +815,8 @@ struct ContentView: View {
                         .toolbar {
                             ToolbarItem(placement: .topBarTrailing) {
                                 Button("Done") { activeToolSheet = nil }
+                                    .font(Theme.Font.bodyEmphasized())
+                                    .foregroundStyle(Theme.Color.ink)
                             }
                         }
                 }
@@ -944,15 +948,15 @@ struct ContentView: View {
         .overlay {
             if isExporting {
                 ZStack {
-                    Color.black.opacity(0.3).ignoresSafeArea()
-                    VStack(spacing: 12) {
+                    Theme.Color.ink.opacity(DressUpMotion.scrimOpacity).ignoresSafeArea()
+                    VStack(spacing: Theme.Spacing.md) {
                         // [T-ios-hud-spinner-contrast] Tint the spinner with the
                         // adaptive label colour (GH#333).
                         //
-                        // The card behind it is `.ultraThinMaterial`, which is
+                        // The card behind it is Theme.Color.surface, which is
                         // LIGHT in light mode. An untinted ProgressView takes
                         // the ambient tint rather than the label colour, and
-                        // over a pale material that lands close to the
+                        // over a pale surface that lands close to the
                         // background — the reported "can't tell whether it is
                         // loading". `UIColor.label` is dark on light and light
                         // on dark, so this fixes light mode without touching
@@ -962,19 +966,21 @@ struct ContentView: View {
                             .tint(Theme.Color.ink)
                         if let p = exportProgress, p.total > 0 {
                             Text(AppLocalized("Exporting… \(p.done) / \(p.total)"))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .font(Theme.Font.body())
+                                .foregroundStyle(Theme.Color.ink)
                         } else {
                             Text(AppLocalized("Exporting…"))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .font(Theme.Font.body())
+                                .foregroundStyle(Theme.Color.ink)
                         }
                     }
-                    .padding(24)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    .padding(Theme.Spacing.xxl)
+                    .background(Theme.Color.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).stroke(Theme.Color.line, lineWidth: 1))
+                    .themeShadow(.card)
                 }
                 .transition(.opacity)
-                .animation(.easeInOut(duration: 0.2), value: isExporting)
+                .animation(.easeInOut(duration: Theme.Motion.base), value: isExporting)
             }
         }
         .task {
