@@ -75,16 +75,19 @@ struct DeleteConfirmSheet: View {
 
                     // Buttons
                     VStack(spacing: Theme.Spacing.md) {
+                        // Delete: ink fill + surface2 text (locked pairing,
+                        // WCAG-recomputed 8.00:1 light / 11.16:1 dark).
+                        // surface2 fill on bubbleAI was 1.18:1 / 1.17:1.
                         Button(role: .destructive) {
                             onDelete()
                             dismiss()
                         } label: {
                             Text("Delete (\(info.formattedSize))")
                                 .font(.body.bold())
-                                .foregroundStyle(Theme.Color.ink)
+                                .foregroundStyle(Theme.Color.surface2)
                                 .frame(maxWidth: .infinity)
                                 .frame(minHeight: 44)
-                                .background(Theme.Color.surface2, in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+                                .background(Theme.Color.ink, in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
                         }
                         .dressUpPress(feedback: .impact)
 
