@@ -212,7 +212,7 @@ extension CollectionViewMessageListV3.Coordinator {
         }
 
         static func estimateItemHeight(_ item: MessageListItem, messages: [ChatMessage], width: CGFloat) -> CGFloat {
-            let scale = FontSettings.shared.scaledMessage(16)
+            let scale = FontSettings.shared.scaled(16)
             let lineHeight = scale * 1.4
             // [T-ios-user-attach-estimate-mismatch] The former `hPad` local died
             // with the `.user` branch's coarse tile arithmetic — the attachment
@@ -366,7 +366,7 @@ extension CollectionViewMessageListV3.Coordinator {
             // CJK replies by 25–46% and made them jump mid-fling as they were
             // measured. See MarkdownHeightEstimate. `scale` / `lineHeight` are
             // the old model's inputs, kept for the call sites.
-            let base = FontSettings.shared.scaledMessage(16.5)
+            let base = FontSettings.shared.scaled(16.5)
             let textWidth = max(width - 32, 100)
             let metrics = Self.estimateLineMetrics(base)
             let estimate = MarkdownHeightEstimate(
