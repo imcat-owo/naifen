@@ -967,7 +967,7 @@ struct ContentView: View {
                         .padding(Theme.Spacing.xxl)
                         .background(Theme.Color.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
                         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).stroke(Theme.Color.line, lineWidth: 1))
-                        .themeShadow(.card)
+                        .themeShadow(Theme.Shadow.card)
                     }
                     .transition(.opacity)
                     .animation(.easeInOut(duration: Theme.Motion.base), value: isExporting)
