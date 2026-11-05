@@ -1285,7 +1285,7 @@ struct ToolLiveSheet: View {
                         } label: {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(HelperAccent.color)
+                                .foregroundStyle(Theme.Color.ink)
                                 .frame(width: 32, height: 32)
                                 .background(Theme.Color.surface)
                                 .clipShape(Circle())
