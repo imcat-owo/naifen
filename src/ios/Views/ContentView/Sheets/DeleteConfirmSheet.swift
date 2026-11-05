@@ -25,12 +25,13 @@ struct DeleteConfirmSheet: View {
                     Spacer()
                     ProgressView("Calculating…")
                         .controlSize(.large)
+                        .tint(Theme.Color.ink)
                     Spacer()
                     let _ = print("[DELETE] DeleteConfirmSheet showing ProgressView. isLoading=\(isLoading), info is \(info == nil ? "nil" : "non-nil")")
                 } else if let info {
                     let _ = print("[DELETE] DeleteConfirmSheet showing info. sessionCount=\(info.sessionCount)")
                     ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                             // Sessions
                             infoRow(
                                 title: "Sessions",
@@ -41,12 +42,12 @@ struct DeleteConfirmSheet: View {
 
                             // Files
                             if info.totalFileCount > 0 {
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                                     Text("Associated Files")
                                         .font(.subheadline.bold())
-                                        .foregroundStyle(.primary)
+                                        .foregroundStyle(Theme.Color.ink)
                                     ForEach(info.fileNames, id: \.self) { name in
-                                        HStack(spacing: 6) {
+                                        HStack(spacing: Theme.Spacing.sm) {
                                             Image(systemName: "doc")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
@@ -66,49 +67,53 @@ struct DeleteConfirmSheet: View {
                             // Storage
                             infoRow(title: "Releases Storage", value: info.formattedSize)
                         }
-                        .padding(20)
+                        .padding(Theme.Spacing.xl)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
                     Divider()
 
                     // Buttons
-                    VStack(spacing: 10) {
+                    VStack(spacing: Theme.Spacing.md) {
                         Button(role: .destructive) {
                             onDelete()
                             dismiss()
                         } label: {
                             Text("Delete (\(info.formattedSize))")
                                 .font(.body.bold())
+                                .foregroundStyle(Theme.Color.ink)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
+                                .frame(minHeight: 44)
+                                .background(Theme.Color.surface2, in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
+                        .dressUpPress(feedback: .impact)
 
                         Button {
                             dismiss()
                         } label: {
                             Text("Cancel")
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
+                                .frame(minHeight: 44)
                         }
                         .buttonStyle(.bordered)
+                        .tint(Theme.Color.ink)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, Theme.Spacing.xl)
+                    .padding(.vertical, Theme.Spacing.md)
                 }
             }
+            .background(Theme.Color.bubbleAI)
             .navigationTitle("Confirm Deletion")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationBackground(Theme.Color.bubbleAI)
     }
 
     private func infoRow(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text(title)
                 .font(.subheadline.bold())
-                .foregroundStyle(.primary)
+                .foregroundStyle(Theme.Color.ink)
             Text(value)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
