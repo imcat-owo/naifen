@@ -325,7 +325,7 @@ struct HelperBlockInfo {
         // not know how it ended, and the transcript may well be intact. Use
         // the same secondary grey the rest of the card's chrome uses so it
         // reads as "no information" rather than "error".
-        default: return ChatColors.secondaryText
+        default: return Theme.Color.ink
         }
     }
 
@@ -478,7 +478,7 @@ struct HelperBlockView: View {
                         .clipShape(Capsule())
                     SearchHighlightText(info.title, blockId: block.id, field: .title, messageId: searchMessageId)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(ChatColors.primaryText)
+                        .foregroundStyle(Theme.Color.ink)
                         .lineLimit(1)
                 }
                 secondLine(info)
@@ -541,7 +541,7 @@ struct HelperBlockView: View {
             }
             Image(systemName: "chevron.right")
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(ChatColors.tertiaryText)
+                .foregroundStyle(Theme.Color.ink2)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
@@ -595,7 +595,7 @@ struct HelperBlockView: View {
     private func secondLine(_ info: HelperBlockInfo) -> some View {
         switch info.phase {
         case .starting:
-            Text(AppLocalized("starting")).font(.system(size: 11)).foregroundStyle(ChatColors.secondaryText)
+            Text(AppLocalized("starting")).font(.system(size: 11)).foregroundStyle(Theme.Color.ink)
         case .running(let tool, let activity, let clock):
             HStack(spacing: 6) {
                 if let tool {
@@ -621,9 +621,9 @@ struct HelperBlockView: View {
                         SearchHighlightText(activity, blockId: block.id, field: .activity, messageId: searchMessageId)
                     }
                 }
-                .font(.system(size: 11)).foregroundStyle(ChatColors.secondaryText).lineLimit(1)
+                .font(.system(size: 11)).foregroundStyle(Theme.Color.ink).lineLimit(1)
                 if !clock.isEmpty {
-                    Text(clock).font(.system(size: 11, design: .monospaced)).foregroundStyle(ChatColors.tertiaryText)
+                    Text(clock).font(.system(size: 11, design: .monospaced)).foregroundStyle(Theme.Color.ink)
                         .fixedSize()
                 }
             }
@@ -647,28 +647,28 @@ struct HelperBlockView: View {
                     Text(tier)
                         .font(.system(size: 9, weight: .semibold, design: .monospaced))
                         .padding(.horizontal, 4).padding(.vertical, 1)
-                        .background(ChatColors.secondaryBg)
+                        .background(Theme.Color.surface)
                         .clipShape(Capsule())
                         .fixedSize()
                 }
                 if let model = info.model, let line = model.compactLine() {
                     Text(line)
                         .font(.system(size: 11))
-                        .foregroundStyle(model.hasEffective ? ChatColors.secondaryText : ChatColors.tertiaryText)
+                        .foregroundStyle(model.hasEffective ? Theme.Color.ink : Theme.Color.ink)
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .layoutPriority(-1)
                 }
                 if let elapsed {
                     Text(HelperBlockInfo.elapsedLabel(elapsed))
-                        .font(.system(size: 11, design: .monospaced)).foregroundStyle(ChatColors.tertiaryText)
+                        .font(.system(size: 11, design: .monospaced)).foregroundStyle(Theme.Color.ink)
                         .fixedSize()
                 }
                 if escalation {
                     Image(systemName: "arrow.up.circle").font(.system(size: 11)).foregroundStyle(.orange)
                 }
                 if background {
-                    Image(systemName: "arrow.turn.down.left").font(.system(size: 10)).foregroundStyle(ChatColors.tertiaryText)
+                    Image(systemName: "arrow.turn.down.left").font(.system(size: 10)).foregroundStyle(Theme.Color.ink2)
                 }
             }
         }
@@ -992,7 +992,7 @@ struct HelperDetailCard: View {
                                     Text(level.displayName)
                                         .font(.system(size: 8, weight: .medium))
                                 }
-                                .foregroundStyle(ChatColors.secondaryText)
+                                .foregroundStyle(Theme.Color.ink)
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 1)
                                 .background(Capsule().fill(Color.secondary.opacity(0.10)))
