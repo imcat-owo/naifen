@@ -98,7 +98,7 @@ struct BridgedAssistantFooterV3: View {
                     if bridge.showUsage, let completedAt = message.completedAt {
                         Text(Self.completedAtFormatter.string(from: completedAt))
                             .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(ChatColors.tertiaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .opacity(bridge.usageContentVisible ? 1 : 0)
                     }
                 }
@@ -220,9 +220,9 @@ struct BridgedAssistantFooterV3: View {
                         Image(systemName: "arrow.clockwise").font(.caption.weight(.semibold))
                         Text(AppLocalized("Retry")).font(.caption.weight(.semibold))
                     }
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .padding(.horizontal, 12).padding(.vertical, 6)
-                    .background(ChatColors.primaryText.opacity(0.15)).clipShape(Capsule())
+                    .background(Theme.Color.ink.opacity(0.15)).clipShape(Capsule())
                 }
             }
         }
@@ -272,9 +272,9 @@ struct BridgedAssistantFooterV3: View {
             Image(systemName: "speedometer").font(.system(size: 9))
             Text(usageSummary(usage)).font(.system(size: 10, design: .monospaced))
         }
-        .foregroundStyle(ChatColors.tertiaryText)
+        .foregroundStyle(Theme.Color.ink)
         .padding(.horizontal, 8).padding(.vertical, 3)
-        .background(ChatColors.userBubble.opacity(0.6)).clipShape(Capsule())
+        .background(Theme.Color.bubbleUser.opacity(0.6)).clipShape(Capsule())
         .transition(.opacity.combined(with: .scale(scale: 0.8)))
     }
 
