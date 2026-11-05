@@ -84,8 +84,8 @@ private enum UserAskTint {
 // Kept byte-identical with MinisTests/Standalone/UserAskTypographyTests.swift.
 // BEGIN UserAskTypography
 /// [T-user-ask-font-scale] Every text size on the user_ask card, derived from
-/// the chat body size - FontSettings.scaledMessage(bodyReference), the same
-/// "message" font the bubbles use (Settings › Appearance) - so the card
+/// the chat body size - FontSettings.scaled(bodyReference), the same
+/// dial-driven size the bubbles use (Settings › Appearance) - so the card
 /// follows the user's font setting instead of fixed points. Ratios keep the
 /// hierarchy: question ≈ body, option titles and buttons just under it,
 /// descriptions one step smaller but never below the previous fixed 12pt.
@@ -129,7 +129,7 @@ struct UserAskTypography: Equatable {
 extension UserAskTypography {
     /// The current chat body size (live: views observe FontSettings).
     @MainActor static var current: UserAskTypography {
-        UserAskTypography(body: FontSettings.shared.scaledMessage(bodyReference))
+        UserAskTypography(body: FontSettings.shared.scaled(bodyReference))
     }
 }
 
