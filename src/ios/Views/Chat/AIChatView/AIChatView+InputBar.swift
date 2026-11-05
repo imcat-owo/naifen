@@ -159,7 +159,7 @@ extension AIChatView {
                     Button { showMoveToSheet = true } label: {
                         Label("Move to…", systemImage: "arrow.right.circle")
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(ChatColors.secondaryText)
+                            .foregroundStyle(Theme.Color.ink)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(.ultraThinMaterial)
@@ -503,8 +503,8 @@ extension AIChatView {
             // while keeping the gap between tool status bar and input bar clear.
             LinearGradient(
                 stops: [
-                    .init(color: ChatColors.background.opacity(0), location: 0),
-                    .init(color: ChatColors.background, location: 0.8),
+                    .init(color: Theme.Color.background.opacity(0), location: 0),
+                    .init(color: Theme.Color.background, location: 0.8),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
