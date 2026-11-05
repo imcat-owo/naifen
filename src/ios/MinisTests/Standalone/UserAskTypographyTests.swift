@@ -1,7 +1,8 @@
 #!/usr/bin/env swift
 // [T-user-ask-font-scale] The user_ask card's text follows the chat font
-// setting (Settings › Appearance, FontSettings.messageBaseScale) instead of
-// fixed points, keeps its hierarchy at every step, and keeps ≥44pt targets.
+// setting (Settings › Appearance, the one global font dial,
+// FontSettings.bodySize) instead of fixed points, keeps its hierarchy at
+// every step, and keeps ≥44pt targets.
 //
 //   [1] UserAskTypography (shipping code, compiled standalone) at all six
 //       FontScaleLevel multipliers (read from FontSettings.swift)
@@ -111,9 +112,9 @@ check("half-point rounding (no 16.005-style sizes)", rows.joined().allSatisfy { 
 check("tap targets ≥ 44pt", r["tap"] == "44.0")
 
 print("\n2. Source guards")
-check("the base is the chat body size: bubbles use scaledMessage(16.5) and so does the card",
-      r["ref"] == "16.5" && source("Views/Chat/ChatMessageViews.swift").contains("FontSettings.shared.scaledMessage(16.5)")
-      && card.contains("UserAskTypography(body: FontSettings.shared.scaledMessage(bodyReference))"))
+check("the base is the chat body size: bubbles use scaled(16.5) and so does the card",
+      r["ref"] == "16.5" && source("Views/Chat/ChatMessageViews.swift").contains("FontSettings.shared.scaled(16.5)")
+      && card.contains("UserAskTypography(body: FontSettings.shared.scaled(bodyReference))"))
 // Only icon glyphs (header badge, resolved badge) and the chevron keep a fixed size.
 let fixed = card.split(separator: "\n").filter { $0.contains(".font(.system(size: ") && $0.contains(".font(.system(size: 1") }
 check("no fixed text sizes left on the card (only the 3 icon/chevron glyphs)", fixed.count == 3)

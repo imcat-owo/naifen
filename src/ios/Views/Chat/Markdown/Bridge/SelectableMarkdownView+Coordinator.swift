@@ -107,7 +107,7 @@ extension SelectableMarkdownView {
                 NotificationCenter.default.removeObserver(resignActiveObserver)
             }
         }
-        var lastFontSize: CGFloat = FontSettings.shared.scaledMessage(16.5)
+        var lastFontSize: CGFloat = FontSettings.shared.scaled(16.5)
         var openURL: OpenURLAction?
         /// Cached sizeThatFits results keyed by integer width bucket.
         /// Multi-bucket cache is required because SwiftUI layout protocol
@@ -147,7 +147,7 @@ extension SelectableMarkdownView {
         var lastFullMeasureBindingLen: Int = 0
         var lastFullMeasureHeight: [Int: CGFloat] = [:]
         var lastFullMeasureAt: CFAbsoluteTime = 0
-        var renderer = MarkdownNSRenderer(baseFontSize: FontSettings.shared.scaledMessage(16.5))
+        var renderer = MarkdownNSRenderer(baseFontSize: FontSettings.shared.scaled(16.5))
 
         /// [WordFade] The textView whose storage the fade animator mutates.
         /// Set on the append fast path so the animator's redraw closure can

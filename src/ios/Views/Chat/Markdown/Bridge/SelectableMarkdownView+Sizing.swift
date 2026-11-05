@@ -271,7 +271,7 @@ extension SelectableMarkdownView {
                 } else {
                     let mut = NSMutableAttributedString(attributedString: rendered)
                     let suffixAttrs: [NSAttributedString.Key: Any] = [
-                        .font: UIFont.systemFont(ofSize: FontSettings.shared.scaledMessage(16.5)),
+                        .font: UIFont.systemFont(ofSize: FontSettings.shared.scaled(16.5)),
                         .foregroundColor: UIColor.label,
                     ]
                     mut.append(NSAttributedString(string: split.plainSuffix, attributes: suffixAttrs))

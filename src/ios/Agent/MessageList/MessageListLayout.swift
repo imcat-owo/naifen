@@ -1103,7 +1103,7 @@ final class CrossLoadHeightMemo {
     }
 
     private static func key(_ stable: String, width: CGFloat) -> String {
-        "\(stable)|w\(Int(width.rounded()))|f\(Int((FontSettings.shared.scaledMessage(16.5) * 10).rounded()))"
+        "\(stable)|w\(Int(width.rounded()))|f\(Int((FontSettings.shared.scaled(16.5) * 10).rounded()))"
     }
 
     func height(for stable: String, width: CGFloat) -> CGFloat? {

@@ -79,7 +79,7 @@ extension CollectionViewMessageListV3.Coordinator {
         /// coarse estimate). Cached by content|width|fontsize.
         ///
         /// Layout constants mirror AIChatView.userRow:
-        ///   - font: .system(size: scaledMessage(16.5))
+        ///   - font: .system(size: scaled(16.5))  (one global dial)
         ///   - bubble: .padding(.horizontal,14) .padding(.vertical,10)  → +20 height, -28 width
         ///   - row:   HStack { Spacer(minLength: 60); VStack(spacing:6){ attachments?; bubble } }
         ///   - cell:  .padding(.horizontal, 16) on the whole row
@@ -103,7 +103,7 @@ extension CollectionViewMessageListV3.Coordinator {
             // over-estimate per row on EVERY image bubble, and a row-count
             // disagreement near width boundaries. `70` appeared nowhere in the
             // rendering code; it was estimator-only drift.
-            let fontSize = FontSettings.shared.scaledMessage(16.5)
+            let fontSize = FontSettings.shared.scaled(16.5)
             // [T-ios-queued-bubble-withdraw-width] A QUEUED message renders a
             // withdraw button beside the bubble:
             //

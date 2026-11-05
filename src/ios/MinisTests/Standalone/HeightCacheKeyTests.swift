@@ -283,7 +283,7 @@ check("no ObjectIdentifier key remains for it", !src.contains("ObjectIdentifier(
 // Font size must be in the key, or a Dynamic Type change would collide now
 // that the cache survives reconfigureAllCells.
 check("the key carries the renderer's 16.5 base size",
-      src.contains("fontSize: FontSettings.shared.scaledMessage(16.5)"))
+      src.contains("fontSize: FontSettings.shared.scaled(16.5)"))
 // And it must be keyed on the markdown source.
 check("the key is built from block.content", src.contains("content: block.content"))
 

@@ -155,9 +155,9 @@ struct SessionRow: View, Equatable {
     // queue changes. The custom Equatable above gates only the parent-push
     // path; @ObservedObject still drives in-place re-eval on store changes.
     @ObservedObject private var badgeStore = SessionBadgeStore.shared
-    // Observe App Base font scale so the row re-evaluates when the user moves
+    // Observe the one global font dial so the row re-evaluates when the user moves
     // the slider. The row's fonts use hardcoded `.system(size:)` which ignore
-    // Dynamic Type, so we must explicitly multiply by the App Base scale.
+    // Dynamic Type, so we must explicitly scale them by the dial.
     @ObservedObject private var fontSettings = FontSettings.shared
 
     init(session: ChatSession,
@@ -274,7 +274,7 @@ struct SessionRow: View, Equatable {
             VStack(alignment: .leading, spacing: 4) {
                 highlightedText(
                     session.title ?? "New Chat",
-                    font: .system(size: fontSettings.scaledApp(16), weight: .semibold),
+                    font: .system(size: fontSettings.scaled(16), weight: .semibold),
                     color: Color(UIColor.label)
                 )
                 .lineLimit(1)
@@ -287,14 +287,14 @@ struct SessionRow: View, Equatable {
                     // keyword stands out inside the ~100-char window.
                     highlightedText(
                         snippet,
-                        font: .system(size: fontSettings.scaledApp(14)),
+                        font: .system(size: fontSettings.scaled(14)),
                         color: Color(UIColor.secondaryLabel)
                     )
                     .lineLimit(2)
                 } else {
                     highlightedText(
                         session.lastMessage ?? "No messages yet",
-                        font: .system(size: fontSettings.scaledApp(14)),
+                        font: .system(size: fontSettings.scaled(14)),
                         color: Color(UIColor.secondaryLabel)
                     )
                     .lineLimit(1)
@@ -320,7 +320,7 @@ struct SessionRow: View, Equatable {
             VStack(alignment: .trailing, spacing: 4) {
                 // Date
                 Text(relativeDate(session.updatedAt))
-                    .font(.system(size: fontSettings.scaledApp(13)))
+                    .font(.system(size: fontSettings.scaled(13)))
                     .foregroundStyle(Color(UIColor.tertiaryLabel))
                 if isVisuallyLocked {
                     Image(systemName: "lock.fill")

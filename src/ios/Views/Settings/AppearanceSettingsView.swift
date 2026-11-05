@@ -58,28 +58,39 @@ private let supportedLanguages: [LanguageOption] = [
     LanguageOption(id: "hr",    name: "Hrvatski", flag: "🇭🇷"),
 ]
 
-private struct FontScaleRow: View {
-    let label: String
-    @Binding var level: FontScaleLevel
+/// The ONE global font dial: body size 10–15pt in 0.5pt steps, bound to
+/// `FontSettings.bodySize`. Message text, chat input and app text scale
+/// together — the old three rows (Chat Input / Message Text / App Base)
+/// are gone. Reuses `SteppedSlider` below with 11 steps (index 0…10).
+private struct FontDialRow: View {
+    @Binding var bodySize: CGFloat
 
-    private static let cases = FontScaleLevel.allCases
-    private let stepCount = FontScaleRow.cases.count  // 5
+    private static let minSize: CGFloat = 10
+    private static let step: CGFloat = 0.5
+    private static let stepCount = 11  // 10, 10.5, …, 15
 
     private var currentIndex: Int {
-        Self.cases.firstIndex(of: level) ?? 0
+        max(0, min(Self.stepCount - 1,
+                   Int(((bodySize - Self.minSize) / Self.step).rounded())))
+    }
+
+    private var dialSize: CGFloat {
+        Self.minSize + CGFloat(currentIndex) * Self.step
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // `label` is a fixed English identifier ("Chat Input" etc.);
-            // wrap in LocalizedStringKey so SwiftUI looks it up in the
-            // String Catalog instead of rendering the verbatim English.
-            Text(LocalizedStringKey(label))
+            HStack {
+                Text(LocalizedStringKey("Font Size"))
+                Spacer()
+                Text("\(dialSize.formatted(.number.precision(.fractionLength(1)))) pt")
+                    .foregroundStyle(.secondary)
+            }
             HStack(spacing: 12) {
                 Button {
                     let idx = currentIndex - 1
                     if idx >= 0 {
-                        level = Self.cases[idx]
+                        bodySize = Self.minSize + CGFloat(idx) * Self.step
                     }
                 } label: {
                     Text("A")
@@ -88,17 +99,17 @@ private struct FontScaleRow: View {
                 }
                 .buttonStyle(.plain)
 
-                SteppedSlider(value: currentIndex, steps: stepCount) { newIndex in
-                    if newIndex >= 0, newIndex < Self.cases.count {
-                        let newLevel = Self.cases[newIndex]
-                        if newLevel != level { level = newLevel }
+                SteppedSlider(value: currentIndex, steps: Self.stepCount) { newIndex in
+                    if newIndex >= 0, newIndex < Self.stepCount {
+                        let size = Self.minSize + CGFloat(newIndex) * Self.step
+                        if size != bodySize { bodySize = size }
                     }
                 }
 
                 Button {
                     let idx = currentIndex + 1
-                    if idx < Self.cases.count {
-                        level = Self.cases[idx]
+                    if idx < Self.stepCount {
+                        bodySize = Self.minSize + CGFloat(idx) * Self.step
                     }
                 } label: {
                     Text("A")
@@ -384,18 +395,7 @@ struct AppearanceSettingsView: View {
             }
 
             Section {
-                FontScaleRow(
-                    label: "Chat Input",
-                    level: $fontSettings.chatInputScale
-                )
-                FontScaleRow(
-                    label: "Message Text",
-                    level: $fontSettings.messageBaseScale
-                )
-                FontScaleRow(
-                    label: "App Base",
-                    level: $fontSettings.appBaseScale
-                )
+                FontDialRow(bodySize: $fontSettings.bodySize)
                 if fontSettings.isModified {
                     Button("Reset to Defaults") {
                         fontSettings.resetToDefaults()
@@ -406,7 +406,7 @@ struct AppearanceSettingsView: View {
             } header: {
                 Text("Font Size")
             } footer: {
-                Text("Scale fonts for chat input, message content, and general app text. Changes apply immediately.")
+                Text("One size for message text, chat input, and general app text. Changes apply immediately.")
             }
 
             if UIApplication.shared.supportsAlternateIcons {
