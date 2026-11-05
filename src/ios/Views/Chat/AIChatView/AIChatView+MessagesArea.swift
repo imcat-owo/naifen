@@ -125,6 +125,10 @@ extension AIChatView {
                             // and iOS 26 floors).
                             scrollFloatingButtonLabel("arrow.up.to.line")
                         }
+                        // [Phase 2 milk-pink] 44pt hit area: the visual stays
+                        // a 36pt circle, the tap target grows 4pt per side
+                        // (2pt gap to the sibling button remains).
+                        .contentShape(Rectangle().inset(by: -4))
                         .transition(.opacity.combined(with: .scale(scale: 0.8)))
                     }
                     // Scroll to bottom — ORIGINAL behavior: shown whenever not
@@ -135,6 +139,8 @@ extension AIChatView {
                     } label: {
                         scrollFloatingButtonLabel("chevron.down")
                     }
+                    // [Phase 2 milk-pink] 44pt hit area, same as above.
+                    .contentShape(Rectangle().inset(by: -4))
                     .transition(.opacity.combined(with: .scale(scale: 0.8)))
                 }
                 .padding(.trailing, 4)
@@ -168,9 +174,13 @@ extension AIChatView {
 
     /// Shared label style for the floating scroll buttons (up / down).
     /// Surface lives in `FloatingCircleButtonSurface` (glass on iOS 26+).
+    /// [Phase 2 milk-pink] That surface is owned by the composer worker
+    /// (ComposerSurface.swift, outside this file's scope) — the glass
+    /// there is still open, see the report. This file only migrates
+    /// the glyph font and grows the hit area to 44pt (on the Buttons).
     private func scrollFloatingButtonLabel(_ systemName: String) -> some View {
         Image(systemName: systemName)
-            .font(.system(size: 14, weight: .semibold))
+            .font(Theme.Font.bodyEmphasized())
             .foregroundStyle(FloatingCircleButtonSurface.glyphStyle)
             .frame(width: 36, height: 36)
             .modifier(FloatingCircleButtonSurface())
