@@ -37,18 +37,18 @@ struct EmptyChatDirectoryTimeline: View {
             HStack(spacing: 6) {
                 Image(systemName: "lightbulb")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink2)
                 Text("Workspace layout")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(ChatColors.secondaryText)
+                    .foregroundStyle(Theme.Color.ink)
             }
             Text("Each chat gets its own **workspace**, **attachments**, **offloads**, and **browser** folders — wiped when the session ends.")
                 .font(.system(size: 12))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
             Text("All chats share **shared**, **skills**, **memory**, and **mounts** — persistent across sessions.")
                 .font(.system(size: 12))
-                .foregroundStyle(ChatColors.primaryText)
+                .foregroundStyle(Theme.Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Spacer()
@@ -59,14 +59,14 @@ struct EmptyChatDirectoryTimeline: View {
                         Text("Browse Chat Files")
                             .font(.system(size: 11, weight: .semibold))
                     }
-                    .foregroundStyle(ChatColors.primaryText)
+                    .foregroundStyle(Theme.Color.ink)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(
-                        Capsule().fill(ChatColors.secondaryBg)
+                        Capsule().fill(Theme.Color.surface)
                     )
                     .overlay(
-                        Capsule().stroke(ChatColors.toolBorder, lineWidth: 0.5)
+                        Capsule().stroke(Theme.Color.line.opacity(0.5), lineWidth: 0.5)
                     )
                 }
                 .buttonStyle(.plain)
@@ -78,11 +78,11 @@ struct EmptyChatDirectoryTimeline: View {
         .frame(maxWidth: 460, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(ChatColors.secondaryBg.opacity(0.6))
+                .fill(Theme.Color.surface.opacity(0.6))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(ChatColors.toolBorder, lineWidth: 0.5)
+                .stroke(Theme.Color.line.opacity(0.5), lineWidth: 0.5)
         )
         .fixedSize(horizontal: false, vertical: true)
     }
