@@ -91,11 +91,11 @@ struct NavBarStyleModifier: ViewModifier {
                 // scrollEdgeEffectHidden is a no-op for it; what does the work
                 // here is toolbarBackground. No change needed in
                 // MessageListViewController.
-                .modifier(MacOS27OpaqueNavigationBar(background: ChatColors.background))
+                .modifier(MacOS27OpaqueNavigationBar(background: Theme.Color.background))
         } else {
             // iOS 16–18: opaque navbar background
             content
-                .toolbarBackground(ChatColors.background, for: .navigationBar)
+                .toolbarBackground(Theme.Color.background, for: .navigationBar)
                 .toolbarBackground(.visible, for: .navigationBar)
                 .overlay(alignment: .top) {
                     if measuresSafeArea {
