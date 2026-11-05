@@ -125,6 +125,6 @@ struct SelectableMarkdownTheme {
 /// Intended for one-shot rendering of completed messages (e.g. caching in AIChatViewModel).
 @MainActor
 func renderMarkdownBlocks(_ blocks: [BlockNode]) -> NSAttributedString {
-    let renderer = MarkdownNSRenderer(baseFontSize: FontSettings.shared.scaledMessage(16.5))
+    let renderer = MarkdownNSRenderer(baseFontSize: FontSettings.shared.scaled(16.5))
     return renderer.render(blocks: blocks)
 }
